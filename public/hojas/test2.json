@@ -1,0 +1,147 @@
+{
+  "images": [
+    {
+      "name": "kk",
+      "img": "img/1751503569461.png",
+      "left": "740px",
+      "top": "1451px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(201, 210, 81)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "cacteye",
+      "img": "img/1751503556030.png",
+      "left": "466px",
+      "top": "329.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(201, 210, 81)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "Waste",
+      "img": "img/1751528114061.png",
+      "left": "700.749px",
+      "top": "689.149px",
+      "scale": "1",
+      "rotate": "-5",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(201, 210, 81)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "Test 508",
+      "img": "img/1751557038739.png",
+      "left": "500px",
+      "top": "799.6px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(201, 210, 81)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "kk",
+      "img": "img/1751503569461.png",
+      "left": "994px",
+      "top": "355px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(247, 247, 247)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "art",
+      "img": "imgart/1751506861498.svg",
+      "left": "834px",
+      "top": "442px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "sacsaas",
+      "img": "img/1751589083752.png",
+      "left": "657px",
+      "top": "243px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(247, 247, 247)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "art",
+      "img": "imgart/1751759489220.webp",
+      "left": "239px",
+      "top": "412px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "http://localhost:3000/img/1751503556030.png",
+      "left": "239px",
+      "top": "412px",
+      "scale": "1",
+      "rotate": "0"
+    }
+  ],
+  "texts": [
+    {
+      "content": "gg",
+      "left": "687.05px",
+      "top": "199.385px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(247, 247, 247)"
+    },
+    {
+      "content": "sfdf",
+      "left": "260px",
+      "top": "362.3px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "Simpsonfont",
+      "fontSize": "32px",
+      "color": "rgb(247, 247, 247)"
+    }
+  ],
+  "backgroundColor": "#6668a9",
+  "fontSettings": {
+    "family": "Simpsonfont",
+    "size": "32",
+    "color": "#f7f7f7"
+  },
+  "exportDate": "2025-07-06T07:20:04.559Z",
+  "showTitles": true
+}

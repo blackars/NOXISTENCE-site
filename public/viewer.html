@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Hoja del Bestiario</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    body {
+      margin: 0;
+      background: #f0f0f0;
+      font-family: sans-serif;
+      overflow: hidden;
+      /* Oculta el scrollbar pero permite el scroll */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none;  /* IE y Edge */
+    }
+    body::-webkit-scrollbar {
+      display: none; /* Chrome, Safari y Opera */
+    }
+    #grid {
+      position: relative;
+      min-width: 100%;
+      min-height: 100%;
+      background: white;
+      overflow: hidden;
+      /* Oculta el scrollbar pero permite el scroll */
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none;  /* IE y Edge */
+    }
+    body::-webkit-scrollbar, #grid::-webkit-scrollbar {
+      display: none; /* Chrome, Safari y Opera */
+    }
+    .item {
+      position: absolute;
+      width: 150px;
+      cursor: grab;
+      user-select: none;
+      transform-origin: center center;
+      border-radius: 8px;
+      padding: 4px;
+      outline: none;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .item-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #111;
+      position: relative;
+    }
+    .item-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      transition: transform 0.2s cubic-bezier(.4,1.3,.5,1), box-shadow 0.2s cubic-bezier(.4,1.3,.5,1);
+      display: block;
+      margin: 0 auto;
+      z-index: 1;
+    }
+    .item:focus .item-content img,
+    .item:hover .item-content img {
+      transform: scale(1.25);
+      z-index: 2;
+    }
+    .item:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+      background: transparent;
+    }
+    .item:active {
+      transform: translateY(0);
+      filter: brightness(0.95);
+    }
+    .item:focus-visible {
+      outline: 2px solid #007bff;
+      outline-offset: 2px;
+    }
+    .text-item {
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+      transform-origin: center center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 0px;
+      padding: 8px;
+      min-width: 100px;
+      min-height: 30px;
+      font-display: swap;
+      font-synthesis: none;
+    }
+    .text-item:focus-within {
+      border-color: #007bff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .text-item textarea {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      resize: none;
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+      text-align: center;
+    }
+    .volver {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      padding: 6px 12px;
+      background: #222;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .volver:hover {
+      background: #0056b3;
+    }
+    .info-message {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 123, 255, 0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      transition: opacity 0.3s ease;
+      opacity: 1;
+    }
+    
+    .info-message.fade-out {
+      opacity: 0;
+    }
+    .item.art-static {
+      pointer-events: none;
+      cursor: default !important;
+    }
+    .item.art-static .item-content img {
+      transition: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="grid"></div>
+  <button class="volver" onclick="window.history.back()">←</button>
+  
+
+  <script>
+    // Cargar fuentes personalizadas
+    async function loadCustomFonts() {
+      try {
+        const res = await fetch('fonts/fonts.json');
+        const fontFiles = await res.json();
+        
+        for (const font of fontFiles) {
+          try {
+            const fontUrl = `fonts/${font}`;
+            const cleanName = font.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
+            const fontFace = new FontFace(cleanName, `url(${fontUrl})`);
+            await fontFace.load();
+            document.fonts.add(fontFace);
+          } catch (e) {
+            console.warn(`No se pudo cargar la fuente: ${font}`, e);
+            continue;
+          }
+        }
+      } catch (e) {
+        console.log('No se encontró fonts.json, usando solo fuentes estándar');
+      }
+    }
+
+    function getFileNameFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('file');
+    }
+
+    function getCreatureNameFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('creature');
+    }
+
+    function loadJSON(file, callback) {
+      fetch(file)
+        .then(res => {
+          if (!res.ok) throw new Error("Archivo no encontrado");
+          return res.json();
+        })
+        .then(callback)
+        .catch(err => {
+          console.log('ERROR EN FETCH O CALLBACK', err);
+          document.body.innerHTML = `<p style="padding:20px;font-size:1.2rem;color:red;">Error: ${err.message}</p>`;
+        });
+    }
+
+    function renderLayout(data) {
+      console.log('JSON cargado', data);
+      const grid = document.getElementById('grid');
+      
+      // Aplicar color de fondo si existe
+      if (data.backgroundColor) {
+        grid.style.backgroundColor = data.backgroundColor;
+        document.body.style.backgroundColor = data.backgroundColor;
+      }
+      
+      // Crear un contenedor interno para el contenido
+      const contentContainer = document.createElement('div');
+      contentContainer.style.position = 'relative';
+      contentContainer.style.display = 'inline-block';
+      contentContainer.style.minWidth = 'fit-content';
+      contentContainer.style.minHeight = 'fit-content';
+      contentContainer.style.margin = 'auto';
+      
+      let maxX = 0, maxY = 0;
+      let minX = Infinity, minY = Infinity;
+      
+      // Renderizar imágenes de criaturas (solo images, con título y click)
+      if (data.images && Array.isArray(data.images)) {
+        data.images.forEach(itemData => {
+          const item = document.createElement('div');
+          item.classList.add('item');
+          item.tabIndex = 0;
+          item.style.left = itemData.left;
+          item.style.top = itemData.top;
+          item.style.transform = `scale(${itemData.scale}) rotate(${itemData.rotate}deg)`;
+          item.style.cursor = 'pointer';
+          // Solo crear el div del nombre si showTitles !== false
+          let titleDiv = '';
+          if (data.showTitles !== false) {
+            titleDiv = `<div>${itemData.name}</div>`;
+          }
+          item.innerHTML = `\n            <div class=\"item-content\">\n              <img src=\"${itemData.img}\" />\n              ${titleDiv}\n            </div>`;
+          const titleElement = item.querySelector('div:last-child');
+          if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
+            titleElement.style.fontFamily = `\"${itemData.fontFamily || 'sans-serif'}\", Arial, sans-serif`;
+            titleElement.style.fontSize = itemData.fontSize || '14px';
+            titleElement.style.color = itemData.color || '#111111';
+          }
+          item.addEventListener('click', function() {
+            openCreaturePage(itemData.name);
+          });
+          item.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openCreaturePage(itemData.name);
+            }
+          });
+          contentContainer.appendChild(item);
+          // Calcular dimensiones del contenido
+          const left = parseFloat(itemData.left) || 0;
+          const top = parseFloat(itemData.top) || 0;
+          const scale = parseFloat(itemData.scale) || 1;
+          const itemWidth = 150 * scale; // Ancho base del item
+          const itemHeight = 150 * scale; // Alto aproximado del item
+          maxX = Math.max(maxX, left + itemWidth);
+          maxY = Math.max(maxY, top + itemHeight);
+          minX = Math.min(minX, left);
+          minY = Math.min(minY, top);
+          console.log('Renderizando criatura', itemData);
+        });
+      }
+      // Renderizar imágenes de arte (solo artimages, sin título ni interacción)
+      if (data.artimages && Array.isArray(data.artimages)) {
+        data.artimages.forEach(artData => {
+          const item = document.createElement('div');
+          item.classList.add('item', 'art-static');
+          item.tabIndex = -1;
+          item.style.left = artData.left;
+          item.style.top = artData.top;
+          item.style.transform = `scale(${artData.scale}) rotate(${artData.rotate}deg)`;
+          item.style.cursor = 'default';
+          // Nunca crear ni mostrar div de nombre en artimages
+          item.innerHTML = `\n            <div class=\"item-content\">\n              <img src=\"${artData.img}\" />\n            </div>`;
+          contentContainer.appendChild(item);
+          // Calcular dimensiones del contenido
+          const left = parseFloat(artData.left) || 0;
+          const top = parseFloat(artData.top) || 0;
+          const scale = parseFloat(artData.scale) || 1;
+          const itemWidth = 150 * scale;
+          const itemHeight = 150 * scale;
+          maxX = Math.max(maxX, left + itemWidth);
+          maxY = Math.max(maxY, top + itemHeight);
+          minX = Math.min(minX, left);
+          minY = Math.min(minY, top);
+          console.log('Renderizando arte', artData);
+        });
+      }
+      
+      // Renderizar textos
+      if (data.texts && Array.isArray(data.texts)) {
+        data.texts.forEach(textData => {
+          const textItem = document.createElement('div');
+          textItem.style.position = 'absolute';
+          textItem.style.left = textData.left;
+          textItem.style.top = textData.top;
+          textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
+          // Aplicar fuente con fallback
+          const fontFamily = textData.fontFamily || 'sans-serif';
+          textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
+          textItem.style.fontSize = textData.fontSize || '14px';
+          textItem.style.color = textData.color || '#000';
+          textItem.style.pointerEvents = 'none';
+          textItem.style.userSelect = 'none';
+          textItem.style.fontDisplay = 'swap';
+          textItem.textContent = textData.content;
+          contentContainer.appendChild(textItem);
+          
+          // Calcular dimensiones del texto
+          const left = parseFloat(textData.left) || 0;
+          const top = parseFloat(textData.top) || 0;
+          const scale = parseFloat(textData.scale) || 1;
+          const fontSize = parseFloat(textData.fontSize) || 14;
+          const textWidth = textData.content.length * fontSize * 0.6 * scale; // Aproximación del ancho del texto
+          const textHeight = fontSize * scale;
+          
+          maxX = Math.max(maxX, left + textWidth);
+          maxY = Math.max(maxY, top + textHeight);
+          minX = Math.min(minX, left);
+          minY = Math.min(minY, top);
+          
+          // Verificar si la fuente se cargó correctamente
+          if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+            document.fonts.ready.then(() => {
+              if (!document.fonts.check(`12px "${fontFamily}"`)) {
+                console.warn(`Fuente "${fontFamily}" no disponible, usando fallback`);
+                textItem.style.fontFamily = 'Arial, sans-serif';
+              }
+            });
+          }
+        });
+      }
+      
+      // Si no hay contenido, usar valores por defecto
+      if (minX === Infinity) {
+        minX = 0;
+        minY = 0;
+        maxX = 800;
+        maxY = 600;
+      }
+      
+      // Limpiar el grid antes de renderizar
+      grid.innerHTML = '';
+
+      // Calcular el tamaño real del contenido
+      const contentWidth = Math.ceil(maxX - minX);
+      const contentHeight = Math.ceil(maxY - minY);
+      const minContentSize = 1000;
+      contentContainer.style.width = `${Math.max(contentWidth, minContentSize)}px`;
+      contentContainer.style.height = `${Math.max(contentHeight, minContentSize)}px`;
+      
+      // Agregar el contenedor interno al grid
+      grid.appendChild(contentContainer);
+      // Centrar el contenido solo si cabe en la ventana
+      setTimeout(() => {
+        const containerRect = contentContainer.getBoundingClientRect();
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        if (containerRect.width < windowWidth && containerRect.height < windowHeight) {
+          contentContainer.style.position = 'absolute';
+          contentContainer.style.left = '50%';
+          contentContainer.style.top = '50%';
+          contentContainer.style.transform = 'translate(-50%, -50%)';
+        } else {
+          contentContainer.style.position = 'relative';
+          contentContainer.style.left = '0';
+          contentContainer.style.top = '0';
+          contentContainer.style.transform = 'none';
+        }
+      }, 100);
+    }
+
+    // Función para abrir la página HTML de una criatura específica
+    function openCreaturePage(creatureName) {
+      if (!creatureName) {
+        console.warn('Nombre de criatura no válido');
+        alert('Error: Nombre de criatura no válido');
+        return;
+      }
+      // Limpiar el nombre para usarlo como nombre de archivo JSON en la carpeta creatures
+      const cleanName = creatureName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Remover caracteres especiales
+        .replace(/\s+/g, '-') // Reemplazar espacios con guiones
+        .replace(/-+/g, '-') // Remover guiones múltiples
+        .trim();
+      const url = `viewer.html?file=creatures/${encodeURIComponent(cleanName)}.json`;
+      window.location.href = url;
+    }
+
+
+    const fileName = getFileNameFromURL();
+    const creatureName = getCreatureNameFromURL();
+    if (creatureName) {
+      // Mostrar criatura individual desde data/creatures.json
+      loadCustomFonts().then(() => {
+        loadJSON('data/creatures.json', function(allCreatures) {
+          const creature = allCreatures.find(c => c.name === creatureName);
+          if (creature) {
+            renderCreature(creature);
+          } else {
+            document.body.innerHTML = `<p style="padding:20px;font-size:1.2rem;color:red;">No se encontró la criatura "${creatureName}" en el catálogo.</p>`;
+          }
+        });
+      });
+    } else if (fileName) {
+      // Cargar fuentes primero, luego renderizar
+      loadCustomFonts().then(() => {
+        loadJSON(`hojas/${fileName}`, renderLayout);
+      }).catch(() => {
+        // Si falla la carga de fuentes, renderizar de todas formas
+        loadJSON(`hojas/${fileName}`, renderLayout);
+      });
+    } else {
+      document.body.innerHTML = `<p style="padding:20px;font-size:1.2rem;">No se especificó ningún archivo para visualizar.</p>`;
+    }
+
+    function renderCreature(creature) {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      const container = document.createElement('div');
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.alignItems = 'center';
+      container.style.justifyContent = 'center';
+      container.style.padding = '2rem';
+      container.style.background = '#fff';
+      container.style.borderRadius = '16px';
+      container.style.boxShadow = '0 2px 16px rgba(0,0,0,0.08)';
+      container.style.maxWidth = '400px';
+      container.style.margin = '2rem auto';
+
+      if (creature.img) {
+        const img = document.createElement('img');
+        img.src = creature.img;
+        img.alt = creature.name;
+        img.style.width = '220px';
+        img.style.height = '220px';
+        img.style.objectFit = 'contain';
+        img.style.borderRadius = '12px';
+        img.style.marginBottom = '1.2rem';
+        container.appendChild(img);
+      }
+      const name = document.createElement('h2');
+      name.textContent = creature.name || '(Sin nombre)';
+      name.style.fontFamily = 'Nox, Segoe UI, sans-serif';
+      name.style.fontSize = '2rem';
+      name.style.margin = '0 0 0.5rem 0';
+      container.appendChild(name);
+      if (creature.world) {
+        const world = document.createElement('div');
+        world.textContent = `Mundo: ${creature.world}`;
+        world.style.color = '#555';
+        world.style.fontSize = '1.1rem';
+        world.style.marginBottom = '0.8rem';
+        container.appendChild(world);
+      }
+      if (creature.description) {
+        const desc = document.createElement('div');
+        desc.textContent = creature.description;
+        desc.style.fontSize = '1.1rem';
+        desc.style.color = '#222';
+        desc.style.marginBottom = '1.2rem';
+        desc.style.textAlign = 'center';
+        container.appendChild(desc);
+      }
+      // Puedes agregar más campos aquí si tu JSON tiene más información
+      grid.appendChild(container);
+    }
+  </script>
+</body>
+</html>

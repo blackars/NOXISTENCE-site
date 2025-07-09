@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Creator's Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
+  <script src="js/edit-tools.js"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .editor-container, .canvas-container, #grid {
+      height: 100%;
+      min-height: 100vh;
+      width: 100%;
+      min-width: 100vw;
+      box-sizing: border-box;
+    }
+    
+    .editor-container {
+      display: flex;
+      background: white;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 33%;
+      background: #f8f9fa33;
+      border: 0px solid #dee2e6;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    
+    .canvas-container {
+      position: relative;
+      overflow: auto;
+      background: #f0f0f0;
+    }
+    
+    #grid {
+      position: relative;
+      background: white;
+    }
+    
+    .item {
+      position: absolute;
+      width: 150px;
+      cursor: grab;
+      user-select: none;
+      transform-origin: center center;
+    }
+    
+    .item-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #111;
+    }
+    
+    .item-content img {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    .import-button {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+    }
+    
+    .upload-form {
+      padding: 15px;
+      background: white;
+      margin: 10px;
+      border-radius: 0px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .upload-form input, .upload-form select, .upload-form textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 0px;
+      box-sizing: border-box;
+    }
+    
+    .upload-form button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 0px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    
+    .upload-form button:hover {
+      background: #0056b3;
+    }
+    
+    .creatures-list {
+      flex: 1;
+      padding: 15px;
+      background: white;
+      margin: 10px;
+      border-radius: 0px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      min-height: 400px;
+      overflow: scroll;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .creature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: grab;
+      transition: background-color 0.2s;
+      margin-bottom: 8px;
+    }
+    
+    .creature-item:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .creature-item:active {
+      cursor: grabbing;
+    }
+    
+    .creature-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 0px;
+    }
+    
+    .delete-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 3px; 
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    .controls-section {
+      padding: 15px;
+      background: white;
+      margin: 10px;
+      border-radius: 0px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .controls-section h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    
+    .controls-section select, .controls-section label {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 0px; 
+      box-sizing: border-box;
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    
+    .checkbox-container input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+    
+    .color-picker-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .color-picker-container label {
+      flex: 1;
+      margin: 0;
+    }
+    
+    .color-picker-container input[type="color"] {
+      width: 50px;
+      height: 40px;
+      border: none;
+      border-radius: 0px; 
+      cursor: pointer;
+      padding: 0;
+    }
+    
+    .font-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .font-control-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .font-control-row label {
+      flex: 1;
+      margin: 0;
+    }
+    
+    .font-control-row input[type="range"] {
+      flex: 1;
+      margin: 0;
+    }
+    
+    .font-size-display {
+      min-width: 40px;
+      text-align: center;
+      font-weight: bold;
+      color: #666;
+    }
+    
+    #trash {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: #e74c3c;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%; 
+      font-size: 2rem;
+      z-index: 2000;
+      box-shadow: 0 0 10px #c0392b;
+      cursor: pointer;
+    }
+    
+    .text-item {
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+      transform-origin: center center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 0px;
+      padding: 8px;
+      min-width: 100px;
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+    .text-item[contenteditable="true"]:focus {
+      outline: 2px solid #007bff;
+      background: rgba(255,255,255,0.1);
+    }
+    .text-align-left { justify-content: flex-start; text-align: left; }
+    .text-align-center { justify-content: center; text-align: center; }
+    .text-align-right { justify-content: flex-end; text-align: right; }
+    .text-valign-top { align-items: flex-start; }
+    .text-valign-middle { align-items: center; }
+    .text-valign-bottom { align-items: flex-end; }
+    
+    .text-controls {
+      padding: 15px;
+      background: white;
+      margin: 10px;
+      border-radius: 0px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .text-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .text-input-group input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 0px;
+    }
+    
+    .text-input-group button {
+      padding: 8px 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 0px;
+      cursor: pointer;
+    }
+    
+    .text-input-group button:hover {
+      background: #218838;
+    }
+    
+    .text-controls-panel {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 0px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      z-index: 3000;
+      display: none;
+      min-width: 300px;
+    }
+    
+    .text-controls-panel h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .text-controls-panel .control-group {
+      margin-bottom: 15px;
+    }
+    
+    .text-controls-panel label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .text-controls-panel input, .text-controls-panel select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 0px;
+      box-sizing: border-box;
+    }
+    
+    .text-controls-panel .button-group {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    
+    .text-controls-panel button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 0px;
+      cursor: pointer;
+    }
+    
+    .text-controls-panel .btn-primary {
+      background: #31eb4d;
+      color: white;
+    }
+    
+    .text-controls-panel .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .text-controls-panel .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 2999;
+      display: none;
+    }
+    
+    .art-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: grab;
+      transition: background-color 0.2s;
+      margin-bottom: 8px;
+    }
+    /* Hacemos scroll visible cuando hay muchos elementos */
+    .art-items-list {
+      max-height: 150px;
+      overflow-y: auto;
+      /* Puedes ajustar el max-height según el diseño */
+    }
+    
+    .art-item:hover {
+      background-color: #f0f0f0;
+    }
+    
+    .art-item:active {
+      cursor: grabbing;
+    }
+    
+    .art-item img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 0px;
+    }
+
+    .floating-sidebar {
+      overflow-x: hidden;
+    }
+  </style>
+</head>
+<body>
+  <button id="toggleSidebarBtn" style="position:fixed;top:10px;right:30px;z-index:3500;padding:12px 16px;background:#007bff;color:white;border:none;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.18);font-size:1.5rem;cursor:pointer;display:block;">🛠️</button>
+  <div id="floatingSidebar" class="floating-sidebar" style="display:none;position:fixed;top:50%;right:60px;transform:translateY(-50%);z-index:3600;width:340px;max-width:90vw;max-height:90vh;background:#fff;border-radius:3px;box-shadow:0 8px 32px rgba(0,0,0,0.18);padding:24px 18px 18px 18px;overflow-y:auto;transition:opacity 0.2s;">
+    <button id="closeSidebarBtn" style="position:absolute;top:10px;right:10px;background:#dc3545;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1.2rem;cursor:pointer;z-index:2;">×</button>
+    <div id="sidebarContent"></div>
+  </div> 
+  <div class="editor-container">
+    <!-- Sidebar izquierdo -->
+    <div class="sidebar ">
+      <!-- Formulario de subida -->
+      <div class="upload-form">
+        <h3>Upload Creature</h3>
+        <input type="file" id="singleImageLoader" accept="image/png, image/jpeg, image/webp" />
+        <input type="text" id="creatureName" placeholder="Creature Name" />
+        <select id="creatureWorld">
+          <option value="Planet X">Planet X</option>
+          <option value="Universe X">Universe X</option>
+          <option value="Uknown">Uknown</option>
+        </select>
+        <button onclick="uploadCreature()">Create</button>
+      </div>
+
+      <!-- Controles de visualización -->
+      <div class="controls-section">
+        <h3>Visualization Controls</h3>
+        <select id="fontSelector">
+          <option value="sans-serif">Sans Serif</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+          <option value="Georgia">Georgia</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Times New Roman">Times New Roman</option>
+        </select>
+        <div class="checkbox-container">
+          <input type="checkbox" id="toggleTitles" checked>
+          <label for="toggleTitles">Show images titles</label>
+        </div>
+        <div class="color-picker-container">
+          <label for="backgroundColor">Background color:</label>
+          <input type="color" id="backgroundColor" value="#ffffff">
+        </div>
+        <div class="font-controls">
+          <h4 style="margin: 0 0 10px 0; color: #333;">Text configuration:</h4>
+          <div class="font-control-row">
+            <label for="fontSize">Font size:</label>
+            <input type="range" id="fontSize" min="8" max="48" value="14" step="1">
+            <span class="font-size-display" id="fontSizeDisplay">14px</span>
+          </div>
+          <div class="font-control-row">
+            <label for="fontColor">Text color:</label>
+            <input type="color" id="fontColor" value="#111111">
+          </div>
+          <div class="font-control-row">
+            <label for="fontUploadInput" style="margin-bottom:0;">Upload fonts:</label>
+            <input type="file" id="fontUploadInput" accept=".ttf,.otf,.woff,.woff2" multiple style="padding: 4px; background: #e9ecef; border: 1px solid #ccc; border-radius: 0px;" />
+          </div>
+        </div>
+        
+        <!-- Sección de textos -->
+        <div class="text-controls" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+          <h4 style="margin: 0 0 10px 0; color: #333;">Add Text</h4>
+          <div class="text-input-group">
+            <input type="text" id="textInput" placeholder="Write your text here...">
+            <button onclick="addTextElement()">Add</button>
+          </div>
+          <div style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+            💡 Drag, scale (Shift + wheel) and rotate (Alt + wheel) texts
+          </div>
+        </div>
+
+        <!-- Sección de acciones del lienzo -->
+        <div class="canvas-actions" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+          <h4 style="margin: 0 0 10px 0; color: #333;">Canvas Actions</h4>
+          <div style="display: flex; gap: 10px;">
+            <button onclick="exportLayout()" style="flex: 1; padding: 10px; background: #28a745; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+              💾 Save Sheet
+            </button>
+            <label for="importJsonInput" style="font: 0.7em sans-serif; flex: 1; padding: 10px; background: #007bff; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'">
+              📂 Import JSON
+              <input type="file" id="importJsonInput" accept="application/json" style="display: none;">
+            </label>
+            <button onclick="restoreCanvas()" style="flex: 1; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+              🔄 Restore Canvas
+            </button>
+          </div>        
+          <div style="font-size: 0.9rem; color: #666; margin-top: 10px;">
+            💡 Restore Canvas deletes all and starts with a blank canvas
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de criaturas -->
+      <div class="creatures-list">
+        <h3>Available Creatures</h3>
+        <div id="creaturesList"></div>
+      </div>
+
+      <!-- Sección de imágenes de arte -->
+      <div class="art-section" style="margin-top: 20px;">
+        <div class="upload-form">
+          <h3>Upload Art Image</h3>
+          <input type="file" id="artImageLoader" accept="image/png, image/jpeg, image/svg+xml, image/gif, image/webp" />
+          <button onclick="uploadArtImage()">Upload Art</button>
+        </div>
+        
+        <div class="creatures-list">
+          <h3>Art Images</h3>
+          <div id="artList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lienzo derecho -->
+    <div class="canvas-container" style="width:100vw;height:100vh;position:relative;overflow:auto;background:#f0f0f0;">
+      <div id="grid"></div>
+    </div>
+  </div>
+
+  <div id="trash">🗑️</div>
+
+  <!-- Panel de controles de texto -->
+  <div class="overlay" id="textControlsOverlay"></div>
+  <div class="text-controls-panel" id="textControlsPanel">
+    <h3>Edit Text</h3>
+    <div class="control-group">
+      <label for="textContent">Content:</label>
+      <textarea id="textContent" rows="3" placeholder="Write your text here..."></textarea>
+    </div>
+    <div class="control-group">
+      <label for="textFontSize">Font size:</label>
+      <input type="range" id="textFontSize" min="8" max="72" value="14" step="1">
+      <span id="textFontSizeDisplay">14px</span>
+    </div>
+    <div class="control-group">
+      <label for="textFontColor">Text color:</label>
+      <input type="color" id="textFontColor" value="#111111">
+    </div>
+    <div class="control-group">
+      <label for="textFontFamily">Font:</label>
+      <select id="textFontFamily">
+        <option value="sans-serif">Sans Serif</option>
+        <option value="serif">Serif</option>
+        <option value="monospace">Monospace</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Times New Roman">Times New Roman</option>
+      </select>
+    </div>
+    <div class="button-group">
+      <button class="btn-danger" onclick="deleteElement()">Delete</button>
+      <button class="btn-secondary" onclick="closeTextControls()">Cancel</button>
+      <button class="btn-primary" onclick="applyChanges()">Apply</button>
+    </div>
+  </div>
+
+  <script>
+    const gridElement = document.getElementById('grid');
+    let isLocalMode = false;
+    let currentFont = localStorage.getItem('currentFont') || 'sans-serif';
+    let currentBackgroundColor = localStorage.getItem('backgroundColor') || '#ffffff';
+    let currentFontSize = localStorage.getItem('fontSize') || '14';
+    let currentFontColor = localStorage.getItem('fontColor') || '#111111';
+    let textCounter = 0;
+    let editTools;
+    
+    // Variables globales para drag de texto
+    let draggingTextItem = null;
+    let isDraggingText = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    
+    // Detectar si estamos en modo local o con servidor
+    function detectMode() {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      
+      isLocalMode = protocol === 'file:' || 
+                    (hostname === 'localhost' && !port) || 
+                    (hostname === '127.0.0.1' && !port);
+      
+      console.log('Modo detectado:', isLocalMode ? 'Local' : 'Servidor');
+      
+      if (isLocalMode) {
+        document.querySelector('.upload-form').style.display = 'none';
+        document.querySelector('.creatures-list').style.display = 'none';
+        document.querySelector('.art-section').style.display = 'none';
+      }
+    }
+    
+    // Función para cargar criaturas según el modo
+    async function loadCreatures() {
+      if (isLocalMode) {
+        try {
+          const response = await fetch('data/creatures.json');
+          const creatures = await response.json();
+          displayCreatures(creatures);
+          return creatures;
+        } catch (error) {
+          console.error('Error loading local creatures:', error);
+          const exampleCreatures = [
+            {
+              id: 'example1',
+              name: 'Example Creature 1',
+              img: 'img/example1.jpg',
+              world: 'Gutterlands'
+            },
+            {
+              id: 'example2', 
+              name: 'Example Creature 2',
+              img: 'img/example2.jpg',
+              world: 'Ashlands'
+            }
+          ];
+          displayCreatures(exampleCreatures);
+          return exampleCreatures;
+        }
+      } else {
+        try {
+          const response = await fetch('/creatures');
+          const creatures = await response.json();
+          displayCreatures(creatures);
+          return creatures;
+        } catch (error) {
+          console.error('Error loading creatures from server:', error);
+          return [];
+        }
+      }
+    }
+
+    // Mostrar lista de criaturas
+    function displayCreatures(creatures) {
+      const list = document.getElementById('creaturesList');
+      list.innerHTML = '';
+      
+      creatures.forEach(creature => {
+        const item = document.createElement('div');
+        item.className = 'creature-item';
+        item.draggable = true;
+        item.dataset.creature = JSON.stringify(creature);
+        item.innerHTML = `
+          <img src="${creature.img}" alt="${creature.name}" />
+          <div style="flex: 1;">
+            <div><strong>${creature.name}</strong></div>
+            <div style="font-size: 0.8rem; color: #666;">${creature.world}</div>
+          </div>
+          ${!isLocalMode ? `<button class="delete-btn" onclick="deleteCreature('${creature.id}')">×</button>` : ''}
+        `;
+        
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify(creature));
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+        
+        const fontSelector = document.getElementById('fontSelector');
+        const fontSizeSlider = document.getElementById('fontSize');
+        const fontColorPicker = document.getElementById('fontColor');
+        const titleElement = item.querySelector('.item-title');
+        if (titleElement) {
+          titleElement.style.fontFamily = fontSelector.value;
+          titleElement.style.fontSize = fontSizeSlider.value + 'px';
+          titleElement.style.color = fontColorPicker.value;
+        }
+        
+        list.appendChild(item);
+      });
+    }
+
+    // Función para cargar imágenes de arte
+    async function loadArtImages() {
+      if (isLocalMode) {
+        document.getElementById('artList').innerHTML = '<p style="color: #666; font-style: italic;">Art images not avaliable in local mode.</p>';
+        return [];
+      } else {
+        try {
+          const response = await fetch('/art');
+          const artImages = await response.json();
+          displayArtImages(artImages);
+          return artImages;
+        } catch (error) {
+          console.error('Error uploading images:', error);
+          document.getElementById('artList').innerHTML = '<p style="color: #666; font-style: italic;">Error uploading art images.</p>';
+          return [];
+        }
+      }
+    }
+    
+    // Mostrar lista de imágenes de arte
+    function displayArtImages(artImages) {
+      const list = document.getElementById('artList');
+      list.innerHTML = '';
+      
+      if (artImages.length === 0) {
+        list.innerHTML = '<p style="color: #666; font-style: italic;">No art images available.</p>';
+        return;
+      }
+      
+      artImages.forEach(art => {
+        const item = document.createElement('div');
+        item.className = 'art-item';
+        item.draggable = true;
+        item.dataset.art = JSON.stringify(art);
+        item.innerHTML = `
+          <img src="${art.img}" alt="${art.name}" />
+          <button class="delete-btn" onclick="deleteArtImage('${art.id}')">×</button>
+        `;
+        
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({...art, type: 'art'}));
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+        
+        const fontSelector = document.getElementById('fontSelector');
+        const fontSizeSlider = document.getElementById('fontSize');
+        const fontColorPicker = document.getElementById('fontColor');
+        const titleElement = item.querySelector('.item-title');
+        if (titleElement) {
+          titleElement.style.fontFamily = fontSelector.value;
+          titleElement.style.fontSize = fontSizeSlider.value + 'px';
+          titleElement.style.color = fontColorPicker.value;
+        }
+        
+        list.appendChild(item);
+      });
+    }
+    
+    // Subir nueva criatura
+    async function uploadCreature() {
+      if (isLocalMode) {
+        alert('Creature upload not avaliable in local mode.\n\nTo upload creatures, run Node.js server with:\n\nnpm start');
+        return;
+      }
+      
+      const fileInput = document.getElementById('singleImageLoader');
+      const nameInput = document.getElementById('creatureName');
+      const worldInput = document.getElementById('creatureWorld');
+
+      if (!fileInput.files[0]) {
+        alert('Select an image');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+      formData.append('name', nameInput.value || fileInput.files[0].name.replace(/\.[^/.]+$/, ''));
+      formData.append('world', worldInput.value);
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Creature uploaded successfully');
+          fileInput.value = '';
+          nameInput.value = '';
+          await loadCreatures();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Error uploading:', error);
+        alert('Error uploading creature');
+      }
+    }
+
+    // Eliminar criatura
+    async function deleteCreature(id) {
+      if (isLocalMode) {
+        alert('Creature deletion not avaliable in local mode.\n\nTo delete creatures, run Node.js server with:\n\nnpm start');
+        return;
+      }
+      
+      if (!confirm('Are you sure you want to delete this creature?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`hojas/creatures/${id}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Creature deleted successfully');
+          await loadCreatures();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Error deleting:', error);
+        alert('Error deleting creature');
+      }
+    }
+    
+    // Subir nueva imagen de arte
+    async function uploadArtImage() {
+      if (isLocalMode) {
+        alert('Art images upload not avaliable in local mode.\n\nTo upload images run  Node.js server with:\n\nnpm start');
+        return;
+      }
+      
+      const fileInput = document.getElementById('artImageLoader');
+
+      if (!fileInput.files[0]) {
+        alert('Select an image');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', fileInput.files[0]);
+
+      try {
+        const response = await fetch('/upload-art', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Art image uploaded successfully');
+          fileInput.value = '';
+          await loadArtImages();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Error uploading art image:', error);
+        alert('Error uploading art image');
+      }
+    }
+    
+    // Eliminar imagen de arte
+    async function deleteArtImage(id) {
+      if (isLocalMode) {
+        alert('Delete art images not avaliable in local mode.\n\nTo delete art images, run Node.js server with:\n\nnpm start');
+        return;
+      }
+      
+      if (!confirm('Are you sure you want to delete this art image?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/art/${id}`, {
+          method: 'DELETE'
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Art image deleted successfully');
+          await loadArtImages();
+        } else {
+          alert('Error: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Error deleting art image:', error);
+        alert('Error deleting art image');
+      }
+    }
+
+    // --- NUEVO: Función para crear un cuadro de texto editable consistente ---
+    function createTextItem(text, options = {}) {
+      const textItem = document.createElement('div');
+      textItem.className = 'text-item text-align-center text-valign-middle';
+      textItem.contentEditable = 'false';
+      textItem.dataset.scale = options.scale || '1';
+      textItem.dataset.rotate = options.rotate || '0';
+      textItem.dataset.textId = options.textId || `text_${Date.now()}_${Math.floor(Math.random()*10000)}`;
+      textItem.style.left = options.left || '100px';
+      textItem.style.top = options.top || '100px';
+      textItem.style.fontFamily = options.fontFamily || 'sans-serif';
+      textItem.style.fontSize = options.fontSize || '14px';
+      textItem.style.color = options.color || '#111111';
+      textItem.style.transform = `scale(${textItem.dataset.scale}) rotate(${textItem.dataset.rotate}deg)`;
+      textItem.innerText = text || '';
+      autoResizeTextDiv(textItem);
+      textItem.addEventListener('input', function() { autoResizeTextDiv(this); });
+      textItem.addEventListener('blur', function() { this.contentEditable = 'false'; autoResizeTextDiv(this); });
+      textItem.addEventListener('dblclick', function(e) {
+        this.contentEditable = 'true';
+        this.focus();
+        document.execCommand('selectAll', false, null);
+        e.stopPropagation();
+      });
+      textItem.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showTextContextMenu(textItem, e.clientX, e.clientY);
+      });
+      editTools.makeInteractive(textItem);
+      return textItem;
+    }
+    // --- NUEVO: Función para autoajustar tamaño del div editable ---
+    function autoResizeTextDiv(div) {
+      div.style.width = 'auto';
+      div.style.height = 'auto';
+      div.style.width = (div.scrollWidth + 8) + 'px';
+      div.style.height = (div.scrollHeight + 8) + 'px';
+    }
+    // --- NUEVO: Menú contextual para alineación y capas ---
+    function showTextContextMenu(textItem, x, y) {
+      let menu = document.getElementById('textContextMenu');
+      if (menu) menu.remove();
+      menu = document.createElement('div');
+      menu.id = 'textContextMenu';
+      menu.style.position = 'fixed';
+      menu.style.left = x + 'px';
+      menu.style.top = y + 'px';
+      menu.style.background = '#fff';
+      menu.style.border = '1px solid #ccc';
+      menu.style.zIndex = 9999;
+      menu.style.padding = '8px';
+      menu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+      menu.style.fontSize = '1rem';
+      menu.innerHTML = `
+        <div style="margin-bottom:4px;font-weight:bold;">Alineación</div>
+        <button onclick="setTextAlign(this, 'left')">Izquierda</button>
+        <button onclick="setTextAlign(this, 'center')">Centro</button>
+        <button onclick="setTextAlign(this, 'right')">Derecha</button>
+        <br>
+        <button onclick="setTextValign(this, 'top')">Arriba</button>
+        <button onclick="setTextValign(this, 'middle')">Medio</button>
+        <button onclick="setTextValign(this, 'bottom')">Abajo</button>
+        <hr>
+        <div style="margin-bottom:4px;font-weight:bold;">Capas</div>
+        <button onclick="bringToFront(this)">Traer al frente</button>
+        <button onclick="sendToBack(this)">Enviar al fondo</button>
+      `;
+      document.body.appendChild(menu);
+      menu.textItem = textItem;
+      setTimeout(() => {
+        document.addEventListener('mousedown', closeTextContextMenu, { once: true });
+      }, 10);
+    }
+    function closeTextContextMenu(e) {
+      const menu = document.getElementById('textContextMenu');
+      if (menu && (!e || !menu.contains(e.target))) menu.remove();
+    }
+    // --- NUEVO: Funciones para alineación y capas ---
+    function setTextAlign(btn, align) {
+      const menu = btn.closest('#textContextMenu');
+      const textItem = menu.textItem;
+      textItem.classList.remove('text-align-left', 'text-align-center', 'text-align-right');
+      textItem.classList.add('text-align-' + align);
+      closeTextContextMenu();
+    }
+    function setTextValign(btn, valign) {
+      const menu = btn.closest('#textContextMenu');
+      const textItem = menu.textItem;
+      textItem.classList.remove('text-valign-top', 'text-valign-middle', 'text-valign-bottom');
+      textItem.classList.add('text-valign-' + valign);
+      closeTextContextMenu();
+    }
+    function bringToFront(btn) {
+      const menu = btn.closest('#textContextMenu');
+      const textItem = menu.textItem;
+      textItem.style.zIndex = 2000;
+      closeTextContextMenu();
+    }
+    function sendToBack(btn) {
+      const menu = btn.closest('#textContextMenu');
+      const textItem = menu.textItem;
+      textItem.style.zIndex = 1;
+      closeTextContextMenu();
+    }
+    // --- MODIFICAR: Función para agregar elemento de texto ---
+    function addTextElement() {
+      const textInput = document.getElementById('textInput');
+      const text = textInput.value.trim();
+      if (!text) {
+        alert('Please write some text');
+        return;
+      }
+      const fontSelector = document.getElementById('fontSelector');
+      const fontSizeSlider = document.getElementById('fontSize');
+      const fontColorPicker = document.getElementById('fontColor');
+      const textItem = createTextItem(text, {
+        fontFamily: fontSelector.value,
+        fontSize: fontSizeSlider.value + 'px',
+        color: fontColorPicker.value
+      });
+      gridElement.appendChild(textItem);
+      textInput.value = '';
+      setTimeout(() => {
+        textItem.focus();
+        document.execCommand('selectAll', false, null);
+      }, 100);
+      editTools.makeInteractive(textItem);
+      autoResizeTextDiv(textItem);
+    }
+
+    // Función para hacer interactivos los elementos de texto
+    function makeTextInteractive(el) {
+      el.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'TEXTAREA') return;
+        if (editTools.draggingItem) return;
+        editTools.draggingItem = el;
+        const rect = el.getBoundingClientRect();
+        const gridRect = gridElement.getBoundingClientRect();
+        editTools.dragOffsetX = e.clientX - rect.left;
+        editTools.dragOffsetY = e.clientY - rect.top;
+        editTools.dragStartX = e.clientX;
+        editTools.dragStartY = e.clientY;
+        editTools.isDragging = false;
+        el.style.zIndex = 1000;
+        e.preventDefault();
+      });
+      
+      el.addEventListener('wheel', (e) => {
+        if (e.shiftKey) {
+          e.preventDefault();
+          const scale = parseFloat(el.dataset.scale || '1');
+          const delta = e.deltaY < 0 ? 0.1 : -0.1;
+          const newScale = Math.max(0.1, scale + delta);
+          el.dataset.scale = newScale;
+          el.style.transform = `scale(${newScale}) rotate(${el.dataset.rotate || '0'}deg)`;
+        } else if (e.altKey) {
+          e.preventDefault();
+          const rotate = parseFloat(el.dataset.rotate || '0');
+          const delta = e.deltaY < 0 ? 5 : -5;
+          const newRotate = rotate + delta;
+          el.dataset.rotate = newRotate;
+          el.style.transform = `scale(${el.dataset.scale || '1'}) rotate(${newRotate}deg)`;
+        }
+      });
+    }
+
+    // Función para abrir controles de texto
+    function openTextControls(textElement) {
+      editTools.currentEditingText = textElement;
+      editTools.currentEditingImage = null;
+      const textarea = textElement.querySelector('textarea');
+      const panel = document.getElementById('textControlsPanel');
+      const overlay = document.getElementById('textControlsOverlay');
+      
+      document.querySelector('#textControlsPanel h3').textContent = 'Editar Texto';
+      
+      document.getElementById('textContent').value = textarea.value;
+      document.getElementById('textFontSize').value = parseInt(textElement.style.fontSize) || 14;
+      document.getElementById('textFontSizeDisplay').textContent = `${document.getElementById('textFontSize').value}px`;
+      document.getElementById('textFontColor').value = textElement.style.color || '#111111';
+      document.getElementById('textFontFamily').value = textElement.style.fontFamily || 'sans-serif';
+      
+      panel.style.display = 'block';
+      overlay.style.display = 'block';
+    }
+    
+    // Función para cerrar controles de texto
+    function closeTextControls() {
+      document.getElementById('textControlsPanel').style.display = 'none';
+      document.getElementById('textControlsOverlay').style.display = 'none';
+      editTools.currentEditingText = null;
+      editTools.currentEditingImage = null;
+    }
+    
+    // Función para aplicar cambios de texto
+    function applyTextChanges() {
+      if (!editTools.currentEditingText) return;
+      
+      const textarea = editTools.currentEditingText.querySelector('textarea');
+      const newContent = document.getElementById('textContent').value;
+      const newSize = document.getElementById('textFontSize').value;
+      const newColor = document.getElementById('textFontColor').value;
+      const newFamily = document.getElementById('textFontFamily').value;
+      
+      textarea.value = newContent;
+      editTools.currentEditingText.style.fontSize = `${newSize}px`;
+      editTools.currentEditingText.style.color = newColor;
+      editTools.currentEditingText.style.fontFamily = newFamily;
+      
+      closeTextControls();
+    }
+    
+    // Función para eliminar elemento de texto
+    function deleteTextElement() {
+      if (!editTools.currentEditingText) return;
+      
+      if (confirm('Are you sure you want to delete this text?')) {
+        editTools.currentEditingText.remove();
+        closeTextControls();
+      }
+    }
+
+    // Función para aplicar fuente a imagen
+    function applyImageFontChanges() {
+      if (!editTools.currentEditingImage) return;
+      
+      const title = editTools.currentEditingImage.querySelector('.item-title');
+      const newContent = document.getElementById('textContent').value;
+      const newSize = document.getElementById('textFontSize').value;
+      const newColor = document.getElementById('textFontColor').value;
+      const newFamily = document.getElementById('textFontFamily').value;
+      
+      if (title) {
+        title.textContent = newContent;
+        title.style.fontSize = `${newSize}px`;
+        title.style.color = newColor;
+        title.style.fontFamily = newFamily;
+      }
+      
+      closeTextControls();
+    }
+    
+    // Función para eliminar elemento de imagen
+    function deleteImageElement() {
+      if (!editTools.currentEditingImage) return;
+      
+      if (confirm('Are you sure you want to delete this image?')) {
+        editTools.currentEditingImage.remove();
+        closeTextControls();
+      }
+    }
+
+    // Función unificada para aplicar cambios
+    function applyChanges() {
+      if (editTools.currentEditingText) {
+        applyTextChanges();
+      } else if (editTools.currentEditingImage) {
+        applyImageFontChanges();
+      }
+    }
+
+    // Función unificada para eliminar elemento
+    function deleteElement() {
+      if (editTools.currentEditingText) {
+        deleteTextElement();
+      } else if (editTools.currentEditingImage) {
+        deleteImageElement();
+      }
+    }
+
+    // Función para restaurar el lienzo
+    function restoreCanvas() {
+      if (!confirm('Are you sure you want to delete all the canvas? This action cannot be undone.')) {
+        return;
+      }
+      
+      const items = document.querySelectorAll('.item, .text-item');
+      items.forEach(item => item.remove());
+      
+      currentBackgroundColor = '#ffffff';
+      currentFont = 'sans-serif';
+      currentFontSize = '14';
+      currentFontColor = '#111111';
+      
+      document.getElementById('backgroundColor').value = currentBackgroundColor;
+      document.getElementById('fontSelector').value = currentFont;
+      document.getElementById('fontSize').value = currentFontSize;
+      document.getElementById('fontSizeDisplay').textContent = `${currentFontSize}px`;
+      document.getElementById('fontColor').value = currentFontColor;
+      
+      gridElement.style.backgroundColor = currentBackgroundColor;
+      localStorage.removeItem('creaturePositions');
+      gridElement.style.width = '100%';
+      gridElement.style.height = '100%';
+      
+      alert('Canvas restored. All has been deleted and a blank canvas has been started.');
+    }
+
+    // Función para exportar layout
+    function exportLayout() {
+      const defaultName = `layout_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}`;
+      const fileName = prompt('File name (without extension):', defaultName);
+      
+      if (!fileName) return;
+      
+      const cleanFileName = fileName.replace(/[<>:"/\\|?*]/g, '_').trim();
+      
+      // --- SEPARAR IMÁGENES Y ARTE ---
+      const allItems = Array.from(document.querySelectorAll('.item'));
+      const images = [];
+      const artimages = [];
+      allItems.forEach(el => {
+        const imgEl = el.querySelector('img');
+        const imgSrc = imgEl?.src || '';
+        // Convertir a ruta relativa si es necesario
+        let relativeImg = imgSrc;
+        if (imgSrc.startsWith(window.location.origin + '/')) {
+          relativeImg = imgSrc.replace(window.location.origin + '/', '');
+        } else if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://')) {
+          // Si por alguna razón tiene otro host, solo tomar la parte después del último /
+          const parts = imgSrc.split('/');
+          const lastTwo = parts.slice(-2).join('/');
+          if (imgSrc.includes('/imgart/')) {
+            relativeImg = 'imgart/' + lastTwo.split('imgart/')[1];
+          } else if (imgSrc.includes('/img/')) {
+            relativeImg = 'img/' + lastTwo.split('img/')[1];
+          }
+        }
+        if (relativeImg.startsWith('imgart/')) {
+          artimages.push({
+            img: relativeImg,
+            left: el.style.left,
+            top: el.style.top,
+            scale: el.dataset.scale || '1',
+            rotate: el.dataset.rotate || '0'
+          });
+        } else if (relativeImg.startsWith('img/')) {
+          const titleElement = el.querySelector('.item-title');
+          const computed = titleElement ? window.getComputedStyle(titleElement) : {};
+          images.push({
+            name: titleElement?.textContent || '',
+            img: relativeImg,
+            left: el.style.left,
+            top: el.style.top,
+            scale: el.dataset.scale || '1',
+            rotate: el.dataset.rotate || '0',
+            fontFamily: computed.fontFamily || '',
+            fontSize: computed.fontSize || '',
+            color: computed.color || '',
+            flipped: el.dataset.flipped === 'true',
+            showTitles: el.dataset.showTitles !== 'false'
+          });
+        }
+      });
+      // --- FIN SEPARACIÓN ---
+      const exportData = {
+        images,
+        artimages,
+        texts: Array.from(document.querySelectorAll('.text-item')).map(el => ({
+          content: el.innerText,
+          left: el.style.left,
+          top: el.style.top,
+          scale: el.dataset.scale || '1',
+          rotate: el.dataset.rotate || '0',
+          fontFamily: el.style.fontFamily,
+          fontSize: el.style.fontSize,
+          color: el.style.color
+        })),
+        backgroundColor: currentBackgroundColor,
+        fontSettings: {
+          family: currentFont,
+          size: currentFontSize,
+          color: currentFontColor
+        },
+        exportDate: new Date().toISOString(),
+        showTitles: document.getElementById('toggleTitles').checked
+      };
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${cleanFileName}.json`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert(`File saved as: ${cleanFileName}.json\n\nLocation: Download folder of your browser`);
+      }, 100);
+    }
+
+    // Cargar fuentes personalizadas
+    async function loadCustomFonts() {
+      const selector = document.getElementById('fontSelector');
+      const panelSelector = document.getElementById('textFontFamily');
+      try {
+        const res = await fetch('fonts/fonts.json');
+        const fontFiles = await res.json();
+        
+        for (const font of fontFiles) {
+          try {
+            const fontUrl = `fonts/${font}`;
+            const cleanName = font.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
+            const fontFace = new FontFace(cleanName, `url(${fontUrl})`);
+            await fontFace.load();
+            document.fonts.add(fontFace);
+            
+            if (![...selector.options].some(opt => opt.value === cleanName)) {
+              const opt = document.createElement('option');
+              opt.value = cleanName;
+              opt.textContent = cleanName;
+              selector.appendChild(opt);
+            }
+            
+            if (![...panelSelector.options].some(opt => opt.value === cleanName)) {
+              const panelOpt = document.createElement('option');
+              panelOpt.value = cleanName;
+              panelOpt.textContent = cleanName;
+              panelSelector.appendChild(panelOpt);
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      } catch (e) {
+        // Si no hay fonts.json, usar solo las fuentes estándar
+      }
+    }
+
+    // Inicializar al cargar la página
+    window.addEventListener('DOMContentLoaded', async () => {
+      detectMode();
+      
+      // Inicializar herramientas de edición
+      editTools = new EditTools(gridElement);
+      
+      await loadCreatures();
+      await loadArtImages();
+      await loadCustomFonts();
+      
+      // Configurar controles
+      const fontSelector = document.getElementById('fontSelector');
+      const toggleTitles = document.getElementById('toggleTitles');
+      const backgroundColorPicker = document.getElementById('backgroundColor');
+      const fontSizeSlider = document.getElementById('fontSize');
+      const fontSizeDisplay = document.getElementById('fontSizeDisplay');
+      const fontColorPicker = document.getElementById('fontColor');
+      
+      fontSelector.value = currentFont;
+      backgroundColorPicker.value = currentBackgroundColor;
+      gridElement.style.backgroundColor = currentBackgroundColor;
+      fontSizeSlider.value = currentFontSize;
+      fontSizeDisplay.textContent = `${currentFontSize}px`;
+      fontColorPicker.value = currentFontColor;
+      
+      fontSelector.addEventListener('change', (e) => {
+        currentFont = e.target.value;
+        localStorage.setItem('currentFont', currentFont);
+      });
+      
+      toggleTitles.addEventListener('change', (e) => {
+        const show = e.target.checked;
+        document.querySelectorAll('.item-title').forEach(title => {
+          title.style.display = show ? '' : 'none';
+        });
+      });
+      
+      backgroundColorPicker.addEventListener('change', (e) => {
+        currentBackgroundColor = e.target.value;
+        gridElement.style.backgroundColor = currentBackgroundColor;
+        localStorage.setItem('backgroundColor', currentBackgroundColor);
+      });
+      
+      fontSizeSlider.addEventListener('input', (e) => {
+        currentFontSize = e.target.value;
+        fontSizeDisplay.textContent = `${currentFontSize}px`;
+        localStorage.setItem('fontSize', currentFontSize);
+      });
+      
+      fontColorPicker.addEventListener('change', (e) => {
+        currentFontColor = e.target.value;
+        localStorage.setItem('fontColor', currentFontColor);
+      });
+      
+      // Cargar estado guardado
+      const saved = localStorage.getItem('creaturePositions');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          
+          if (data.backgroundColor) {
+            currentBackgroundColor = data.backgroundColor;
+            gridElement.style.backgroundColor = currentBackgroundColor;
+            document.getElementById('backgroundColor').value = currentBackgroundColor;
+          }
+          
+          if (data.fontSettings) {
+            currentFont = data.fontSettings.family || currentFont;
+            currentFontSize = data.fontSettings.size || currentFontSize;
+            currentFontColor = data.fontSettings.color || currentFontColor;
+            
+            document.getElementById('fontSelector').value = currentFont;
+            document.getElementById('fontSize').value = currentFontSize;
+            document.getElementById('fontSizeDisplay').textContent = `${currentFontSize}px`;
+            document.getElementById('fontColor').value = currentFontColor;
+          }
+          
+          if (data.images && Array.isArray(data.images)) {
+            data.images.forEach(itemData => {
+              const item = document.createElement('div');
+              item.classList.add('item');
+              item.style.left = itemData.left;
+              item.style.top = itemData.top;
+              item.dataset.scale = itemData.scale;
+              item.dataset.rotate = itemData.rotate;
+              
+              item.innerHTML = `
+                <div class="item-content">
+                  <img src="${itemData.img}" />
+                  <div class="item-title">${itemData.name}</div>
+                </div>`;
+              
+              const titleElement = item.querySelector('.item-title');
+              if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
+                titleElement.style.fontFamily = itemData.fontFamily || 'sans-serif';
+                titleElement.style.fontSize = itemData.fontSize || '14px';
+                titleElement.style.color = itemData.color || '#111111';
+              }
+              
+              item.style.transform = `scale(${itemData.scale}) rotate(${itemData.rotate}deg)`;
+              editTools.makeInteractive(item);
+              gridElement.appendChild(item);
+            });
+          }
+          
+          if (data.texts && Array.isArray(data.texts)) {
+            data.texts.forEach(textData => {
+              const textItem = document.createElement('div');
+              textItem.className = 'text-item';
+              textItem.style.left = textData.left;
+              textItem.style.top = textData.top;
+              textItem.dataset.scale = textData.scale;
+              textItem.dataset.rotate = textData.rotate;
+              textItem.dataset.textId = textData.textId || `text_${Date.now()}_${textCounter++}`;
+              textItem.style.fontFamily = textData.fontFamily || currentFont;
+              textItem.style.fontSize = textData.fontSize || `${currentFontSize}px`;
+              textItem.style.color = textData.color || currentFontColor;
+              textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
+              
+              const textarea = document.createElement('textarea');
+              textarea.value = textData.content;
+              textarea.rows = 1;
+              textarea.style.height = 'auto';
+              
+              textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+              });
+              
+              textarea.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+              });
+              
+              textItem.appendChild(textarea);
+              editTools.makeInteractive(textItem);
+              gridElement.appendChild(textItem);
+            });
+          }
+          
+          editTools.expandCanvas();
+        } catch (error) {
+          console.error('Error loading saved state:', error);
+        }
+      }
+    });
+
+    // Eventos para cerrar panel con Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeTextControls();
+      }
+    });
+    
+    // Evento para cerrar panel al hacer click en overlay
+    document.getElementById('textControlsOverlay').addEventListener('click', closeTextControls);
+    
+    // Evento para el slider de tamaño de fuente
+    document.getElementById('textFontSize').addEventListener('input', (e) => {
+      document.getElementById('textFontSizeDisplay').textContent = `${e.target.value}px`;
+    });
+
+    // Función para importar un archivo JSON y cargarlo en el editor
+    function importJsonToEditor(jsonData) {
+      // Limpiar el lienzo
+      const items = document.querySelectorAll('.item, .text-item');
+      items.forEach(item => item.remove());
+      // Limpiar fondo y fuentes
+      currentBackgroundColor = jsonData.backgroundColor || '#ffffff';
+      gridElement.style.backgroundColor = currentBackgroundColor;
+      document.getElementById('backgroundColor').value = currentBackgroundColor;
+      currentFont = (jsonData.fontSettings && jsonData.fontSettings.family) || 'sans-serif';
+      currentFontSize = (jsonData.fontSettings && jsonData.fontSettings.size) || '14';
+      currentFontColor = (jsonData.fontSettings && jsonData.fontSettings.color) || '#111111';
+      document.getElementById('fontSelector').value = currentFont;
+      document.getElementById('fontSize').value = currentFontSize;
+      document.getElementById('fontSizeDisplay').textContent = `${currentFontSize}px`;
+      document.getElementById('fontColor').value = currentFontColor;
+      // Cargar imágenes de criaturas
+      if (jsonData.images && Array.isArray(jsonData.images)) {
+        jsonData.images.forEach(itemData => {
+          const item = document.createElement('div');
+          item.classList.add('item');
+          item.style.left = itemData.left;
+          item.style.top = itemData.top;
+          item.dataset.scale = itemData.scale;
+          item.dataset.rotate = itemData.rotate;
+          item.innerHTML = `
+            <div class='item-content'>
+              <img src='${itemData.img}' />
+              <div class='item-title'>${itemData.name || ''}</div>
+            </div>`;
+          const titleElement = item.querySelector('.item-title');
+          if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
+            titleElement.style.fontFamily = itemData.fontFamily || 'sans-serif';
+            titleElement.style.fontSize = itemData.fontSize || '14px';
+            titleElement.style.color = itemData.color || '#111111';
+          }
+          item.style.transform = `scale(${itemData.scale}) rotate(${itemData.rotate}deg)`;
+          editTools.makeInteractive(item);
+          gridElement.appendChild(item);
+        });
+      }
+      // Cargar imágenes de arte
+      if (jsonData.artimages && Array.isArray(jsonData.artimages)) {
+        jsonData.artimages.forEach(artData => {
+          const item = document.createElement('div');
+          item.classList.add('item');
+          item.style.left = artData.left;
+          item.style.top = artData.top;
+          item.dataset.scale = artData.scale;
+          item.dataset.rotate = artData.rotate;
+          item.innerHTML = `
+            <div class='item-content'>
+              <img src='${artData.img}' />
+            </div>`;
+          item.style.transform = `scale(${artData.scale}) rotate(${artData.rotate}deg)`;
+          editTools.makeInteractive(item);
+          gridElement.appendChild(item);
+        });
+      }
+      // Cargar textos
+      if (jsonData.texts && Array.isArray(jsonData.texts)) {
+        jsonData.texts.forEach(textData => {
+          const textItem = document.createElement('div');
+          textItem.className = 'text-item';
+          textItem.style.left = textData.left;
+          textItem.style.top = textData.top;
+          textItem.dataset.scale = textData.scale;
+          textItem.dataset.rotate = textData.rotate;
+          textItem.dataset.textId = textData.textId || `text_${Date.now()}_${textCounter++}`;
+          textItem.style.fontFamily = textData.fontFamily || currentFont;
+          textItem.style.fontSize = textData.fontSize || `${currentFontSize}px`;
+          textItem.style.color = textData.color || currentFontColor;
+          textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
+          const textarea = document.createElement('textarea');
+          textarea.value = textData.content;
+          textarea.rows = 1;
+          textarea.style.height = 'auto';
+          textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+          });
+          textarea.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+          });
+          textItem.appendChild(textarea);
+          editTools.makeInteractive(textItem);
+          gridElement.appendChild(textItem);
+        });
+      }
+      editTools.expandCanvas();
+    }
+    // Evento para importar archivo JSON
+    document.getElementById('importJsonInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const jsonData = JSON.parse(evt.target.result);
+          if (confirm('¿Seguro que quieres importar este archivo? Se perderán los cambios no guardados.')) {
+            importJsonToEditor(jsonData);
+          }
+        } catch (err) {
+          alert('El archivo seleccionado no es un JSON válido.');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    // Subir fuentes personalizadas
+    document.getElementById('fontUploadInput').addEventListener('change', async function(e) {
+      if (isLocalMode) {
+        alert('Font upload not available in local mode.');
+        e.target.value = '';
+        return;
+      }
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
+      const formData = new FormData();
+      files.forEach(file => formData.append('fonts', file));
+      try {
+        const response = await fetch('/fonts', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        if (result.success) {
+          alert('Fonts uploaded successfully!');
+          await loadCustomFonts();
+        } else {
+          alert('Error uploading fonts: ' + (result.error || 'Unknown error'));
+        }
+      } catch (err) {
+        alert('Error uploading fonts.');
+      }
+      e.target.value = '';
+    });
+
+    // --- Sidebar flotante y plegable ---
+    const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');
+    const floatingSidebar = document.getElementById('floatingSidebar');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    const sidebarContent = document.getElementById('sidebarContent');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const originalSidebar = document.querySelector('.sidebar');
+      if (originalSidebar) {
+        sidebarContent.appendChild(originalSidebar);
+        originalSidebar.style.display = 'block';
+        originalSidebar.style.width = '100%';
+        originalSidebar.style.border = 'none';
+        originalSidebar.style.background = 'transparent';
+        originalSidebar.style.boxShadow = 'none';
+        originalSidebar.style.margin = '0';
+        originalSidebar.style.padding = '0';
+      }
+    });
+
+    toggleSidebarBtn.addEventListener('click', () => {
+      floatingSidebar.style.display = 'block';
+      toggleSidebarBtn.style.display = 'none';
+    });
+    closeSidebarBtn.addEventListener('click', () => {
+      floatingSidebar.style.display = 'none';
+      toggleSidebarBtn.style.display = 'block';
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && floatingSidebar.style.display === 'block') {
+        floatingSidebar.style.display = 'none';
+        toggleSidebarBtn.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
