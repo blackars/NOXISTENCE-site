@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "npm run generate-catalog && npm run generate-thumbnails",
+    "generate-catalog": "node src/generate-catalog.js",
+    "generate-thumbnails": "node src/generate-thumbnails.js",
+    "netlify-build": "npm run build"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
@@ -25,8 +29,13 @@
   "keywords": [
     "creatures",
     "layout",
-    "editor"
+    "editor",
+    "netlify",
+    "static-site"
   ],
   "author": "Andrés Mesa - Blackars",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

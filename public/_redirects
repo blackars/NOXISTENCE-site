@@ -1,0 +1,20 @@
+# Redirecciones para Netlify
+# Este archivo maneja las rutas y redirecciones del sitio
+
+# Redirigir la raíz a index.html
+/ /index.html 200
+
+# Redirigir rutas de páginas principales
+/catalog /catalog.html 200
+/collections /collections.html 200
+/editor /editor.html 200
+/viewer /viewer.html 200
+
+# Manejar rutas con parámetros para el viewer
+/viewer/* /viewer.html 200
+
+# Redirigir rutas de API a funciones serverless (cuando las creemos)
+/api/* /.netlify/functions/:splat 200
+
+# Redirigir cualquier otra ruta a index.html (para SPA)
+/* /index.html 200 
