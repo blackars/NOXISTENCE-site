@@ -1,0 +1,16 @@
+{
+  "name": "Ejemplo",
+  "description": "Archivo de ejemplo para mantener la estructura del directorio",
+  "images": [],
+  "artimages": [],
+  "texts": [],
+  "backgroundColor": "#ffffff",
+  "fontSettings": {
+    "family": "sans-serif",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2024-01-01T00:00:00.000Z",
+  "showTitles": true,
+  "isExample": true
+} 

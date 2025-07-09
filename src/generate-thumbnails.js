@@ -50,9 +50,21 @@ async function generateAllThumbnails() {
     return;
   }
   
+  // Si solo hay el archivo de ejemplo, saltar la generación de thumbnails
+  if (files.length === 1 && files[0] === 'example.json') {
+    console.log('Solo se encontró el archivo de ejemplo, saltando generación de thumbnails');
+    return;
+  }
+  
   console.log(`Generando ${files.length} thumbnails...`);
   
   for (const file of files) {
+    // Saltar el archivo de ejemplo
+    if (file === 'example.json') {
+      console.log('Saltando archivo de ejemplo:', file);
+      continue;
+    }
+    
     try {
       console.log('Generando miniatura para', file);
       await generateThumbnailForFile(file);
