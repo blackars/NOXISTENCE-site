@@ -171,11 +171,27 @@ class CloudinarySync {
   // Eliminar imagen de Cloudinary (usando API pública)
   async deleteFromCloudinary(publicId) {
     try {
-      // Nota: La API pública no permite eliminar, pero podemos marcar como eliminada
+      if (!publicId) {
+        throw new Error('ID de imagen no proporcionado');
+      }
+      
       console.log(`Intentando eliminar de Cloudinary: ${publicId}`);
       
+      // Verificar que la imagen existe en localStorage
+      const creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+      const creature = creatures.find(c => c.cloudinaryId === publicId);
+      
+      if (!creature) {
+        return {
+          success: false,
+          message: 'Imagen no encontrada en localStorage'
+        };
+      }
+      
+      // Nota: La API pública no permite eliminar, pero podemos marcar como eliminada
       // Para eliminar realmente necesitarías credenciales de API
-      // Por ahora, solo marcamos como eliminada en localStorage
+      console.log('Imagen encontrada, marcando como eliminada');
+      
       return {
         success: true,
         message: 'Imagen marcada como eliminada (requiere credenciales para eliminación real)'
@@ -184,7 +200,7 @@ class CloudinarySync {
       console.error('Error eliminando de Cloudinary:', error);
       return {
         success: false,
-        message: 'Error al eliminar de Cloudinary'
+        message: 'Error al eliminar de Cloudinary: ' + error.message
       };
     }
   }

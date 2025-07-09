@@ -945,21 +945,38 @@
         let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
         const creatureToDelete = creatures.find(creature => creature.id === id);
         
+        if (!creatureToDelete) {
+          alert('Criatura no encontrada');
+          return;
+        }
+        
         // Eliminar de localStorage
         creatures = creatures.filter(creature => creature.id !== id);
         localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
         
         // Intentar eliminar de Cloudinary si tiene cloudinaryId
-        if (creatureToDelete && creatureToDelete.cloudinaryId) {
-          if (!cloudinarySync) initCloudinarySync();
-          
-          const deleteResult = await cloudinarySync.deleteFromCloudinary(creatureToDelete.cloudinaryId);
-          console.log('Resultado eliminación Cloudinary:', deleteResult);
-          
-          if (deleteResult.success) {
-            alert('Criatura eliminada del localStorage. ' + deleteResult.message);
-          } else {
-            alert('Criatura eliminada del localStorage. ' + deleteResult.message);
+        if (creatureToDelete.cloudinaryId) {
+          try {
+            // Asegurar que cloudinarySync esté inicializado
+            if (!cloudinarySync) {
+              initCloudinarySync();
+            }
+            
+            if (cloudinarySync && typeof cloudinarySync.deleteFromCloudinary === 'function') {
+              const deleteResult = await cloudinarySync.deleteFromCloudinary(creatureToDelete.cloudinaryId);
+              console.log('Resultado eliminación Cloudinary:', deleteResult);
+              
+              if (deleteResult && deleteResult.success) {
+                alert('Criatura eliminada del localStorage. ' + (deleteResult.message || 'Imagen marcada como eliminada.'));
+              } else {
+                alert('Criatura eliminada del localStorage. ' + (deleteResult?.message || 'No se pudo eliminar de Cloudinary.'));
+              }
+            } else {
+              alert('Criatura eliminada del localStorage. Función de eliminación de Cloudinary no disponible.');
+            }
+          } catch (cloudinaryError) {
+            console.error('Error eliminando de Cloudinary:', cloudinaryError);
+            alert('Criatura eliminada del localStorage. Error al eliminar de Cloudinary: ' + cloudinaryError.message);
           }
         } else {
           alert('Criatura eliminada exitosamente');
@@ -970,7 +987,7 @@
 
       } catch (error) {
         console.error('Error eliminando criatura:', error);
-        alert('Error al eliminar la criatura');
+        alert('Error al eliminar la criatura: ' + error.message);
       }
     }
     
