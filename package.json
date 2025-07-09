@@ -1,41 +1,22 @@
 {
   "name": "noxistence-site",
   "version": "1.0.0",
-  "description": "NOXISTENCE Project",
-  "main": "server.js",
+  "description": "NOXISTENCE Site - Editor de criaturas y visualizador",
+  "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server.js",
-    "build": "npm run generate-catalog && npm run generate-thumbnails",
-    "generate-catalog": "node src/generate-catalog.js",
-    "generate-thumbnails": "node src/generate-thumbnails.js",
-    "netlify-build": "npm run build"
+    "build": "node src/generate-catalog.js && node src/generate-thumbnails.js",
+    "dev": "nodemon server/server.js"
   },
   "dependencies": {
-    "@studio-freight/lenis": "^1.0.42",
-    "dotenv": "^17.0.1",
     "express": "^4.18.2",
-    "express-basic-auth": "^1.2.1",
-    "form-data": "^4.0.3",
-    "gsap": "^3.13.0",
     "multer": "^1.4.5-lts.1",
-    "node-fetch": "^3.3.2",
-    "puppeteer": "^24.11.2",
-    "three": "^0.178.0"
+    "cloudinary": "^1.41.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": [
-    "creatures",
-    "layout",
-    "editor",
-    "netlify",
-    "static-site"
-  ],
-  "author": "Andrés Mesa - Blackars",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "keywords": ["noxistence", "editor", "creatures", "cloudinary"],
+  "author": "OSCAR",
+  "license": "MIT"
 }

@@ -9,6 +9,15 @@
   # Variables de entorno para el build
   NODE_VERSION = "18"
 
+[functions]
+  directory = "netlify/functions"
+
+# Redirecciones para funciones serverless
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
 # Redirecciones para SPA (Single Page Application) si es necesario
 [[redirects]]
   from = "/*"

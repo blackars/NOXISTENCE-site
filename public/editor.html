@@ -634,31 +634,51 @@
       }
     }
     
-    // Función para cargar criaturas según el modo
+    // Función para cargar criaturas desde Cloudinary y archivo JSON
     async function loadCreatures() {
       let creatures = [];
       
-      // Primero intentar cargar desde localStorage (para criaturas subidas con Cloudinary)
-      const localCreatures = localStorage.getItem('noxistence_creatures');
-      if (localCreatures) {
-        try {
-          const parsedCreatures = JSON.parse(localCreatures);
-          creatures = creatures.concat(parsedCreatures);
-        } catch (error) {
-          console.error('Error parsing localStorage creatures:', error);
+      try {
+        // Cargar desde función serverless (Cloudinary + JSON)
+        const response = await fetch('/.netlify/functions/get-creatures');
+        if (response.ok) {
+          creatures = await response.json();
+        } else {
+          console.log('Error loading from serverless function, falling back to local');
+          // Fallback: cargar desde localStorage y archivo JSON
+          const localCreatures = localStorage.getItem('noxistence_creatures');
+          if (localCreatures) {
+            try {
+              const parsedCreatures = JSON.parse(localCreatures);
+              creatures = creatures.concat(parsedCreatures);
+            } catch (error) {
+              console.error('Error parsing localStorage creatures:', error);
+            }
+          }
+          
+          try {
+            const jsonResponse = await fetch('data/creatures.json');
+            const jsonCreatures = await jsonResponse.json();
+            creatures = creatures.concat(jsonCreatures);
+          } catch (error) {
+            console.log('No creatures.json file found or error loading it');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading creatures:', error);
+        // Fallback completo
+        const localCreatures = localStorage.getItem('noxistence_creatures');
+        if (localCreatures) {
+          try {
+            const parsedCreatures = JSON.parse(localCreatures);
+            creatures = creatures.concat(parsedCreatures);
+          } catch (error) {
+            console.error('Error parsing localStorage creatures:', error);
+          }
         }
       }
       
-      // Luego intentar cargar desde archivo JSON (para criaturas existentes)
-      try {
-        const response = await fetch('data/creatures.json');
-        const jsonCreatures = await response.json();
-        creatures = creatures.concat(jsonCreatures);
-      } catch (error) {
-        console.log('No creatures.json file found or error loading it');
-      }
-      
-      // Si no hay criaturas en ningún lado, mostrar ejemplos
+      // Si no hay criaturas, mostrar ejemplos
       if (creatures.length === 0) {
         creatures = [
           {
@@ -865,7 +885,7 @@
 
       // Crear objeto de criatura
       const newCreature = {
-        id: `creature_${Date.now()}`,
+        id: uploadedImageName, // Usar el nombre del archivo como ID
         name: creatureName,
         world: creatureWorld,
         img: uploadedImageUrl, // URL de Cloudinary
@@ -874,14 +894,25 @@
       };
 
       try {
-        // Cargar criaturas existentes desde localStorage
-        let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+        // Intentar guardar usando función serverless
+        const response = await fetch('/.netlify/functions/save-creature', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newCreature)
+        });
 
-        // Agregar nueva criatura
-        creatures.push(newCreature);
-
-        // Guardar en localStorage
-        localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Creature saved via serverless function:', result);
+        } else {
+          console.log('Serverless function failed, falling back to localStorage');
+          // Fallback: guardar en localStorage
+          let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+          creatures.push(newCreature);
+          localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
+        }
 
         // Limpiar formulario
         nameInput.value = '';
@@ -897,7 +928,7 @@
         statusDiv.style.background = '#d4edda';
         statusDiv.style.color = '#155724';
         statusDiv.style.border = '1px solid #c3e6cb';
-        statusDiv.innerHTML = `✅ Creature "${creatureName}" saved successfully!`;
+        statusDiv.innerHTML = `✅ Criatura "${creatureName}" guardada exitosamente!`;
 
         // Limpiar mensaje después de 3 segundos
         setTimeout(() => {
@@ -906,7 +937,12 @@
 
       } catch (error) {
         console.error('Error saving creature:', error);
-        alert('Error saving creature. Check console for details.');
+        // Fallback completo
+        let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+        creatures.push(newCreature);
+        localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
+        
+        alert('Error saving creature. Saved to localStorage as backup.');
       }
     }
 
@@ -916,38 +952,45 @@
         return;
       }
 
-      if (isLocalMode) {
-        // Eliminar de localStorage
+      try {
+        // Intentar eliminar usando función serverless
+        const response = await fetch('/.netlify/functions/delete-creature', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ id })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Creature deleted via serverless function:', result);
+          alert('Criatura eliminada exitosamente');
+        } else {
+          console.log('Serverless function failed, falling back to localStorage');
+          // Fallback: eliminar de localStorage
+          let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+          creatures = creatures.filter(creature => creature.id !== id);
+          localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
+          alert('Criatura eliminada de localStorage');
+        }
+
+        // Actualizar lista
+        await loadCreatures();
+
+      } catch (error) {
+        console.error('Error eliminando criatura:', error);
+        // Fallback completo
         try {
           let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
           creatures = creatures.filter(creature => creature.id !== id);
           localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
-          
-          alert('Criatura eliminada exitosamente');
+          alert('Criatura eliminada de localStorage');
           await loadCreatures();
-        } catch (error) {
-          console.error('Error eliminando criatura:', error);
+        } catch (localError) {
+          console.error('Error eliminando de localStorage:', localError);
           alert('Error al eliminar la criatura');
         }
-        return;
-      }
-      
-      try {
-        const response = await fetch(`hojas/creatures/${id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Criatura eliminada exitosamente');
-          await loadCreatures();
-        } else {
-          alert('Error: ' + result.error);
-        }
-      } catch (error) {
-        console.error('Error eliminando:', error);
-        alert('Error al eliminar la criatura');
       }
     }
     
