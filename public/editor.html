@@ -639,7 +639,7 @@
       let creatures = [];
       
       // Primero intentar cargar desde localStorage (para criaturas subidas con Cloudinary)
-      const localCreatures = localStorage.getItem('creatures');
+      const localCreatures = localStorage.getItem('noxistence_creatures');
       if (localCreatures) {
         try {
           const parsedCreatures = JSON.parse(localCreatures);
@@ -696,7 +696,7 @@
             <div><strong>${creature.name}</strong></div>
             <div style="font-size: 0.8rem; color: #666;">${creature.world}</div>
           </div>
-          ${!isLocalMode ? `<button class="delete-btn" onclick="deleteCreature('${creature.id}')">×</button>` : ''}
+          <button class="delete-btn" onclick="deleteCreature('${creature.id}')">×</button>
         `;
         
         item.addEventListener('dragstart', (e) => {
@@ -874,20 +874,14 @@
       };
 
       try {
-        // Cargar criaturas existentes
-        let creatures = [];
-        try {
-          const response = await fetch('data/creatures.json');
-          creatures = await response.json();
-        } catch (error) {
-          console.log('No existing creatures file, starting fresh');
-        }
+        // Cargar criaturas existentes desde localStorage
+        let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
 
         // Agregar nueva criatura
         creatures.push(newCreature);
 
-        // Guardar en localStorage como respaldo
-        localStorage.setItem('creatures', JSON.stringify(creatures));
+        // Guardar en localStorage
+        localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
 
         // Limpiar formulario
         nameInput.value = '';
@@ -918,15 +912,26 @@
 
     // Eliminar criatura
     async function deleteCreature(id) {
-      if (isLocalMode) {
-        alert('Creature deletion not avaliable in local mode.\n\nTo delete creatures, run Node.js server with:\n\nnpm start');
-        return;
-      }
-      
-      if (!confirm('Are you sure you want to delete this creature?')) {
+      if (!confirm('¿Estás seguro de que quieres eliminar esta criatura?')) {
         return;
       }
 
+      if (isLocalMode) {
+        // Eliminar de localStorage
+        try {
+          let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+          creatures = creatures.filter(creature => creature.id !== id);
+          localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
+          
+          alert('Criatura eliminada exitosamente');
+          await loadCreatures();
+        } catch (error) {
+          console.error('Error eliminando criatura:', error);
+          alert('Error al eliminar la criatura');
+        }
+        return;
+      }
+      
       try {
         const response = await fetch(`hojas/creatures/${id}`, {
           method: 'DELETE'
@@ -935,14 +940,14 @@
         const result = await response.json();
         
         if (result.success) {
-          alert('Creature deleted successfully');
+          alert('Criatura eliminada exitosamente');
           await loadCreatures();
         } else {
           alert('Error: ' + result.error);
         }
       } catch (error) {
-        console.error('Error deleting:', error);
-        alert('Error deleting creature');
+        console.error('Error eliminando:', error);
+        alert('Error al eliminar la criatura');
       }
     }
     
