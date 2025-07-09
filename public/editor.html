@@ -941,12 +941,29 @@
       }
 
       try {
-        // Eliminar de localStorage
+        // Obtener la criatura antes de eliminarla
         let creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+        const creatureToDelete = creatures.find(creature => creature.id === id);
+        
+        // Eliminar de localStorage
         creatures = creatures.filter(creature => creature.id !== id);
         localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
         
-        alert('Criatura eliminada exitosamente');
+        // Intentar eliminar de Cloudinary si tiene cloudinaryId
+        if (creatureToDelete && creatureToDelete.cloudinaryId) {
+          if (!cloudinarySync) initCloudinarySync();
+          
+          const deleteResult = await cloudinarySync.deleteFromCloudinary(creatureToDelete.cloudinaryId);
+          console.log('Resultado eliminación Cloudinary:', deleteResult);
+          
+          if (deleteResult.success) {
+            alert('Criatura eliminada del localStorage. ' + deleteResult.message);
+          } else {
+            alert('Criatura eliminada del localStorage. ' + deleteResult.message);
+          }
+        } else {
+          alert('Criatura eliminada exitosamente');
+        }
         
         // Actualizar lista
         await loadCreatures();
@@ -1810,18 +1827,30 @@
       statusDiv.innerHTML = '🔄 Sincronizando con Cloudinary...';
       
       try {
-        const creatures = await cloudinarySync.syncWithCloudinary();
-        statusDiv.style.background = '#d4edda';
-        statusDiv.style.color = '#155724';
-        statusDiv.style.border = '1px solid #c3e6cb';
-        statusDiv.innerHTML = `✅ Sincronización completada. ${creatures.length} criaturas encontradas.`;
+        const result = await cloudinarySync.syncWithCloudinary();
+        
+        if (result.error) {
+          statusDiv.style.background = '#f8d7da';
+          statusDiv.style.color = '#721c24';
+          statusDiv.style.border = '1px solid #f5c6cb';
+          statusDiv.innerHTML = `❌ Error en sincronización: ${result.error}`;
+        } else {
+          statusDiv.style.background = '#d4edda';
+          statusDiv.style.color = '#155724';
+          statusDiv.style.border = '1px solid #c3e6cb';
+          statusDiv.innerHTML = `✅ Sincronización completada:<br>
+            • ${result.cloudinaryCount} imágenes en Cloudinary<br>
+            • ${result.localCount} criaturas en localStorage<br>
+            • ${result.newCount} nuevas agregadas<br>
+            • ${result.totalCount} total de criaturas`;
+        }
         
         // Actualizar lista
         await loadCreatures();
         
         setTimeout(() => {
           statusDiv.style.display = 'none';
-        }, 3000);
+        }, 5000);
         
       } catch (error) {
         statusDiv.style.background = '#f8d7da';
