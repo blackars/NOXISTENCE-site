@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
   <script src="js/edit-tools.js"></script>
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <style>
     html, body {
       height: 100%;
@@ -449,17 +451,19 @@
   <div class="editor-container">
     <!-- Sidebar izquierdo -->
     <div class="sidebar ">
-      <!-- Formulario de subida -->
+      <!-- Formulario de subida con Cloudinary -->
       <div class="upload-form">
         <h3>Upload Creature</h3>
-        <input type="file" id="singleImageLoader" accept="image/png, image/jpeg, image/webp" />
         <input type="text" id="creatureName" placeholder="Creature Name" />
         <select id="creatureWorld">
           <option value="Planet X">Planet X</option>
           <option value="Universe X">Universe X</option>
           <option value="Uknown">Uknown</option>
         </select>
-        <button onclick="uploadCreature()">Create</button>
+        <button onclick="openCloudinaryWidget()" style="background: #007bff; color: white; border: none; padding: 10px; border-radius: 0px; cursor: pointer; width: 100%; margin-top: 10px;">
+          📁 Upload Image to Cloudinary
+        </button>
+        <div id="uploadStatus" style="margin-top: 10px; padding: 8px; border-radius: 4px; display: none;"></div>
       </div>
 
       <!-- Controles de visualización -->
@@ -632,42 +636,48 @@
     
     // Función para cargar criaturas según el modo
     async function loadCreatures() {
-      if (isLocalMode) {
+      let creatures = [];
+      
+      // Primero intentar cargar desde localStorage (para criaturas subidas con Cloudinary)
+      const localCreatures = localStorage.getItem('creatures');
+      if (localCreatures) {
         try {
-          const response = await fetch('data/creatures.json');
-          const creatures = await response.json();
-          displayCreatures(creatures);
-          return creatures;
+          const parsedCreatures = JSON.parse(localCreatures);
+          creatures = creatures.concat(parsedCreatures);
         } catch (error) {
-          console.error('Error loading local creatures:', error);
-          const exampleCreatures = [
-            {
-              id: 'example1',
-              name: 'Example Creature 1',
-              img: 'img/example1.jpg',
-              world: 'Gutterlands'
-            },
-            {
-              id: 'example2', 
-              name: 'Example Creature 2',
-              img: 'img/example2.jpg',
-              world: 'Ashlands'
-            }
-          ];
-          displayCreatures(exampleCreatures);
-          return exampleCreatures;
-        }
-      } else {
-        try {
-          const response = await fetch('/creatures');
-          const creatures = await response.json();
-          displayCreatures(creatures);
-          return creatures;
-        } catch (error) {
-          console.error('Error loading creatures from server:', error);
-          return [];
+          console.error('Error parsing localStorage creatures:', error);
         }
       }
+      
+      // Luego intentar cargar desde archivo JSON (para criaturas existentes)
+      try {
+        const response = await fetch('data/creatures.json');
+        const jsonCreatures = await response.json();
+        creatures = creatures.concat(jsonCreatures);
+      } catch (error) {
+        console.log('No creatures.json file found or error loading it');
+      }
+      
+      // Si no hay criaturas en ningún lado, mostrar ejemplos
+      if (creatures.length === 0) {
+        creatures = [
+          {
+            id: 'example1',
+            name: 'Example Creature 1',
+            img: 'img/example1.jpg',
+            world: 'Gutterlands'
+          },
+          {
+            id: 'example2', 
+            name: 'Example Creature 2',
+            img: 'img/example2.jpg',
+            world: 'Ashlands'
+          }
+        ];
+      }
+      
+      displayCreatures(creatures);
+      return creatures;
     }
 
     // Mostrar lista de criaturas
@@ -766,46 +776,143 @@
       });
     }
     
-    // Subir nueva criatura
-    async function uploadCreature() {
-      if (isLocalMode) {
-        alert('Creature upload not avaliable in local mode.\n\nTo upload creatures, run Node.js server with:\n\nnpm start');
+    // Variables para Cloudinary
+    let cloudinaryWidget;
+    let uploadedImageUrl = null;
+    let uploadedImageName = null;
+
+    // Configurar Cloudinary Upload Widget
+    function initializeCloudinaryWidget() {
+      cloudinaryWidget = cloudinary.createUploadWidget({
+        cloudName: 'dgff8o52c',
+        uploadPreset: 'ml_default', // Usar preset por defecto
+        sources: ['local', 'url', 'camera'],
+        multiple: false,
+        maxFiles: 1,
+        resourceType: 'image',
+        allowedFormats: ['jpg', 'jpeg', 'png', 'webp', 'svg'],
+        maxFileSize: 10000000, // 10MB
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp', 'svg'],
+        maxImageWidth: 4000,
+        maxImageHeight: 4000,
+        cropping: false,
+        showAdvancedOptions: false,
+        styles: {
+          palette: {
+            window: "#FFFFFF",
+            windowBorder: "#90A0B3",
+            tabIcon: "#0078FF",
+            menuIcons: "#5A616A",
+            textDark: "#000000",
+            textLight: "#FFFFFF",
+            link: "#0078FF",
+            action: "#FF620C",
+            inactiveTabIcon: "#0E2F5A",
+            error: "#F44235",
+            inProgress: "#0078FF",
+            complete: "#20B832",
+            sourceBg: "#E4EBF1"
+          }
+        }
+      }, (error, result) => {
+        if (!error && result && result.event === "success") {
+          console.log('Upload successful:', result.info);
+          uploadedImageUrl = result.info.secure_url;
+          uploadedImageName = result.info.original_filename;
+          
+          // Mostrar estado de subida
+          const statusDiv = document.getElementById('uploadStatus');
+          statusDiv.style.display = 'block';
+          statusDiv.style.background = '#d4edda';
+          statusDiv.style.color = '#155724';
+          statusDiv.style.border = '1px solid #c3e6cb';
+          statusDiv.innerHTML = `✅ Image uploaded successfully!<br>Name: ${uploadedImageName}`;
+          
+          // Guardar la criatura
+          saveCreatureToLocal();
+        } else if (error) {
+          console.error('Upload error:', error);
+          const statusDiv = document.getElementById('uploadStatus');
+          statusDiv.style.display = 'block';
+          statusDiv.style.background = '#f8d7da';
+          statusDiv.style.color = '#721c24';
+          statusDiv.style.border = '1px solid #f5c6cb';
+          statusDiv.innerHTML = `❌ Upload failed: ${error.message}`;
+        }
+      });
+    }
+
+    // Abrir el widget de Cloudinary
+    function openCloudinaryWidget() {
+      if (!cloudinaryWidget) {
+        initializeCloudinaryWidget();
+      }
+      cloudinaryWidget.open();
+    }
+
+    // Guardar criatura con imagen de Cloudinary
+    async function saveCreatureToLocal() {
+      if (!uploadedImageUrl) {
+        alert('No image uploaded yet');
         return;
       }
-      
-      const fileInput = document.getElementById('singleImageLoader');
+
       const nameInput = document.getElementById('creatureName');
       const worldInput = document.getElementById('creatureWorld');
+      
+      const creatureName = nameInput.value || uploadedImageName || 'Unnamed Creature';
+      const creatureWorld = worldInput.value || 'Unknown';
 
-      if (!fileInput.files[0]) {
-        alert('Select an image');
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('image', fileInput.files[0]);
-      formData.append('name', nameInput.value || fileInput.files[0].name.replace(/\.[^/.]+$/, ''));
-      formData.append('world', worldInput.value);
+      // Crear objeto de criatura
+      const newCreature = {
+        id: `creature_${Date.now()}`,
+        name: creatureName,
+        world: creatureWorld,
+        img: uploadedImageUrl, // URL de Cloudinary
+        cloudinaryId: uploadedImageName, // ID de Cloudinary para referencia
+        uploadDate: new Date().toISOString()
+      };
 
       try {
-        const response = await fetch('/upload', {
-          method: 'POST',
-          body: formData
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Creature uploaded successfully');
-          fileInput.value = '';
-          nameInput.value = '';
-          await loadCreatures();
-        } else {
-          alert('Error: ' + result.error);
+        // Cargar criaturas existentes
+        let creatures = [];
+        try {
+          const response = await fetch('data/creatures.json');
+          creatures = await response.json();
+        } catch (error) {
+          console.log('No existing creatures file, starting fresh');
         }
+
+        // Agregar nueva criatura
+        creatures.push(newCreature);
+
+        // Guardar en localStorage como respaldo
+        localStorage.setItem('creatures', JSON.stringify(creatures));
+
+        // Limpiar formulario
+        nameInput.value = '';
+        uploadedImageUrl = null;
+        uploadedImageName = null;
+
+        // Actualizar lista
+        await loadCreatures();
+
+        // Mostrar éxito
+        const statusDiv = document.getElementById('uploadStatus');
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#d4edda';
+        statusDiv.style.color = '#155724';
+        statusDiv.style.border = '1px solid #c3e6cb';
+        statusDiv.innerHTML = `✅ Creature "${creatureName}" saved successfully!`;
+
+        // Limpiar mensaje después de 3 segundos
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, 3000);
+
       } catch (error) {
-        console.error('Error uploading:', error);
-        alert('Error uploading creature');
+        console.error('Error saving creature:', error);
+        alert('Error saving creature. Check console for details.');
       }
     }
 
