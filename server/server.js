@@ -9,9 +9,19 @@ const path = require('path');
 const fs = require('fs');
 const basicAuth = require('express-basic-auth');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
+
+// Importar configuración de base de datos
+const { 
+  initDatabase, 
+  getAllCreatures, 
+  getCreatureById, 
+  createCreature, 
+  updateCreature, 
+  deleteCreature 
+} = require('./database');
 
 // Función auxiliar para limpiar tags de criaturas
 function cleanCreaturesTags(creatures) {
@@ -96,7 +106,7 @@ app.use(['public/fonts', 'public/hojas', 'public/imageart'], basicAuth({
 }));
 
 // Ruta para subir imágenes
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post('/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -112,38 +122,23 @@ app.post('/upload', upload.single('image'), (req, res) => {
       body: req.body
     });
 
-    // Leer el JSON actual
-    const jsonPath = 'public/data/creatures.json';
-    let creatures = [];
-    try {
-      const jsonData = fs.readFileSync(jsonPath, 'utf8');
-      creatures = JSON.parse(jsonData);
-      // Limpiar tags existentes de criaturas anteriores
-      creatures = cleanCreaturesTags(creatures);
-      // Guardar el archivo limpio inmediatamente
-      fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
-    } catch (error) {
-      console.log('Creando nuevo archivo creatures.json');
-    }
-
-    // Crear nuevo entry
+    // Crear nueva criatura en la base de datos
     const newCreature = {
       id: `creature_${Date.now()}`,
       name: imageName,
       world: world,
-      img: imagePath
+      img: imagePath,
+      cloudinaryId: null,
+      uploadDate: new Date().toISOString()
     };
 
-    // Agregar al array
-    creatures.push(newCreature);
-
-    // Escribir de vuelta al archivo
-    fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
+    // Guardar en la base de datos
+    const savedCreature = await createCreature(newCreature);
 
     res.json({
       success: true,
-      creature: newCreature,
-      message: 'Imagen subida y JSON actualizado correctamente'
+      creature: savedCreature,
+      message: 'Imagen subida y criatura guardada en base de datos correctamente'
     });
 
   } catch (error) {
@@ -186,20 +181,13 @@ app.post('/upload-art', uploadArt.single('image'), (req, res) => {
 });
 
 // Ruta para obtener todas las criaturas
-app.get('/creatures', (req, res) => {
+app.get('/creatures', async (req, res) => {
   try {
-    const jsonPath = 'public/data/creatures.json';
-    const jsonData = fs.readFileSync(jsonPath, 'utf8');
-    const creatures = JSON.parse(jsonData);
-    // Limpiar tags existentes de criaturas anteriores
-    const cleanCreatures = cleanCreaturesTags(creatures);
-    
-    // Guardar el archivo limpio de vuelta al disco
-    fs.writeFileSync(jsonPath, JSON.stringify(cleanCreatures, null, 2));
-    
-    res.json(cleanCreatures);
+    const creatures = await getAllCreatures();
+    res.json(creatures);
   } catch (error) {
-    res.status(500).json({ error: 'Error al leer el archivo JSON' });
+    console.error('Error obteniendo criaturas:', error);
+    res.status(500).json({ error: 'Error al obtener las criaturas' });
   }
 });
 
@@ -232,42 +220,28 @@ app.get('/art', (req, res) => {
 });
 
 // Ruta para eliminar una criatura
-app.delete('/creatures/:id', (req, res) => {
+app.delete('/creatures/:id', async (req, res) => {
   try {
     const creatureId = req.params.id;
-    const jsonPath = 'public/data/creatures.json';
-    const jsonData = fs.readFileSync(jsonPath, 'utf8');
-    let creatures = JSON.parse(jsonData);
-
-    // Limpiar tags existentes de criaturas anteriores
-    creatures = cleanCreaturesTags(creatures);
-
-    // Guardar el archivo limpio inmediatamente
-    fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
-
-    // Encontrar y eliminar la criatura
-    const creatureIndex = creatures.findIndex(c => c.id === creatureId);
-    if (creatureIndex === -1) {
+    
+    // Obtener la criatura antes de eliminarla
+    const creature = await getCreatureById(creatureId);
+    if (!creature) {
       return res.status(404).json({ error: 'Criatura no encontrada' });
     }
-
-    const creature = creatures[creatureIndex];
     
     console.log('Eliminando criatura:', creature);
     
-    // Eliminar el archivo de imagen
-    if (fs.existsSync(creature.img)) {
+    // Eliminar el archivo de imagen si existe
+    if (creature.img && fs.existsSync(`public/${creature.img}`)) {
       console.log('Eliminando archivo de imagen:', creature.img);
-      fs.unlinkSync(creature.img);
+      fs.unlinkSync(`public/${creature.img}`);
     } else {
       console.log('Archivo de imagen no encontrado:', creature.img);
     }
 
-    // Eliminar del array
-    creatures.splice(creatureIndex, 1);
-
-    // Escribir de vuelta al archivo
-    fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
+    // Eliminar de la base de datos
+    await deleteCreature(creatureId);
 
     res.json({ success: true, message: 'Criatura eliminada correctamente' });
 
@@ -343,10 +317,22 @@ app.post('/admin/generate-thumbnails', basicAuth({
 
 app.use('/', fontsRoutes);
 
-generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
+// Inicializar base de datos y generar miniaturas al iniciar el servidor
+async function initializeServer() {
+  try {
+    await initDatabase();
+    await generateAllThumbnails();
+    console.log('✅ Servidor inicializado correctamente');
+  } catch (error) {
+    console.error('❌ Error inicializando servidor:', error);
+  }
+}
+
+initializeServer();
 
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
-  console.log('Editor disponible en: http://localhost:3000/editor.html');
-  console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
+  console.log(`🚀 Servidor corriendo en http://localhost:${port}`);
+  console.log('📝 Editor disponible en: http://localhost:3000/editor.html');
+  console.log('📚 Catálogo disponible en: http://localhost:3000/catalog.html');
+  console.log('🗄️ Base de datos PostgreSQL conectada');
 }); 
