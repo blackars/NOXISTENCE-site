@@ -305,7 +305,7 @@ class EditTools {
     const fullLayout = {
       images: Array.from(document.querySelectorAll('.item')).map(el => ({
         name: el.querySelector('.item-title')?.textContent || 'art',
-        img: el.querySelector('img').src,
+        img: el.querySelector('img')?.src || '',
         left: el.style.left,
         top: el.style.top,
         scale: el.dataset.scale || '1',
@@ -315,7 +315,7 @@ class EditTools {
         color: el.querySelector('.item-title')?.style.color || '#111111'
       })),
       texts: Array.from(document.querySelectorAll('.text-item')).map(el => ({
-        content: el.querySelector('textarea').value,
+        content: el.querySelector('textarea')?.value || '',
         left: el.style.left,
         top: el.style.top,
         scale: el.dataset.scale || '1',

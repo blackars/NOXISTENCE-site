@@ -3,7 +3,10 @@ const { Pool } = require('pg');
 // Configuración de la base de datos
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://localhost:5432/noxistence',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 // Verificar conexión a la base de datos
@@ -50,6 +53,13 @@ async function initDatabase() {
 async function getAllCreatures() {
   try {
     console.log('🔍 Obteniendo criaturas de la base de datos...');
+    
+    // Verificar si tenemos conexión a la base de datos
+    if (!process.env.DATABASE_URL) {
+      console.log('⚠️ No hay DATABASE_URL configurada, usando fallback');
+      return [];
+    }
+    
     const result = await pool.query('SELECT * FROM creatures ORDER BY upload_date DESC');
     console.log(`📊 ${result.rows.length} criaturas encontradas`);
     return result.rows;
@@ -74,6 +84,16 @@ async function getCreatureById(id) {
 // Función para crear una nueva criatura
 async function createCreature(creature) {
   try {
+    // Verificar si tenemos conexión a la base de datos
+    if (!process.env.DATABASE_URL) {
+      console.log('⚠️ No hay DATABASE_URL configurada, simulando creación');
+      return {
+        ...creature,
+        id: creature.id || `creature_${Date.now()}`,
+        upload_date: new Date().toISOString()
+      };
+    }
+    
     const result = await pool.query(`
       INSERT INTO creatures (id, name, world, img, cloudinary_id, upload_date)
       VALUES ($1, $2, $3, $4, $5, $6)
