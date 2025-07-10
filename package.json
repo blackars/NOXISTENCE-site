@@ -2,10 +2,10 @@
   "name": "noxistence-site",
   "version": "1.0.0",
   "description": "NOXISTENCE Project",
-  "main": "server.js",
+  "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server/server.js"
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
