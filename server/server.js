@@ -20,7 +20,9 @@ const {
   getCreatureById, 
   createCreature, 
   updateCreature, 
-  deleteCreature 
+  deleteCreature,
+  createArtImage,
+  getAllArtImages
 } = require('./database');
 
 // Función auxiliar para limpiar tags de criaturas
@@ -50,18 +52,20 @@ const storage = process.env.NODE_ENV === 'production'
       }
     });
 
-// Configurar multer para subir imágenes de arte
-const artStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/imgart/');
-  },
-  filename: function (req, file, cb) {
-    // Generar nombre único basado en timestamp
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    cb(null, `${timestamp}${ext}`);
-  }
-});
+// Configurar multer para subir imágenes de arte (usar memoria en producción)
+const artStorage = process.env.NODE_ENV === 'production' 
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, 'public/imgart/');
+      },
+      filename: function (req, file, cb) {
+        // Generar nombre único basado en timestamp
+        const timestamp = Date.now();
+        const ext = path.extname(file.originalname);
+        cb(null, `${timestamp}${ext}`);
+      }
+    });
 
 const upload = multer({ 
   storage: storage,
@@ -125,21 +129,15 @@ app.post('/upload', upload.single('image'), async (req, res) => {
       mimetype: req.file.mimetype
     });
 
-    // En producción, no guardamos archivos físicos
-    let imagePath = null;
-    if (process.env.NODE_ENV !== 'production') {
-      imagePath = `img/${req.file.filename}`;
-    } else {
-      // En producción, usar un placeholder o URL temporal
-      imagePath = `placeholder_${Date.now()}.png`;
-    }
-
+    // Convertir imagen a base64 para persistencia
+    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    
     // Crear nueva criatura en la base de datos
     const newCreature = {
       id: `creature_${Date.now()}`,
       name: imageName,
       world: world,
-      img: imagePath,
+      img: base64Image, // Guardar como base64
       cloudinaryId: null,
       uploadDate: new Date().toISOString()
     };
@@ -150,9 +148,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     res.json({
       success: true,
       creature: savedCreature,
-      message: process.env.NODE_ENV === 'production' 
-        ? 'Criatura guardada en base de datos (imagen en memoria)'
-        : 'Imagen subida y criatura guardada en base de datos correctamente'
+      message: 'Criatura guardada en base de datos con imagen base64'
     });
 
   } catch (error) {
@@ -162,30 +158,39 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 });
 
 // Ruta para subir imágenes de arte
-app.post('/upload-art', uploadArt.single('image'), (req, res) => {
+app.post('/upload-art', uploadArt.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No se subió ningún archivo' });
     }
 
-    const imagePath = `imgart/${req.file.filename}`;
+    // Convertir imagen a base64 para persistencia
+    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const imageName = req.file.originalname.replace(/\.[^/.]+$/, '');
 
     console.log('Imagen de arte subida:', {
       name: imageName,
-      path: imagePath,
-      originalName: req.file.originalname
+      originalName: req.file.originalname,
+      size: req.file.size,
+      mimetype: req.file.mimetype
     });
+
+    // Crear nueva imagen de arte en la base de datos
+    const newArt = {
+      id: `art_${Date.now()}`,
+      name: imageName,
+      img: base64Image,
+      originalName: req.file.originalname,
+      uploadDate: new Date().toISOString()
+    };
+
+    // Guardar en la base de datos
+    const savedArt = await createArtImage(newArt);
 
     res.json({
       success: true,
-      art: {
-        id: `art_${Date.now()}`,
-        name: imageName,
-        img: imagePath,
-        originalName: req.file.originalname
-      },
-      message: 'Imagen de arte subida correctamente'
+      art: savedArt,
+      message: 'Imagen de arte guardada en base de datos con base64'
     });
 
   } catch (error) {
@@ -206,30 +211,13 @@ app.get('/creatures', async (req, res) => {
 });
 
 // Ruta para obtener todas las imágenes de arte
-app.get('/art', (req, res) => {
+app.get('/art', async (req, res) => {
   try {
-    const artDir = 'public/imgart/';
-    const artFiles = [];
-    
-    if (fs.existsSync(artDir)) {
-      const files = fs.readdirSync(artDir);
-      
-      files.forEach(file => {
-        if (file.match(/\.(png|jpg|jpeg|svg|gif|webp)$/i)) {
-          artFiles.push({
-            id: `art_${file.replace(/\.[^/.]+$/, '')}`,
-            name: file.replace(/\.[^/.]+$/, ''),
-            img: `imgart/${file}`,
-            originalName: file
-          });
-        }
-      });
-    }
-    
-    res.json(artFiles);
+    const artImages = await getAllArtImages();
+    res.json(artImages);
   } catch (error) {
-    console.error('Error al leer imágenes de arte:', error);
-    res.status(500).json({ error: 'Error al leer las imágenes de arte' });
+    console.error('Error obteniendo imágenes de arte:', error);
+    res.status(500).json({ error: 'Error al obtener las imágenes de arte' });
   }
 });
 

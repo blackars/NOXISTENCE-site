@@ -31,17 +31,30 @@ async function initDatabase() {
         id VARCHAR PRIMARY KEY,
         name VARCHAR NOT NULL,
         world VARCHAR,
-        img VARCHAR,
+        img TEXT,
         cloudinary_id VARCHAR,
+        upload_date TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    
+    // Crear tabla de imágenes de arte si no existe
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS art_images (
+        id VARCHAR PRIMARY KEY,
+        name VARCHAR NOT NULL,
+        img TEXT,
+        original_name VARCHAR,
         upload_date TIMESTAMP DEFAULT NOW()
       )
     `);
     
     console.log('✅ Base de datos inicializada correctamente');
     
-    // Verificar que la tabla existe
-    const result = await pool.query("SELECT COUNT(*) FROM creatures");
-    console.log(`📈 Tabla creatures creada, ${result.rows[0].count} criaturas encontradas`);
+    // Verificar que las tablas existen
+    const creaturesResult = await pool.query("SELECT COUNT(*) FROM creatures");
+    const artResult = await pool.query("SELECT COUNT(*) FROM art_images");
+    console.log(`📈 Tabla creatures creada, ${creaturesResult.rows[0].count} criaturas encontradas`);
+    console.log(`🎨 Tabla art_images creada, ${artResult.rows[0].count} imágenes de arte encontradas`);
     
   } catch (error) {
     console.error('❌ Error inicializando base de datos:', error);
@@ -135,6 +148,53 @@ async function deleteCreature(id) {
   }
 }
 
+// Función para crear una imagen de arte
+async function createArtImage(art) {
+  try {
+    // Verificar si tenemos conexión a la base de datos
+    if (!process.env.DATABASE_URL) {
+      console.log('⚠️ No hay DATABASE_URL configurada, simulando creación de arte');
+      return {
+        ...art,
+        id: art.id || `art_${Date.now()}`,
+        upload_date: new Date().toISOString()
+      };
+    }
+    
+    const result = await pool.query(`
+      INSERT INTO art_images (id, name, img, original_name, upload_date)
+      VALUES ($1, $2, $3, $4, $5)
+      RETURNING *
+    `, [art.id, art.name, art.img, art.originalName, art.uploadDate]);
+    
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error creando imagen de arte:', error);
+    throw error;
+  }
+}
+
+// Función para obtener todas las imágenes de arte
+async function getAllArtImages() {
+  try {
+    console.log('🎨 Obteniendo imágenes de arte de la base de datos...');
+    
+    // Verificar si tenemos conexión a la base de datos
+    if (!process.env.DATABASE_URL) {
+      console.log('⚠️ No hay DATABASE_URL configurada, usando fallback para arte');
+      return [];
+    }
+    
+    const result = await pool.query('SELECT * FROM art_images ORDER BY upload_date DESC');
+    console.log(`🎨 ${result.rows.length} imágenes de arte encontradas`);
+    return result.rows;
+  } catch (error) {
+    console.error('❌ Error obteniendo imágenes de arte:', error);
+    console.error('🔍 Detalles del error:', error.message);
+    return [];
+  }
+}
+
 module.exports = {
   pool,
   initDatabase,
@@ -142,5 +202,7 @@ module.exports = {
   getCreatureById,
   createCreature,
   updateCreature,
-  deleteCreature
+  deleteCreature,
+  createArtImage,
+  getAllArtImages
 }; 
