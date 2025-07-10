@@ -2,9 +2,9 @@
   "name": "noxistence-site",
   "version": "1.0.0",
   "description": "NOXISTENCE Project",
-  "main": "server/server.js",
+  "main": "start.js",
   "scripts": {
-    "start": "node server/server.js",
+    "start": "node start.js",
     "dev": "nodemon server/server.js"
   },
   "dependencies": {

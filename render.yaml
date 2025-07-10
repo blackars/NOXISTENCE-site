@@ -3,7 +3,7 @@ services:
     name: noxistence-site
     env: node
     buildCommand: npm install
-    startCommand: node server/server.js
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
