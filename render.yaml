@@ -21,4 +21,5 @@ services:
 databases:
   - name: noxistence-db
     databaseName: noxistence
-    user: noxistence_user 
+    user: noxistence_user
+    plan: free 
