@@ -6,9 +6,22 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Verificar conexión a la base de datos
+pool.on('connect', () => {
+  console.log('✅ Conectado a PostgreSQL');
+});
+
+pool.on('error', (err) => {
+  console.error('❌ Error de conexión PostgreSQL:', err);
+});
+
 // Función para inicializar la base de datos
 async function initDatabase() {
   try {
+    console.log('🔧 Inicializando base de datos...');
+    console.log('📊 DATABASE_URL:', process.env.DATABASE_URL ? 'Configurado' : 'No configurado');
+    console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+    
     // Crear tabla de criaturas si no existe
     await pool.query(`
       CREATE TABLE IF NOT EXISTS creatures (
@@ -22,18 +35,27 @@ async function initDatabase() {
     `);
     
     console.log('✅ Base de datos inicializada correctamente');
+    
+    // Verificar que la tabla existe
+    const result = await pool.query("SELECT COUNT(*) FROM creatures");
+    console.log(`📈 Tabla creatures creada, ${result.rows[0].count} criaturas encontradas`);
+    
   } catch (error) {
     console.error('❌ Error inicializando base de datos:', error);
+    throw error;
   }
 }
 
 // Función para obtener todas las criaturas
 async function getAllCreatures() {
   try {
+    console.log('🔍 Obteniendo criaturas de la base de datos...');
     const result = await pool.query('SELECT * FROM creatures ORDER BY upload_date DESC');
+    console.log(`📊 ${result.rows.length} criaturas encontradas`);
     return result.rows;
   } catch (error) {
-    console.error('Error obteniendo criaturas:', error);
+    console.error('❌ Error obteniendo criaturas:', error);
+    console.error('🔍 Detalles del error:', error.message);
     return [];
   }
 }
