@@ -1,4 +1,10 @@
 const { Pool } = require('pg');
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Configuración de la base de datos
 const pool = new Pool({
@@ -31,7 +37,7 @@ async function initDatabase() {
         id VARCHAR PRIMARY KEY,
         name VARCHAR NOT NULL,
         world VARCHAR,
-        img TEXT,
+        img VARCHAR(500),
         cloudinary_id VARCHAR,
         upload_date TIMESTAMP DEFAULT NOW()
       )
@@ -42,7 +48,8 @@ async function initDatabase() {
       CREATE TABLE IF NOT EXISTS art_images (
         id VARCHAR PRIMARY KEY,
         name VARCHAR NOT NULL,
-        img TEXT,
+        img VARCHAR(500),
+        cloudinary_id VARCHAR,
         original_name VARCHAR,
         upload_date TIMESTAMP DEFAULT NOW()
       )
@@ -162,10 +169,10 @@ async function createArtImage(art) {
     }
     
     const result = await pool.query(`
-      INSERT INTO art_images (id, name, img, original_name, upload_date)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO art_images (id, name, img, cloudinary_id, original_name, upload_date)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
-    `, [art.id, art.name, art.img, art.originalName, art.uploadDate]);
+    `, [art.id, art.name, art.img, art.cloudinaryId, art.originalName, art.uploadDate]);
     
     return result.rows[0];
   } catch (error) {
@@ -195,6 +202,17 @@ async function getAllArtImages() {
   }
 }
 
+// Función para eliminar una imagen de arte
+async function deleteArtImage(id) {
+  try {
+    const result = await pool.query('DELETE FROM art_images WHERE id = $1 RETURNING *', [id]);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error eliminando imagen de arte:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   pool,
   initDatabase,
@@ -204,5 +222,6 @@ module.exports = {
   updateCreature,
   deleteCreature,
   createArtImage,
-  getAllArtImages
+  getAllArtImages,
+  deleteArtImage
 }; 

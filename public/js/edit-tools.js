@@ -219,9 +219,9 @@ class EditTools {
     item.dataset.scale = '1';
     item.dataset.rotate = '0';
     
-    // Manejar tanto URLs como base64
+    // Manejar URLs de Cloudinary, base64 y archivos locales
     let imgSrc = creature.img;
-    if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('img/')) {
+    if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('http') && !imgSrc.startsWith('img/')) {
       imgSrc = 'img/' + imgSrc.replace(/^.*[\\\/]/, '');
     }
     
@@ -247,9 +247,9 @@ class EditTools {
     item.dataset.scale = '1';
     item.dataset.rotate = '0';
     
-    // Manejar tanto URLs como base64
+    // Manejar URLs de Cloudinary, base64 y archivos locales
     let imgSrc = art.img;
-    if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('imgart/')) {
+    if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('http') && !imgSrc.startsWith('imgart/')) {
       imgSrc = 'imgart/' + imgSrc.replace(/^.*[\\\/]/, '');
     }
     

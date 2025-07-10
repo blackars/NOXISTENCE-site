@@ -22,8 +22,12 @@ const {
   updateCreature, 
   deleteCreature,
   createArtImage,
-  getAllArtImages
+  getAllArtImages,
+  deleteArtImage
 } = require('./database');
+
+// Importar configuración de Cloudinary
+const { uploadToCloudinary, deleteFromCloudinary } = require('./cloudinary');
 
 // Función auxiliar para limpiar tags de criaturas
 function cleanCreaturesTags(creatures) {
@@ -129,16 +133,19 @@ app.post('/upload', upload.single('image'), async (req, res) => {
       mimetype: req.file.mimetype
     });
 
-    // Convertir imagen a base64 para persistencia
-    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    // Subir imagen a Cloudinary
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+      folder: 'noxistence/creatures',
+      public_id: `creature_${Date.now()}`
+    });
     
     // Crear nueva criatura en la base de datos
     const newCreature = {
       id: `creature_${Date.now()}`,
       name: imageName,
       world: world,
-      img: base64Image, // Guardar como base64
-      cloudinaryId: null,
+      img: cloudinaryResult.secure_url, // URL de Cloudinary
+      cloudinaryId: cloudinaryResult.public_id,
       uploadDate: new Date().toISOString()
     };
 
@@ -148,7 +155,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     res.json({
       success: true,
       creature: savedCreature,
-      message: 'Criatura guardada en base de datos con imagen base64'
+      message: 'Criatura subida a Cloudinary y guardada en base de datos'
     });
 
   } catch (error) {
@@ -164,8 +171,6 @@ app.post('/upload-art', uploadArt.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'No se subió ningún archivo' });
     }
 
-    // Convertir imagen a base64 para persistencia
-    const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const imageName = req.file.originalname.replace(/\.[^/.]+$/, '');
 
     console.log('Imagen de arte subida:', {
@@ -175,11 +180,18 @@ app.post('/upload-art', uploadArt.single('image'), async (req, res) => {
       mimetype: req.file.mimetype
     });
 
+    // Subir imagen a Cloudinary
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+      folder: 'noxistence/art',
+      public_id: `art_${Date.now()}`
+    });
+
     // Crear nueva imagen de arte en la base de datos
     const newArt = {
       id: `art_${Date.now()}`,
       name: imageName,
-      img: base64Image,
+      img: cloudinaryResult.secure_url, // URL de Cloudinary
+      cloudinaryId: cloudinaryResult.public_id,
       originalName: req.file.originalname,
       uploadDate: new Date().toISOString()
     };
@@ -190,7 +202,7 @@ app.post('/upload-art', uploadArt.single('image'), async (req, res) => {
     res.json({
       success: true,
       art: savedArt,
-      message: 'Imagen de arte guardada en base de datos con base64'
+      message: 'Imagen de arte subida a Cloudinary y guardada en base de datos'
     });
 
   } catch (error) {
@@ -234,12 +246,15 @@ app.delete('/creatures/:id', async (req, res) => {
     
     console.log('Eliminando criatura:', creature);
     
-    // Eliminar el archivo de imagen si existe
-    if (creature.img && fs.existsSync(`public/${creature.img}`)) {
-      console.log('Eliminando archivo de imagen:', creature.img);
-      fs.unlinkSync(`public/${creature.img}`);
-    } else {
-      console.log('Archivo de imagen no encontrado:', creature.img);
+    // Eliminar de Cloudinary si existe
+    if (creature.cloudinary_id) {
+      try {
+        await deleteFromCloudinary(creature.cloudinary_id);
+        console.log('Imagen eliminada de Cloudinary:', creature.cloudinary_id);
+      } catch (cloudinaryError) {
+        console.error('Error eliminando de Cloudinary:', cloudinaryError);
+        // Continuar con la eliminación de la base de datos aunque falle Cloudinary
+      }
     }
 
     // Eliminar de la base de datos
@@ -254,34 +269,38 @@ app.delete('/creatures/:id', async (req, res) => {
 });
 
 // Ruta para eliminar una imagen de arte
-app.delete('/art/:id', (req, res) => {
+app.delete('/art/:id', async (req, res) => {
   try {
     const artId = req.params.id;
-    const artDir = 'imgart/';
     
-    if (fs.existsSync(artDir)) {
-      const files = fs.readdirSync(artDir);
-      
-      for (const file of files) {
-        const fileId = `art_${file.replace(/\.[^/.]+$/, '')}`;
-        
-        if (fileId === artId) {
-          const filePath = `${artDir}${file}`;
-          
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            console.log('Imagen de arte eliminada:', filePath);
-            
-            return res.json({ 
-              success: true, 
-              message: 'Imagen de arte eliminada correctamente' 
-            });
-          }
-        }
+    // Obtener la imagen de arte antes de eliminarla
+    const artImages = await getAllArtImages();
+    const artImage = artImages.find(art => art.id === artId);
+    
+    if (!artImage) {
+      return res.status(404).json({ error: 'Imagen de arte no encontrada' });
+    }
+    
+    console.log('Eliminando imagen de arte:', artImage);
+    
+    // Eliminar de Cloudinary si existe
+    if (artImage.cloudinary_id) {
+      try {
+        await deleteFromCloudinary(artImage.cloudinary_id);
+        console.log('Imagen de arte eliminada de Cloudinary:', artImage.cloudinary_id);
+      } catch (cloudinaryError) {
+        console.error('Error eliminando de Cloudinary:', cloudinaryError);
+        // Continuar con la eliminación de la base de datos aunque falle Cloudinary
       }
     }
     
-    res.status(404).json({ error: 'Imagen de arte no encontrada' });
+    // Eliminar de la base de datos
+    await deleteArtImage(artId);
+    
+    res.json({ 
+      success: true, 
+      message: 'Imagen de arte eliminada correctamente' 
+    });
 
   } catch (error) {
     console.error('Error al eliminar imagen de arte:', error);
