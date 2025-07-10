@@ -474,6 +474,9 @@
         <button onclick="exportCreatures()" style="background: #17a2b8; color: white; border: none; padding: 8px; border-radius: 0px; cursor: pointer; width: 100%; margin: 5px 0;">
           📤 Exportar Datos
         </button>
+        <button onclick="generateCreaturesJson()" style="background: #6f42c1; color: white; border: none; padding: 8px; border-radius: 0px; cursor: pointer; width: 100%; margin: 5px 0;">
+          📄 Generar creatures.json
+        </button>
         <button onclick="importCreatures()" style="background: #ffc107; color: #000; border: none; padding: 8px; border-radius: 0px; cursor: pointer; width: 100%; margin: 5px 0;">
           📥 Importar Datos
         </button>
@@ -954,33 +957,8 @@
         creatures = creatures.filter(creature => creature.id !== id);
         localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
         
-        // Intentar eliminar de Cloudinary si tiene cloudinaryId
-        if (creatureToDelete.cloudinaryId) {
-          try {
-            // Asegurar que cloudinarySync esté inicializado
-            if (!cloudinarySync) {
-              initCloudinarySync();
-            }
-            
-            if (cloudinarySync && typeof cloudinarySync.deleteFromCloudinary === 'function') {
-              const deleteResult = await cloudinarySync.deleteFromCloudinary(creatureToDelete.cloudinaryId);
-              console.log('Resultado eliminación Cloudinary:', deleteResult);
-              
-              if (deleteResult && deleteResult.success) {
-                alert('Criatura eliminada del localStorage. ' + (deleteResult.message || 'Imagen marcada como eliminada.'));
-              } else {
-                alert('Criatura eliminada del localStorage. ' + (deleteResult?.message || 'No se pudo eliminar de Cloudinary.'));
-              }
-            } else {
-              alert('Criatura eliminada del localStorage. Función de eliminación de Cloudinary no disponible.');
-            }
-          } catch (cloudinaryError) {
-            console.error('Error eliminando de Cloudinary:', cloudinaryError);
-            alert('Criatura eliminada del localStorage. Error al eliminar de Cloudinary: ' + cloudinaryError.message);
-          }
-        } else {
-          alert('Criatura eliminada exitosamente');
-        }
+        // Mostrar mensaje de éxito
+        alert('Criatura eliminada exitosamente del localStorage');
         
         // Actualizar lista
         await loadCreatures();
@@ -1879,16 +1857,34 @@
 
     // Exportar criaturas
     function exportCreatures() {
-      if (!cloudinarySync) initCloudinarySync();
-      
       try {
-        cloudinarySync.exportData();
+        // Obtener datos del localStorage
+        const creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+        
+        if (creatures.length === 0) {
+          alert('No hay criaturas para exportar');
+          return;
+        }
+        
+        // Crear archivo JSON para descargar
+        const dataStr = JSON.stringify(creatures, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        // Crear enlace de descarga
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `noxistence_creatures_${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+        
+        // Limpiar URL
+        URL.revokeObjectURL(link.href);
+        
         const statusDiv = document.getElementById('dataStatus');
         statusDiv.style.display = 'block';
         statusDiv.style.background = '#d4edda';
         statusDiv.style.color = '#155724';
         statusDiv.style.border = '1px solid #c3e6cb';
-        statusDiv.innerHTML = '✅ Datos exportados exitosamente';
+        statusDiv.innerHTML = `✅ ${creatures.length} criaturas exportadas exitosamente`;
         
         setTimeout(() => {
           statusDiv.style.display = 'none';
@@ -1907,8 +1903,6 @@
         const file = e.target.files[0];
         if (!file) return;
         
-        if (!cloudinarySync) initCloudinarySync();
-        
         const statusDiv = document.getElementById('dataStatus');
         statusDiv.style.display = 'block';
         statusDiv.style.background = '#d1ecf1';
@@ -1917,7 +1911,16 @@
         statusDiv.innerHTML = '📥 Importando datos...';
         
         try {
-          const creatures = await cloudinarySync.importData(file);
+          const text = await file.text();
+          const creatures = JSON.parse(text);
+          
+          if (!Array.isArray(creatures)) {
+            throw new Error('El archivo debe contener un array de criaturas');
+          }
+          
+          // Guardar en localStorage
+          localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
+          
           statusDiv.style.background = '#d4edda';
           statusDiv.style.color = '#155724';
           statusDiv.style.border = '1px solid #c3e6cb';
@@ -1942,9 +1945,9 @@
 
     // Limpiar todos los datos
     function clearAllData() {
-      if (!cloudinarySync) initCloudinarySync();
-      
-      if (cloudinarySync.clearData()) {
+      if (confirm('¿Estás seguro de que quieres eliminar TODOS los datos? Esta acción no se puede deshacer.')) {
+        localStorage.removeItem('noxistence_creatures');
+        
         const statusDiv = document.getElementById('dataStatus');
         statusDiv.style.display = 'block';
         statusDiv.style.background = '#d4edda';
@@ -1958,6 +1961,45 @@
         setTimeout(() => {
           statusDiv.style.display = 'none';
         }, 3000);
+      }
+    }
+
+    // Generar archivo creatures.json para copiar manualmente
+    function generateCreaturesJson() {
+      try {
+        const creatures = JSON.parse(localStorage.getItem('noxistence_creatures') || '[]');
+        
+        if (creatures.length === 0) {
+          alert('No hay criaturas para generar el archivo JSON');
+          return;
+        }
+        
+        // Crear contenido del archivo
+        const jsonContent = JSON.stringify(creatures, null, 2);
+        
+        // Crear archivo para descargar
+        const dataBlob = new Blob([jsonContent], {type: 'application/json'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = 'creatures.json';
+        link.click();
+        
+        // Limpiar URL
+        URL.revokeObjectURL(link.href);
+        
+        const statusDiv = document.getElementById('dataStatus');
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#d4edda';
+        statusDiv.style.color = '#155724';
+        statusDiv.style.border = '1px solid #c3e6cb';
+        statusDiv.innerHTML = `✅ Archivo creatures.json generado con ${creatures.length} criaturas. Descárgalo y reemplaza el archivo en public/data/creatures.json`;
+        
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, 5000);
+        
+      } catch (error) {
+        alert('Error al generar el archivo JSON: ' + error.message);
       }
     }
 
