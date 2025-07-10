@@ -1,0 +1,66 @@
+{
+  "images": [
+    {
+      "name": "Blacky",
+      "img": "img/gjp8cwaywfljxwnerfwu.png",
+      "left": "595px",
+      "top": "363px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "Blacky",
+      "img": "img/j2d9adfhzohrtrxtwacu.png",
+      "left": "713px",
+      "top": "402px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "hh",
+      "img": "img/mgftov9i2gym1ps2hs3c.png",
+      "left": "820px",
+      "top": "283px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    },
+    {
+      "name": "Panocha",
+      "img": "img/zovzw9auegf7chajvlxx.png",
+      "left": "846px",
+      "top": "502px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "texts": [],
+  "backgroundColor": "#ffffff",
+  "fontSettings": {
+    "family": "sans-serif",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2025-07-10T02:31:04.365Z",
+  "showTitles": true
+}
