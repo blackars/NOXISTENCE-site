@@ -472,7 +472,7 @@
           🔄 Sincronizar con Cloudinary
         </button>
         <button onclick="syncWithCreaturesJson()" style="background: #fd7e14; color: white; border: none; padding: 8px; border-radius: 0px; cursor: pointer; width: 100%; margin: 5px 0;">
-          📄 Sincronizar con creatures.json
+          📄 Generar creatures.json
         </button>
         <button onclick="exportCreatures()" style="background: #17a2b8; color: white; border: none; padding: 8px; border-radius: 0px; cursor: pointer; width: 100%; margin: 5px 0;">
           📤 Exportar Datos
@@ -908,26 +908,9 @@
         creatures.push(newCreature);
         localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
 
-        // Intentar guardar en creatures.json usando función serverless
-        try {
-          const response = await fetch('/.netlify/functions/save-creature', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newCreature)
-          });
-
-          const result = await response.json();
-          
-          if (result.success) {
-            console.log('Criatura guardada en creatures.json:', result.message);
-          } else {
-            console.warn('Error guardando en creatures.json:', result.error);
-          }
-        } catch (serverlessError) {
-          console.warn('No se pudo guardar en creatures.json (modo offline):', serverlessError);
-        }
+        // Nota: Las funciones serverless requieren variables de entorno en Netlify
+        // Por ahora, solo guardamos en localStorage y usamos sincronización manual
+        console.log('Criatura guardada en localStorage. Usa "Sincronizar con creatures.json" para actualizar el archivo.');
 
         // Limpiar formulario
         nameInput.value = '';
@@ -981,26 +964,9 @@
         creatures = creatures.filter(creature => creature.id !== id);
         localStorage.setItem('noxistence_creatures', JSON.stringify(creatures));
         
-        // Intentar eliminar de creatures.json usando función serverless
-        try {
-          const response = await fetch('/.netlify/functions/delete-creature', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id: id })
-          });
-
-          const result = await response.json();
-          
-          if (result.success) {
-            console.log('Criatura eliminada de creatures.json:', result.message);
-          } else {
-            console.warn('Error eliminando de creatures.json:', result.error);
-          }
-        } catch (serverlessError) {
-          console.warn('No se pudo eliminar de creatures.json (modo offline):', serverlessError);
-        }
+        // Nota: Las funciones serverless requieren variables de entorno en Netlify
+        // Por ahora, solo eliminamos de localStorage
+        console.log('Criatura eliminada de localStorage. Usa "Sincronizar con creatures.json" para actualizar el archivo.');
         
         // Mostrar mensaje de éxito
         alert('Criatura eliminada exitosamente');
@@ -1907,7 +1873,7 @@
       statusDiv.style.background = '#d1ecf1';
       statusDiv.style.color = '#0c5460';
       statusDiv.style.border = '1px solid #bee5eb';
-      statusDiv.innerHTML = '🔄 Sincronizando localStorage con creatures.json...';
+      statusDiv.innerHTML = '🔄 Generando archivo creatures.json desde localStorage...';
       
       try {
         // Obtener criaturas del localStorage
@@ -1921,55 +1887,32 @@
           return;
         }
         
-        // Enviar cada criatura a la función serverless
-        let successCount = 0;
-        let errorCount = 0;
+        // Generar archivo JSON para descargar
+        const jsonContent = JSON.stringify(localCreatures, null, 2);
+        const dataBlob = new Blob([jsonContent], {type: 'application/json'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = 'creatures.json';
+        link.click();
         
-        for (const creature of localCreatures) {
-          try {
-            const response = await fetch('/.netlify/functions/save-creature', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(creature)
-            });
-
-            const result = await response.json();
-            
-            if (result.success) {
-              successCount++;
-            } else {
-              errorCount++;
-              console.warn('Error guardando criatura:', creature.name, result.error);
-            }
-          } catch (error) {
-            errorCount++;
-            console.warn('Error de red guardando criatura:', creature.name, error);
-          }
-        }
+        // Limpiar URL
+        URL.revokeObjectURL(link.href);
         
-        if (errorCount === 0) {
-          statusDiv.style.background = '#d4edda';
-          statusDiv.style.color = '#155724';
-          statusDiv.style.border = '1px solid #c3e6cb';
-          statusDiv.innerHTML = `✅ Sincronización completada: ${successCount} criaturas guardadas en creatures.json`;
-        } else {
-          statusDiv.style.background = '#fff3cd';
-          statusDiv.style.color = '#856404';
-          statusDiv.style.border = '1px solid #ffeaa7';
-          statusDiv.innerHTML = `⚠️ Sincronización parcial: ${successCount} exitosas, ${errorCount} errores`;
-        }
+        statusDiv.style.background = '#d4edda';
+        statusDiv.style.color = '#155724';
+        statusDiv.style.border = '1px solid #c3e6cb';
+        statusDiv.innerHTML = `✅ Archivo creatures.json generado con ${localCreatures.length} criaturas.<br>
+          📥 Descarga completada. Reemplaza el archivo en public/data/creatures.json y haz commit/push.`;
         
         setTimeout(() => {
           statusDiv.style.display = 'none';
-        }, 5000);
+        }, 8000);
         
       } catch (error) {
         statusDiv.style.background = '#f8d7da';
         statusDiv.style.color = '#721c24';
         statusDiv.style.border = '1px solid #f5c6cb';
-        statusDiv.innerHTML = `❌ Error en sincronización: ${error.message}`;
+        statusDiv.innerHTML = `❌ Error generando archivo: ${error.message}`;
       }
     }
 
@@ -2110,11 +2053,12 @@
         statusDiv.style.background = '#d4edda';
         statusDiv.style.color = '#155724';
         statusDiv.style.border = '1px solid #c3e6cb';
-        statusDiv.innerHTML = `✅ Archivo creatures.json generado con ${creatures.length} criaturas. Descárgalo y reemplaza el archivo en public/data/creatures.json`;
+        statusDiv.innerHTML = `✅ Archivo creatures.json generado con ${creatures.length} criaturas.<br>
+          📥 Descarga completada. Reemplaza el archivo en public/data/creatures.json y haz commit/push.`;
         
         setTimeout(() => {
           statusDiv.style.display = 'none';
-        }, 5000);
+        }, 8000);
         
       } catch (error) {
         alert('Error al generar el archivo JSON: ' + error.message);
