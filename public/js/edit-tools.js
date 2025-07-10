@@ -218,11 +218,13 @@ class EditTools {
     item.style.top = `${y}px`;
     item.dataset.scale = '1';
     item.dataset.rotate = '0';
-    // Asegurar ruta relativa correcta para imágenes de criaturas
+    
+    // Manejar tanto URLs como base64
     let imgSrc = creature.img;
-    if (!imgSrc.startsWith('img/')) {
+    if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('img/')) {
       imgSrc = 'img/' + imgSrc.replace(/^.*[\\\/]/, '');
     }
+    
     const fontSelector = document.getElementById('fontSelector');
     const fontSizeSlider = document.getElementById('fontSize');
     const fontColorPicker = document.getElementById('fontColor');
@@ -244,11 +246,13 @@ class EditTools {
     item.style.top = `${y}px`;
     item.dataset.scale = '1';
     item.dataset.rotate = '0';
-    // Asegurar ruta relativa correcta para imágenes de arte
+    
+    // Manejar tanto URLs como base64
     let imgSrc = art.img;
-    if (!imgSrc.startsWith('imgart/')) {
+    if (!imgSrc.startsWith('data:') && !imgSrc.startsWith('imgart/')) {
       imgSrc = 'imgart/' + imgSrc.replace(/^.*[\\\/]/, '');
     }
+    
     item.innerHTML = `
       <div class="item-content">
         <img src="${imgSrc}" alt="art" />

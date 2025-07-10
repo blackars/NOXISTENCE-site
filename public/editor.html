@@ -680,8 +680,12 @@
         item.className = 'creature-item';
         item.draggable = true;
         item.dataset.creature = JSON.stringify(creature);
+        
+        // Manejar tanto URLs como base64
+        const imgSrc = creature.img.startsWith('data:') ? creature.img : creature.img;
+        
         item.innerHTML = `
-          <img src="${creature.img}" alt="${creature.name}" />
+          <img src="${imgSrc}" alt="${creature.name}" />
           <div style="flex: 1;">
             <div><strong>${creature.name}</strong></div>
             <div style="font-size: 0.8rem; color: #666;">${creature.world}</div>
@@ -742,8 +746,12 @@
         item.className = 'art-item';
         item.draggable = true;
         item.dataset.art = JSON.stringify(art);
+        
+        // Manejar tanto URLs como base64
+        const imgSrc = art.img.startsWith('data:') ? art.img : art.img;
+        
         item.innerHTML = `
-          <img src="${art.img}" alt="${art.name}" />
+          <img src="${imgSrc}" alt="${art.name}" />
           <button class="delete-btn" onclick="deleteArtImage('${art.id}')">×</button>
         `;
         
@@ -821,7 +829,7 @@
       }
 
       try {
-        const response = await fetch(`hojas/creatures/${id}`, {
+        const response = await fetch(`/creatures/${id}`, {
           method: 'DELETE'
         });
 
