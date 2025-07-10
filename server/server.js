@@ -35,18 +35,20 @@ function cleanCreaturesTags(creatures) {
   });
 }
 
-// Configurar multer para subir imágenes
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'public/img/');
-  },
-  filename: function (req, file, cb) {
-    // Generar nombre único basado en timestamp
-    const timestamp = Date.now();
-    const ext = path.extname(file.originalname);
-    cb(null, `${timestamp}${ext}`);
-  }
-});
+// Configurar multer para subir imágenes (usar memoria en producción)
+const storage = process.env.NODE_ENV === 'production' 
+  ? multer.memoryStorage()
+  : multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, 'public/img/');
+      },
+      filename: function (req, file, cb) {
+        // Generar nombre único basado en timestamp
+        const timestamp = Date.now();
+        const ext = path.extname(file.originalname);
+        cb(null, `${timestamp}${ext}`);
+      }
+    });
 
 // Configurar multer para subir imágenes de arte
 const artStorage = multer.diskStorage({
@@ -112,15 +114,25 @@ app.post('/upload', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const imagePath = `img/${req.file.filename}`;
     const imageName = req.body.name || req.file.originalname.replace(/\.[^/.]+$/, '');
     const world = req.body.world || 'Default';
 
     console.log('Datos recibidos:', {
       name: imageName,
       world: world,
-      body: req.body
+      body: req.body,
+      fileSize: req.file.size,
+      mimetype: req.file.mimetype
     });
+
+    // En producción, no guardamos archivos físicos
+    let imagePath = null;
+    if (process.env.NODE_ENV !== 'production') {
+      imagePath = `img/${req.file.filename}`;
+    } else {
+      // En producción, usar un placeholder o URL temporal
+      imagePath = `placeholder_${Date.now()}.png`;
+    }
 
     // Crear nueva criatura en la base de datos
     const newCreature = {
@@ -138,12 +150,14 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     res.json({
       success: true,
       creature: savedCreature,
-      message: 'Imagen subida y criatura guardada en base de datos correctamente'
+      message: process.env.NODE_ENV === 'production' 
+        ? 'Criatura guardada en base de datos (imagen en memoria)'
+        : 'Imagen subida y criatura guardada en base de datos correctamente'
     });
 
   } catch (error) {
     console.error('Error al procesar la subida:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    res.status(500).json({ error: 'Error interno del servidor: ' + error.message });
   }
 });
 
