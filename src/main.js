@@ -2,13 +2,28 @@ import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import { init3DShape } from './3dshape.js';
 
+// Variables globales
+let lenis;
+let sections;
+let currentSection = 0;
+let isScrolling = false;
+
 // Inicializar enjambre 3D
 init3DShape();
 
 // Inicializar Lenis para scroll suave
-const lenis = new Lenis({
-  autoRaf: true
-});
+function initLenis() {
+  lenis = new Lenis({
+    autoRaf: true
+  });
+
+  // Conectar Lenis al loop de animación
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+}
 
 // Divide el texto en palabras y las envuelve en spans
 function splitTextToWordSpans(selector) {
@@ -22,7 +37,6 @@ function splitTextToWordSpans(selector) {
     });
   });
 }
-splitTextToWordSpans('.smoke-text');
 
 // Efecto de aparición de palabras tipo humo con GSAP
 function animateSmokeText(el) {
@@ -62,18 +76,6 @@ function revealSections() {
   });
   sections.forEach(section => observer.observe(section));
 }
-window.addEventListener('DOMContentLoaded', revealSections);
-
-// Cargar el footer modular
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('footer.html')
-    .then(r => r.text())
-    .then(html => { document.getElementById('footer-container').innerHTML = html; });
-});
-
-const sections = Array.from(document.querySelectorAll('.section'));
-let currentSection = 0;
-let isScrolling = false;
 
 function scrollToSection(index) {
   if (index < 0 || index >= sections.length) return;
@@ -87,51 +89,38 @@ function scrollToSection(index) {
   setTimeout(() => { isScrolling = false; }, 1300); // Bloquea scroll hasta terminar animación
 }
 
-// Detecta scroll de rueda
-window.addEventListener('wheel', (e) => {
-  if (isScrolling) return;
-  if (e.deltaY > 0) {
-    scrollToSection(currentSection + 1);
-  } else if (e.deltaY < 0) {
-    scrollToSection(currentSection - 1);
+// Función para inicializar todo cuando el DOM esté listo
+function initApp() {
+  console.log('Initializing app...');
+  
+  // Inicializar Lenis
+  initLenis();
+  
+  // Buscar secciones después de que el DOM esté listo
+  sections = Array.from(document.querySelectorAll('.section'));
+  console.log('Sections found:', sections.length);
+  
+  // Dividir texto en palabras
+  splitTextToWordSpans('.smoke-text');
+  
+  // Configurar event listeners
+  setupEventListeners();
+  
+  // Revelar secciones
+  revealSections();
+  
+  // Cargar footer
+  fetch('footer.html')
+    .then(r => r.text())
+    .then(html => { document.getElementById('footer-container').innerHTML = html; });
+  
+  // Al cargar, encaja en la primera sección
+  if (sections.length > 0) {
+    lenis.scrollTo(sections[0], { immediate: true });
+    currentSection = 0;
   }
-}, { passive: false });
-
-// Detecta flechas del teclado
-window.addEventListener('keydown', (e) => {
-  if (isScrolling) return;
-  if (e.key === 'ArrowDown' || e.key === 'PageDown') {
-    scrollToSection(currentSection + 1);
-  } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
-    scrollToSection(currentSection - 1);
-  }
-});
-
-// Opcional: Detecta swipe en móvil
-let touchStartY = null;
-window.addEventListener('touchstart', e => {
-  touchStartY = e.touches[0].clientY;
-});
-window.addEventListener('touchend', e => {
-  if (touchStartY === null) return;
-  const touchEndY = e.changedTouches[0].clientY;
-  if (isScrolling) return;
-  if (touchStartY - touchEndY > 50) {
-    scrollToSection(currentSection + 1);
-  } else if (touchEndY - touchStartY > 50) {
-    scrollToSection(currentSection - 1);
-  }
-  touchStartY = null;
-});
-
-// Al cargar, encaja en la primera sección
-window.addEventListener('DOMContentLoaded', () => {
-  lenis.scrollTo(sections[0], { immediate: true });
-  currentSection = 0;
-});
-
-// Animación del icono The Creator
-document.addEventListener('DOMContentLoaded', () => {
+  
+  // Animación del icono The Creator
   const creatorIcon = document.querySelector('.creator-icon');
   if (creatorIcon) {
     gsap.to(creatorIcon, {
@@ -170,4 +159,48 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-}); 
+}
+
+// Configurar event listeners
+function setupEventListeners() {
+  // Detecta scroll de rueda
+  window.addEventListener('wheel', (e) => {
+    console.log('Wheel event, isScrolling:', isScrolling, 'deltaY:', e.deltaY);
+    if (isScrolling) return;
+    if (e.deltaY > 0) {
+      scrollToSection(currentSection + 1);
+    } else if (e.deltaY < 0) {
+      scrollToSection(currentSection - 1);
+    }
+  }, { passive: false });
+
+  // Detecta flechas del teclado
+  window.addEventListener('keydown', (e) => {
+    if (isScrolling) return;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+      scrollToSection(currentSection + 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+      scrollToSection(currentSection - 1);
+    }
+  });
+
+  // Opcional: Detecta swipe en móvil
+  let touchStartY = null;
+  window.addEventListener('touchstart', e => {
+    touchStartY = e.touches[0].clientY;
+  });
+  window.addEventListener('touchend', e => {
+    if (touchStartY === null) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    if (isScrolling) return;
+    if (touchStartY - touchEndY > 50) {
+      scrollToSection(currentSection + 1);
+    } else if (touchEndY - touchStartY > 50) {
+      scrollToSection(currentSection - 1);
+    }
+    touchStartY = null;
+  });
+}
+
+// Inicializar cuando el DOM esté listo
+window.addEventListener('DOMContentLoaded', initApp); 
