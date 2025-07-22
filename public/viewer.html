@@ -398,6 +398,14 @@
       window.location.href = url;
     }
 
+    async function ensureFontLoaded(fontFamily, fontUrl) {
+      if (!fontUrl) return;
+      if (!document.fonts.check(`12px "${fontFamily}"`)) {
+        const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
+        await fontFace.load();
+        document.fonts.add(fontFace);
+      }
+    }
 
     const fileName = getFileNameFromURL();
     const creatureName = getCreatureNameFromURL();

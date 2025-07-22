@@ -1265,16 +1265,21 @@
       const exportData = {
         images,
         artimages,
-        texts: Array.from(document.querySelectorAll('.text-item')).map(el => ({
-          content: el.innerText,
-          left: el.style.left,
-          top: el.style.top,
-          scale: el.dataset.scale || '1',
-          rotate: el.dataset.rotate || '0',
-          fontFamily: el.style.fontFamily,
-          fontSize: el.style.fontSize,
-          color: el.style.color
-        })),
+        texts: Array.from(document.querySelectorAll('.text-item')).map(el => {
+          const fontFamily = el.style.fontFamily;
+          const fontObj = (window.uploadedFonts || []).find(f => f.name === fontFamily || fontFamily.includes(f.name));
+          return {
+            content: el.innerText,
+            left: el.style.left,
+            top: el.style.top,
+            scale: el.dataset.scale || '1',
+            rotate: el.dataset.rotate || '0',
+            fontFamily: fontFamily,
+            fontSize: el.style.fontSize,
+            color: el.style.color,
+            fontUrl: fontObj ? fontObj.url : undefined // Aquí se guarda la URL de Cloudinary
+          };
+        }),
         backgroundColor: currentBackgroundColor,
         fontSettings: {
           family: currentFont,
@@ -1617,22 +1622,16 @@
       }
       const files = Array.from(e.target.files);
       if (!files.length) return;
-      const formData = new FormData();
-      files.forEach(file => formData.append('fonts', file));
-      try {
-        const response = await fetch('/fonts', {
-          method: 'POST',
-          body: formData
-        });
-        const result = await response.json();
-        if (result.success) {
-          alert('Fonts uploaded successfully!');
-          await loadCustomFonts();
-        } else {
-          alert('Error uploading fonts: ' + (result.error || 'Unknown error'));
-        }
-      } catch (err) {
-        alert('Error uploading fonts.');
+
+      for (const file of files) {
+        console.log('Subiendo fuente:', file.name);
+        const fontUrl = await uploadFontToCloudinary(file);
+        console.log('URL recibida:', fontUrl);
+        // Guarda el nombre y la URL en una estructura para usarlas al exportar
+        // Por ejemplo, en un array global:
+        window.uploadedFonts = window.uploadedFonts || [];
+        window.uploadedFonts.push({ name: file.name, url: fontUrl });
+        alert(`Fuente subida: ${file.name}`);
       }
       e.target.value = '';
     });
