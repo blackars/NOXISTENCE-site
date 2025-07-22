@@ -1614,6 +1614,21 @@
     });
 
     // Subir fuentes personalizadas
+    async function uploadFontToCloudinary(file) {
+      const url = 'https://api.cloudinary.com/v1_1/dgff8o52c/raw/upload'; // Cambia TU_CUENTA por tu cloud name de Cloudinary
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'fonts_unsigned'); // Cambia esto por el nombre de tu preset unsigned
+
+      const res = await fetch(url, { method: 'POST', body: formData });
+      const data = await res.json();
+      if (!data.secure_url) {
+        alert('Error subiendo fuente: ' + (data.error && data.error.message ? data.error.message : 'Desconocido'));
+        throw new Error('Error subiendo fuente');
+      }
+      return data.secure_url; // URL pública de la fuente
+    }
+
     document.getElementById('fontUploadInput').addEventListener('change', async function(e) {
       if (isLocalMode) {
         alert('Font upload not available in local mode.');
@@ -1625,13 +1640,15 @@
 
       for (const file of files) {
         console.log('Subiendo fuente:', file.name);
-        const fontUrl = await uploadFontToCloudinary(file);
-        console.log('URL recibida:', fontUrl);
-        // Guarda el nombre y la URL en una estructura para usarlas al exportar
-        // Por ejemplo, en un array global:
-        window.uploadedFonts = window.uploadedFonts || [];
-        window.uploadedFonts.push({ name: file.name, url: fontUrl });
-        alert(`Fuente subida: ${file.name}`);
+        try {
+          const fontUrl = await uploadFontToCloudinary(file);
+          console.log('URL recibida:', fontUrl);
+          window.uploadedFonts = window.uploadedFonts || [];
+          window.uploadedFonts.push({ name: file.name, url: fontUrl });
+          alert(`Fuente subida: ${file.name}`);
+        } catch (err) {
+          alert('Error subiendo fuente: ' + file.name);
+        }
       }
       e.target.value = '';
     });
