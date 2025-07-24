@@ -9,9 +9,16 @@ const path = require('path');
 const fs = require('fs');
 const basicAuth = require('express-basic-auth');
 const app = express();
-const port = 3000;
+const port = 3100;
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Función auxiliar para limpiar tags de criaturas
 function cleanCreaturesTags(creatures) {
@@ -339,6 +346,54 @@ app.post('/admin/generate-thumbnails', basicAuth({
     console.error('Error al generar miniaturas:', error);
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// Endpoint para obtener firma de subida segura
+app.post('/cloudinary-signature', (req, res) => {
+  const { folder, resource_type, public_id } = req.body;
+  const timestamp = Math.round((new Date).getTime() / 1000);
+
+  // Solo incluir en la firma los parámetros que realmente se enviarán a Cloudinary
+  const paramsToSign = {
+    folder: folder || 'uploads',
+    timestamp
+  };
+  if (public_id) paramsToSign.public_id = public_id;
+  // Solo incluir resource_type si se va a enviar explícitamente
+  if (resource_type) paramsToSign.resource_type = resource_type;
+
+  // LOGS DE DEPURACIÓN DETALLADOS
+  console.log('--- /cloudinary-signature ---');
+  console.log('Body recibido:', req.body);
+  console.log('Parámetros a firmar:', paramsToSign);
+  const stringToSign = Object.keys(paramsToSign)
+    .sort()
+    .map(key => `${key}=${paramsToSign[key]}`)
+    .join('&');
+  console.log('String to sign:', stringToSign);
+  // Imprimir variables de entorno relevantes
+  console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
+  console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY);
+  console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET);
+  // Imprimir config de cloudinary
+  console.log('cloudinary.config():', cloudinary.config());
+  // Imprimir api_secret usado para firmar
+  const apiSecretUsed = cloudinary.config().api_secret;
+  console.log('api_secret usado para firmar:', apiSecretUsed);
+  const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecretUsed);
+  console.log('Signature generada:', signature);
+  console.log('----------------------------');
+
+  // Devolver todos los parámetros que el frontend debe enviar tal cual
+  res.json({
+    signature,
+    timestamp,
+    cloudName: cloudinary.config().cloud_name,
+    apiKey: cloudinary.config().api_key,
+    folder: paramsToSign.folder,
+    resource_type: paramsToSign.resource_type,
+    public_id: paramsToSign.public_id
+  });
 });
 
 app.use('/', fontsRoutes);

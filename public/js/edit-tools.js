@@ -153,7 +153,7 @@ class EditTools {
         el.style.transform = `scale(${el.dataset.scale || '1'}) rotate(${newRotate}deg)`;
         this.saveState();
       }
-    });
+    }, { passive: false });
 
     el.addEventListener('contextmenu', (e) => {
       e.preventDefault();
@@ -208,7 +208,7 @@ class EditTools {
         el.style.transform = `scale(${el.dataset.scale || '1'}) rotate(${newRotate}deg)`;
         this.saveState();
       }
-    });
+    }, { passive: false });
   }
   
   addCreatureToGrid(creature, x, y) {

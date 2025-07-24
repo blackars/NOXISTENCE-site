@@ -1613,22 +1613,49 @@
       e.target.value = '';
     });
 
-    // Subir fuentes personalizadas
-    async function uploadFontToCloudinary(file) {
-      const url = 'https://api.cloudinary.com/v1_1/dgff8o52c/raw/upload'; // Cambia TU_CUENTA por tu cloud name de Cloudinary
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'fonts_unsigned'); // Cambia esto por el nombre de tu preset unsigned
-
-      const res = await fetch(url, { method: 'POST', body: formData });
-      const data = await res.json();
-      if (!data.secure_url) {
-        alert('Error subiendo fuente: ' + (data.error && data.error.message ? data.error.message : 'Desconocido'));
-        throw new Error('Error subiendo fuente');
-      }
-      return data.secure_url; // URL pública de la fuente
+    // --- Cloudinary Secure Upload ---
+    async function getCloudinarySignature({ folder = 'uploads', resource_type = 'auto', public_id = undefined }) {
+      const res = await fetch('/cloudinary-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folder, resource_type, public_id })
+      });
+      if (!res.ok) throw new Error('No se pudo obtener la firma de Cloudinary');
+      return await res.json();
     }
 
+    async function uploadToCloudinary(file, resource_type = 'auto', folder = 'uploads', public_id = undefined) {
+      // 1. Obtener la firma y datos necesarios del backend
+      const { signature, timestamp, cloudName, apiKey, folder: signedFolder, resource_type: signedResourceType, public_id: signedPublicId } =
+        await getCloudinarySignature({ folder, resource_type, public_id });
+
+      // 2. Crear el FormData con todos los campos requeridos
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', apiKey);
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
+      formData.append('folder', signedFolder);
+      if (signedPublicId) formData.append('public_id', signedPublicId);
+
+      // 3. Construir la URL correcta para el tipo de recurso
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/${signedResourceType}/upload`;
+
+      // 4. Hacer la petición
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error?.message || 'Error al subir a Cloudinary');
+      }
+
+      return await res.json();
+    }
+
+    // --- Event listener para subir fuentes ---
     document.getElementById('fontUploadInput').addEventListener('change', async function(e) {
       if (isLocalMode) {
         alert('Font upload not available in local mode.');
@@ -1641,7 +1668,8 @@
       for (const file of files) {
         console.log('Subiendo fuente:', file.name);
         try {
-          const fontUrl = await uploadFontToCloudinary(file);
+          // Usa 'raw' como resource_type para fuentes
+          const fontUrl = await uploadToCloudinary(file, 'raw', 'fonts');
           console.log('URL recibida:', fontUrl);
           window.uploadedFonts = window.uploadedFonts || [];
           window.uploadedFonts.push({ name: file.name, url: fontUrl });
