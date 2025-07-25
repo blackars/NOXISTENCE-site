@@ -46,5 +46,11 @@
     "name": "diablillo",
     "world": "Planet X",
     "img": "img/1751882080125.png"
+  },
+  {
+    "id": "creature_1753417849191",
+    "name": "kabron",
+    "world": "Planet X",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417199/creatures/ChatGPT%20Image%2022%20jun%202025%2C%2004_08_51%20a.m.%20%281%29.png"
   }
 ]

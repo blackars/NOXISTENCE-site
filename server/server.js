@@ -8,8 +8,20 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const basicAuth = require('express-basic-auth');
+const cors = require('cors');
 const app = express();
 const port = 3100;
+
+// Configuración CORS
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3100'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// Para manejar solicitudes preflight (OPTIONS)
+app.options('*', cors());
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
 const cloudinary = require('cloudinary').v2;
@@ -105,6 +117,11 @@ app.use(['public/fonts', 'public/hojas', 'public/imageart'], basicAuth({
 // Ruta para subir imágenes
 app.post('/upload', (req, res) => {
   try {
+    console.log('Datos recibidos en /upload:', {
+      body: req.body,
+      headers: req.headers
+    });
+    
     console.log('Solicitud recibida para /upload');
     console.log('Datos recibidos:', req.body);
 
@@ -121,14 +138,25 @@ app.post('/upload', (req, res) => {
     }
 
     // Leer el JSON actual
-    const jsonPath = 'public/data/creatures.json';
+    const jsonPath = path.join(__dirname, '../public/data/creatures.json');
+    
+    // Asegurarse de que el directorio exista
+    const dirPath = path.dirname(jsonPath);
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+    }
+    
     let creatures = [];
     try {
-      const jsonData = fs.readFileSync(jsonPath, 'utf8');
-      creatures = JSON.parse(jsonData);
-      console.log('Criaturas leídas del archivo:', creatures.length);
-      // Limpiar tags existentes de criaturas anteriores
-      creatures = cleanCreaturesTags(creatures);
+      if (fs.existsSync(jsonPath)) {
+        const jsonData = fs.readFileSync(jsonPath, 'utf8');
+        creatures = JSON.parse(jsonData);
+        console.log('Criaturas leídas del archivo:', creatures.length);
+        // Limpiar tags existentes de criaturas anteriores
+        creatures = cleanCreaturesTags(creatures);
+      } else {
+        console.log('Creando nuevo archivo creatures.json');
+      }
     } catch (error) {
       console.log('Creando nuevo archivo creatures.json');
     }

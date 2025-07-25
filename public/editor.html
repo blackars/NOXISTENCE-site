@@ -778,18 +778,24 @@
       const worldInput = document.getElementById('creatureWorld');
 
       if (!fileInput.files[0]) {
-        alert('Select an image');
+        alert('Por favor selecciona una imagen');
         return;
       }
-
+      
       try {
         // Subir a Cloudinary
         const file = fileInput.files[0];
-        const fileName = file.name.replace(/\\.[^/.]+$/, '');
+        const fileName = file.name.replace(/\.[^/.]+$/, '');
         const creatureName = nameInput.value || fileName;
         
         const imageUrl = await uploadToCloudinary(file, 'image', 'creatures', fileName);
         console.log('URL de Cloudinary:', imageUrl);
+        
+        console.log('Enviando a /upload:', {
+          name: creatureName,
+          world: worldInput.value || '',
+          img: imageUrl.secure_url
+        });
         
         // Crear la criatura
         const creature = {
@@ -800,7 +806,7 @@
         };
 
         // Guardar la criatura
-        const response = await fetch('/upload', {
+        const response = await fetch('http://localhost:3100/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(creature)
