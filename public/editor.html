@@ -630,84 +630,104 @@
       }
     }
     
-    // Función para cargar criaturas según el modo
+    // Función para cargar criaturas desde el archivo JSON local
     async function loadCreatures() {
-      if (isLocalMode) {
-        try {
-          const response = await fetch('data/creatures.json');
-          const creatures = await response.json();
-          displayCreatures(creatures);
-          return creatures;
-        } catch (error) {
-          console.error('Error loading local creatures:', error);
-          const exampleCreatures = [
-            {
-              id: 'example1',
-              name: 'Example Creature 1',
-              img: 'img/example1.jpg',
-              world: 'Gutterlands'
-            },
-            {
-              id: 'example2', 
-              name: 'Example Creature 2',
-              img: 'img/example2.jpg',
-              world: 'Ashlands'
-            }
-          ];
-          displayCreatures(exampleCreatures);
-          return exampleCreatures;
+      try {
+        const response = await fetch('data/creatures.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-      } else {
-        try {
-          const response = await fetch('/creatures');
-          const creatures = await response.json();
-          displayCreatures(creatures);
-          return creatures;
-        } catch (error) {
-          console.error('Error loading creatures from server:', error);
-          return [];
+        const creatures = await response.json();
+        displayCreatures(creatures);
+        return creatures;
+      } catch (error) {
+        console.error('Error loading creatures:', error);
+        // Mostrar mensaje de error en la interfaz
+        const creaturesList = document.getElementById('creaturesList');
+        if (creaturesList) {
+          creaturesList.innerHTML = `
+            <div class="error-message" style="color: #dc3545; padding: 10px; background: #f8d7da; border-radius: 4px; margin: 10px 0;">
+              Error al cargar las criaturas: ${error.message}
+            </div>
+          `;
         }
+        return [];
       }
     }
 
     // Mostrar lista de criaturas
     function displayCreatures(creatures) {
       const list = document.getElementById('creaturesList');
+      if (!list) return;
+      
+      // Limpiar la lista actual
       list.innerHTML = '';
       
-      creatures.forEach(creature => {
+      if (!creatures || creatures.length === 0) {
+        list.innerHTML = '<p style="color: #666; font-style: italic;">No se encontraron criaturas</p>';
+        return;
+      }
+      
+      // Ordenar las criaturas por nombre
+      const sortedCreatures = [...creatures].sort((a, b) => a.name.localeCompare(b.name));
+      
+      // Crear contenedor de cuadrícula
+      const gridContainer = document.createElement('div');
+      gridContainer.style.display = 'grid';
+      gridContainer.style.gridTemplateColumns = '1fr';  // Una sola columna que ocupa todo el ancho
+      gridContainer.style.gap = '5px';
+      gridContainer.style.padding = '5px';
+      
+      // Agregar cada criatura
+      sortedCreatures.forEach(creature => {
         const item = document.createElement('div');
         item.className = 'creature-item';
         item.draggable = true;
         item.dataset.creature = JSON.stringify(creature);
-        item.innerHTML = `
-          <img src="${creature.img}" alt="${creature.name}" />
-          <div style="flex: 1;">
-            <div><strong>${creature.name}</strong></div>
-            <div style="font-size: 0.8rem; color: #666;">${creature.world}</div>
-          </div>
-          ${!isLocalMode ? `<button class="delete-btn" onclick="deleteCreature('${creature.id}')">×</button>` : ''}
-        `;
+        item.style.display = 'flex';
+        item.style.flexDirection = 'column';
+        item.style.alignItems = 'center';
+        item.style.padding = '5px'; 
         
+
+        // Crear la imagen directamente sin contenedor extra
+        const img = document.createElement('img');
+        img.src = creature.img;
+        img.alt = creature.name || 'Criatura';
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        img.style.aspectRatio = '1/1';
+        img.style.objectFit = 'contain';
+        img.style.cursor = 'grab';
+        
+        // Crear el nombre
+        const name = document.createElement('div');
+        name.textContent = creature.name || 'Sin nombre';
+        name.style.fontSize = '0.9em';
+        name.style.textAlign = 'center';
+        name.style.width = '100%';
+        name.style.whiteSpace = 'nowrap';
+        name.style.overflow = 'hidden';
+        name.style.textOverflow = 'ellipsis';
+        
+        // Agregar elementos al contenedor
+        item.appendChild(img);
+        item.appendChild(name);
+        
+        // Hacer el elemento arrastrable
         item.addEventListener('dragstart', (e) => {
-          e.dataTransfer.setData('text/plain', JSON.stringify(creature));
+          e.dataTransfer.setData('text/plain', JSON.stringify({...creature, type: 'creature'}));
           e.dataTransfer.effectAllowed = 'copy';
         });
         
-        const fontSelector = document.getElementById('fontSelector');
-        const fontSizeSlider = document.getElementById('fontSize');
-        const fontColorPicker = document.getElementById('fontColor');
-        const titleElement = item.querySelector('.item-title');
-        if (titleElement) {
-          titleElement.style.fontFamily = fontSelector.value;
-          titleElement.style.fontSize = fontSizeSlider.value + 'px';
-          titleElement.style.color = fontColorPicker.value;
-        }
-        
-        list.appendChild(item);
+        // Agregar al contenedor de la cuadrícula
+        gridContainer.appendChild(item);
       });
+      
+      // Agregar la cuadrícula al contenedor de la lista
+      list.appendChild(gridContainer);
     }
-
+    
     // Función para cargar imágenes de arte
     async function loadArtImages() {
       const artList = document.getElementById('artList');

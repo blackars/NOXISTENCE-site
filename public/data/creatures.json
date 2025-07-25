@@ -1,53 +1,5 @@
 [
   {
-    "id": "creature_1751856742322",
-    "name": "Dorado Golem",
-    "world": "Universe X",
-    "img": "img/1751856742317.png"
-  },
-  {
-    "id": "creature_1751857759471",
-    "name": "sdasdasas",
-    "world": "Planet X",
-    "img": "img/1751857759468.png"
-  },
-  {
-    "id": "creature_1751868213991",
-    "name": "azaa",
-    "world": "Planet X",
-    "img": "img/1751868213974.png"
-  },
-  {
-    "id": "creature_1751881984217",
-    "name": "4",
-    "world": "Planet X",
-    "img": "img/1751881984202.png"
-  },
-  {
-    "id": "creature_1751881991586",
-    "name": "45",
-    "world": "Planet X",
-    "img": "img/1751881991584.png"
-  },
-  {
-    "id": "creature_1751881998345",
-    "name": "456",
-    "world": "Planet X",
-    "img": "img/1751881998343.png"
-  },
-  {
-    "id": "creature_1751882065013",
-    "name": "gato",
-    "world": "Planet X",
-    "img": "img/1751882065001.png"
-  },
-  {
-    "id": "creature_1751882080128",
-    "name": "diablillo",
-    "world": "Planet X",
-    "img": "img/1751882080125.png"
-  },
-  {
     "id": "creature_1753417849191",
     "name": "kabron",
     "world": "Planet X",
