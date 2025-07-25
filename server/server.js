@@ -103,21 +103,22 @@ app.use(['public/fonts', 'public/hojas', 'public/imageart'], basicAuth({
 }));
 
 // Ruta para subir imágenes
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post('/upload', (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+    console.log('Solicitud recibida para /upload');
+    console.log('Datos recibidos:', req.body);
+
+    // Validar que el cuerpo de la solicitud sea JSON
+    if (!req.body) {
+      console.log('Error: No se recibieron datos en el cuerpo de la solicitud');
+      return res.status(400).json({ error: 'No se recibieron datos en el cuerpo de la solicitud' });
     }
 
-    const imagePath = `img/${req.file.filename}`;
-    const imageName = req.body.name || req.file.originalname.replace(/\.[^/.]+$/, '');
-    const world = req.body.world || 'Default';
-
-    console.log('Datos recibidos:', {
-      name: imageName,
-      world: world,
-      body: req.body
-    });
+    const creature = req.body;
+    if (!creature || !creature.name || !creature.img) {
+      console.log('Error: Datos de criatura inválidos');
+      return res.status(400).json({ error: 'Datos de criatura inválidos' });
+    }
 
     // Leer el JSON actual
     const jsonPath = 'public/data/creatures.json';
@@ -125,37 +126,48 @@ app.post('/upload', upload.single('image'), (req, res) => {
     try {
       const jsonData = fs.readFileSync(jsonPath, 'utf8');
       creatures = JSON.parse(jsonData);
+      console.log('Criaturas leídas del archivo:', creatures.length);
       // Limpiar tags existentes de criaturas anteriores
       creatures = cleanCreaturesTags(creatures);
-      // Guardar el archivo limpio inmediatamente
-      fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
     } catch (error) {
       console.log('Creando nuevo archivo creatures.json');
     }
 
     // Crear nuevo entry
     const newCreature = {
-      id: `creature_${Date.now()}`,
-      name: imageName,
-      world: world,
-      img: imagePath
+      id: creature.id || `creature_${Date.now()}`,
+      name: creature.name,
+      world: creature.world || 'Default',
+      img: creature.img
     };
 
     // Agregar al array
     creatures.push(newCreature);
+    console.log('Nueva criatura agregada:', newCreature);
 
     // Escribir de vuelta al archivo
-    fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
+    try {
+      const creaturesJson = JSON.stringify(creatures, null, 2);
+      console.log('Contenido a escribir:', creaturesJson);
+      fs.writeFileSync(jsonPath, creaturesJson);
+      console.log('Archivo creatures.json actualizado exitosamente');
+    } catch (error) {
+      console.error('Error al escribir creatures.json:', error);
+      throw error; // Propagar el error para que se capture en el catch principal
+    }
 
-    res.json({
+    // Responder con JSON
+    const response = {
       success: true,
       creature: newCreature,
-      message: 'Imagen subida y JSON actualizado correctamente'
-    });
+      creatures: creatures
+    };
+    console.log('Respondiendo con:', response);
+    res.json(response);
 
   } catch (error) {
-    console.error('Error al procesar la subida:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error('Error al subir criatura:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -359,10 +371,9 @@ app.post('/cloudinary-signature', (req, res) => {
     timestamp
   };
   if (public_id) paramsToSign.public_id = public_id;
-  // Solo incluir resource_type si se va a enviar explícitamente
-  if (resource_type) paramsToSign.resource_type = resource_type;
+  // resource_type no se incluye en la firma, solo en la URL final
 
-  // LOGS DE DEPURACIÓN DETALLADOS
+  // LOGS DE DEPURACIÓN DETALLADOS Y PRUEBA DEFINITIVA
   console.log('--- /cloudinary-signature ---');
   console.log('Body recibido:', req.body);
   console.log('Parámetros a firmar:', paramsToSign);
@@ -372,19 +383,27 @@ app.post('/cloudinary-signature', (req, res) => {
     .join('&');
   console.log('String to sign:', stringToSign);
   // Imprimir variables de entorno relevantes
-  console.log('CLOUDINARY_CLOUD_NAME:', process.env.CLOUDINARY_CLOUD_NAME);
-  console.log('CLOUDINARY_API_KEY:', process.env.CLOUDINARY_API_KEY);
-  console.log('CLOUDINARY_API_SECRET:', process.env.CLOUDINARY_API_SECRET);
+  console.log('CLOUDINARY_CLOUD_NAME (.env):', process.env.CLOUDINARY_CLOUD_NAME);
+  console.log('CLOUDINARY_API_KEY (.env):', process.env.CLOUDINARY_API_KEY);
+  console.log('CLOUDINARY_API_SECRET (.env):', process.env.CLOUDINARY_API_SECRET);
   // Imprimir config de cloudinary
-  console.log('cloudinary.config():', cloudinary.config());
+  const config = cloudinary.config();
+  console.log('cloudinary.config():', config);
   // Imprimir api_secret usado para firmar
-  const apiSecretUsed = cloudinary.config().api_secret;
+  const apiSecretUsed = config.api_secret;
   console.log('api_secret usado para firmar:', apiSecretUsed);
+  // Imprimir timestamp y hora UTC
+  console.log('timestamp usado:', paramsToSign.timestamp);
+  console.log('timestamp UTC:', new Date(paramsToSign.timestamp * 1000).toISOString());
+  // Generar y mostrar la firma
   const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecretUsed);
   console.log('Signature generada:', signature);
   console.log('----------------------------');
 
   // Devolver todos los parámetros que el frontend debe enviar tal cual
+  // Si no se especifica public_id, usar el nombre del archivo sin extensión
+  const publicId = public_id || file.name.replace(/\.[^/.]+$/, '');
+  
   res.json({
     signature,
     timestamp,
@@ -392,7 +411,7 @@ app.post('/cloudinary-signature', (req, res) => {
     apiKey: cloudinary.config().api_key,
     folder: paramsToSign.folder,
     resource_type: paramsToSign.resource_type,
-    public_id: paramsToSign.public_id
+    public_id: publicId
   });
 });
 

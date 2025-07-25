@@ -782,16 +782,34 @@
         return;
       }
 
-      const formData = new FormData();
-      formData.append('image', fileInput.files[0]);
-      formData.append('name', nameInput.value || fileInput.files[0].name.replace(/\.[^/.]+$/, ''));
-      formData.append('world', worldInput.value);
-
       try {
+        // Subir a Cloudinary
+        const file = fileInput.files[0];
+        const fileName = file.name.replace(/\\.[^/.]+$/, '');
+        const creatureName = nameInput.value || fileName;
+        
+        const imageUrl = await uploadToCloudinary(file, 'image', 'creatures', fileName);
+        console.log('URL de Cloudinary:', imageUrl);
+        
+        // Crear la criatura
+        const creature = {
+          name: creatureName,
+          img: imageUrl.secure_url,
+          world: worldInput.value || '',
+          id: `creature_${Date.now()}`
+        };
+
+        // Guardar la criatura
         const response = await fetch('/upload', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(creature)
         });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Error en el servidor: ${error}`);
+        }
 
         const result = await response.json();
         
@@ -805,7 +823,7 @@
         }
       } catch (error) {
         console.error('Error uploading:', error);
-        alert('Error uploading creature');
+        alert('Error uploading creature: ' + error.message);
       }
     }
 
@@ -853,13 +871,25 @@
         return;
       }
 
-      const formData = new FormData();
-      formData.append('image', fileInput.files[0]);
-
       try {
+        // Subir a Cloudinary
+        const file = fileInput.files[0];
+        const fileName = file.name.replace(/\\.[^/.]+$/, '');
+        
+        const imageUrl = await uploadToCloudinary(file, 'image', 'imageart', fileName);
+        
+        // Crear la imagen de arte
+        const art = {
+          name: fileName,
+          img: imageUrl.secure_url,
+          id: `art_${Date.now()}`
+        };
+
+        // Guardar la imagen de arte
         const response = await fetch('/upload-art', {
           method: 'POST',
-          body: formData
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(art)
         });
 
         const result = await response.json();
@@ -873,7 +903,7 @@
         }
       } catch (error) {
         console.error('Error uploading art image:', error);
-        alert('Error uploading art image');
+        alert('Error uploading art image: ' + error.message);
       }
     }
     
@@ -1615,44 +1645,59 @@
 
     // --- Cloudinary Secure Upload ---
     async function getCloudinarySignature({ folder = 'uploads', resource_type = 'auto', public_id = undefined }) {
+      // For raw resources (fonts), we need to specify the correct parameters
+      if (resource_type === 'raw') {
+        folder = 'fonts';
+      }
+      
       const res = await fetch('/cloudinary-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folder, resource_type, public_id })
       });
-      if (!res.ok) throw new Error('No se pudo obtener la firma de Cloudinary');
-      return await res.json();
+      if (!res.ok) {
+        throw new Error('Error uploading to Cloudinary');
+      }
+      const response = await res.json();
+      return response;
     }
 
     async function uploadToCloudinary(file, resource_type = 'auto', folder = 'uploads', public_id = undefined) {
-      // 1. Obtener la firma y datos necesarios del backend
-      const { signature, timestamp, cloudName, apiKey, folder: signedFolder, resource_type: signedResourceType, public_id: signedPublicId } =
-        await getCloudinarySignature({ folder, resource_type, public_id });
+      try {
+        // 1. Obtener la firma y datos necesarios del backend
+        const params = await getCloudinarySignature({ folder, resource_type, public_id });
 
-      // 2. Crear el FormData con todos los campos requeridos
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', timestamp);
-      formData.append('signature', signature);
-      formData.append('folder', signedFolder);
-      if (signedPublicId) formData.append('public_id', signedPublicId);
+        // 2. Crear el FormData SOLO con los campos devueltos por el backend
+        const formData = new FormData();
+        formData.append('file', file);
+        // Solo agregar los campos que existen en la respuesta
+        if (params.apiKey) formData.append('api_key', params.apiKey);
+        if (params.timestamp) formData.append('timestamp', params.timestamp);
+        if (params.signature) formData.append('signature', params.signature);
+        if (params.folder) formData.append('folder', params.folder);
+        if (params.public_id) formData.append('public_id', params.public_id);
+        // resource_type NO se envía en el formData, solo se usa en la URL
 
-      // 3. Construir la URL correcta para el tipo de recurso
-      const url = `https://api.cloudinary.com/v1_1/${cloudName}/${signedResourceType}/upload`;
+        // 3. Construir la URL correcta para el tipo de recurso
+        const url = `https://api.cloudinary.com/v1_1/${params.cloudName}/${params.resource_type || 'auto'}/upload`;
 
-      // 4. Hacer la petición
-      const res = await fetch(url, {
-        method: 'POST',
-        body: formData
-      });
+        // 4. Hacer la petición
+        const res = await fetch(url, {
+          method: 'POST',
+          body: formData
+        });
 
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error?.message || 'Error al subir a Cloudinary');
+        if (!res.ok) {
+          const error = await res.text(); // Cambiado a text() para capturar cualquier respuesta
+          throw new Error(`Error al subir a Cloudinary: ${error}`);
+        }
+
+        const response = await res.json();
+        return response;
+      } catch (error) {
+        console.error('Error en uploadToCloudinary:', error);
+        throw error;
       }
-
-      return await res.json();
     }
 
     // --- Event listener para subir fuentes ---
@@ -1668,8 +1713,8 @@
       for (const file of files) {
         console.log('Subiendo fuente:', file.name);
         try {
-          // Usa 'raw' como resource_type para fuentes
-          const fontUrl = await uploadToCloudinary(file, 'raw', 'fonts');
+          // Usa 'raw' como resource_type para fuentes y mantiene el nombre original
+          const fontUrl = await uploadToCloudinary(file, 'raw', 'fonts', file.name);
           console.log('URL recibida:', fontUrl);
           window.uploadedFonts = window.uploadedFonts || [];
           window.uploadedFonts.push({ name: file.name, url: fontUrl });
