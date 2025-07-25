@@ -429,17 +429,15 @@ app.post('/cloudinary-signature', (req, res) => {
   console.log('----------------------------');
 
   // Devolver todos los parámetros que el frontend debe enviar tal cual
-  // Si no se especifica public_id, usar el nombre del archivo sin extensión
-  const publicId = public_id || file.name.replace(/\.[^/.]+$/, '');
-  
+  // Usar el public_id proporcionado o undefined para que Cloudinary genere uno aleatorio
   res.json({
     signature,
     timestamp,
     cloudName: cloudinary.config().cloud_name,
     apiKey: cloudinary.config().api_key,
     folder: paramsToSign.folder,
-    resource_type: paramsToSign.resource_type,
-    public_id: publicId
+    resource_type: resource_type || 'auto',
+    public_id: public_id // Usar el public_id proporcionado o undefined
   });
 });
 

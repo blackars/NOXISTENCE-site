@@ -52,5 +52,11 @@
     "name": "kabron",
     "world": "Planet X",
     "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417199/creatures/ChatGPT%20Image%2022%20jun%202025%2C%2004_08_51%20a.m.%20%281%29.png"
+  },
+  {
+    "id": "creature_1753417926628",
+    "name": "Fumor",
+    "world": "Planet X",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417926/creatures/Fumor.png"
   }
 ]

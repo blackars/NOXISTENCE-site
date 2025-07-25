@@ -711,17 +711,32 @@
     // Función para cargar imágenes de arte
     async function loadArtImages() {
       if (isLocalMode) {
-        document.getElementById('artList').innerHTML = '<p style="color: #666; font-style: italic;">Art images not avaliable in local mode.</p>';
+        document.getElementById('artList').innerHTML = '<p style="color: #666; font-style: italic;">Art images not available in local mode.</p>';
         return [];
       } else {
         try {
-          const response = await fetch('/art');
-          const artImages = await response.json();
+          // Obtener recursos de la carpeta 'imageart' en Cloudinary
+          const response = await fetch('/cloudinary-resources?folder=imageart');
+          if (!response.ok) {
+            throw new Error('Error al cargar las imágenes');
+          }
+          const data = await response.json();
+          
+          // Mapear los recursos al formato esperado
+          const artImages = data.resources.map(resource => ({
+            id: `art_${resource.asset_id}`,
+            name: resource.public_id.split('/').pop(),
+            img: resource.secure_url,
+            public_id: resource.public_id
+          }));
+          
           displayArtImages(artImages);
           return artImages;
         } catch (error) {
-          console.error('Error uploading images:', error);
-          document.getElementById('artList').innerHTML = '<p style="color: #666; font-style: italic;">Error uploading art images.</p>';
+          console.error('Error loading art images:', error);
+          document.getElementById('artList').innerHTML = 
+            '<p style="color: #ff4444; font-style: italic;">Error loading art images: ' + 
+            (error.message || 'Unknown error') + '</p>';
           return [];
         }
       }
@@ -766,107 +781,95 @@
       });
     }
     
-    // Subir nueva criatura
-    async function uploadCreature() {
-      if (isLocalMode) {
-        alert('Creature upload not avaliable in local mode.\n\nTo upload creatures, run Node.js server with:\n\nnpm start');
+    // Añadir miniatura de arte a la interfaz
+    function addArtThumbnail(art) {
+      const artList = document.getElementById('artList');
+      if (!artList) return;
+      
+      // Verificar si ya existe una miniatura con este ID
+      if (document.querySelector(`.art-item[data-art-id="${art.id}"]`)) {
         return;
       }
       
-      const fileInput = document.getElementById('singleImageLoader');
-      const nameInput = document.getElementById('creatureName');
-      const worldInput = document.getElementById('creatureWorld');
-
-      if (!fileInput.files[0]) {
-        alert('Por favor selecciona una imagen');
-        return;
+      const item = document.createElement('div');
+      item.className = 'art-item';
+      item.draggable = true;
+      item.dataset.artId = art.id;
+      item.dataset.art = JSON.stringify(art);
+      
+      item.innerHTML = `
+        <img src="${art.img}" alt="${art.name}" loading="lazy" />
+        <div class="art-item-overlay">
+          <button class="delete-btn" onclick="deleteArtImage('${art.id}')">×</button>
+        </div>
+      `;
+      
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+          ...art,
+          type: 'art',
+          img: art.img,
+          id: art.id
+        }));
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+      
+      // Insertar al principio de la lista
+      if (artList.firstChild) {
+        artList.insertBefore(item, artList.firstChild);
+      } else {
+        artList.appendChild(item);
       }
       
-      try {
-        // Subir a Cloudinary
-        const file = fileInput.files[0];
-        const fileName = file.name.replace(/\.[^/.]+$/, '');
-        const creatureName = nameInput.value || fileName;
-        
-        const imageUrl = await uploadToCloudinary(file, 'image', 'creatures', fileName);
-        console.log('URL de Cloudinary:', imageUrl);
-        
-        console.log('Enviando a /upload:', {
-          name: creatureName,
-          world: worldInput.value || '',
-          img: imageUrl.secure_url
-        });
-        
-        // Crear la criatura
-        const creature = {
-          name: creatureName,
-          img: imageUrl.secure_url,
-          world: worldInput.value || '',
-          id: `creature_${Date.now()}`
-        };
-
-        // Guardar la criatura
-        const response = await fetch('http://localhost:3100/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(creature)
-        });
-
-        if (!response.ok) {
-          const error = await response.text();
-          throw new Error(`Error en el servidor: ${error}`);
-        }
-
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Creature uploaded successfully');
-          fileInput.value = '';
-          nameInput.value = '';
-          await loadCreatures();
-        } else {
-          alert('Error: ' + result.error);
-        }
-      } catch (error) {
-        console.error('Error uploading:', error);
-        alert('Error uploading creature: ' + error.message);
+      // Si estaba vacío, limpiar el mensaje
+      const emptyMessage = artList.querySelector('p');
+      if (emptyMessage) {
+        emptyMessage.remove();
       }
     }
-
-    // Eliminar criatura
-    async function deleteCreature(id) {
+    
+    // Eliminar imagen de arte
+    async function deleteArtImage(id) {
       if (isLocalMode) {
-        alert('Creature deletion not avaliable in local mode.\n\nTo delete creatures, run Node.js server with:\n\nnpm start');
+        alert('Delete art images not available in local mode.\n\nTo delete art images, run Node.js server with:\n\nnpm start');
         return;
       }
       
-      if (!confirm('Are you sure you want to delete this creature?')) {
+      if (!confirm('Are you sure you want to delete this art image?')) {
         return;
       }
 
       try {
-        const response = await fetch(`hojas/creatures/${id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Creature deleted successfully');
-          await loadCreatures();
-        } else {
-          alert('Error: ' + result.error);
+        // Encontrar el elemento en la interfaz
+        const artItem = document.querySelector(`.art-item[data-art-id="${id}"]`);
+        if (artItem) {
+          // Eliminar de la interfaz inmediatamente para mejor experiencia de usuario
+          artItem.remove();
+          
+          // Si no quedan más imágenes, mostrar mensaje
+          const artList = document.getElementById('artList');
+          if (artList && artList.children.length === 0) {
+            artList.innerHTML = '<p style="color: #666; font-style: italic;">No art images available.</p>';
+          }
         }
+        
+        // Opcional: Aquí podrías agregar una llamada a tu servidor para eliminar la imagen de Cloudinary
+        // await fetch(`/delete-art/${id}`, { method: 'DELETE' });
+        
+        alert('Art image deleted successfully');
+        
       } catch (error) {
-        console.error('Error deleting:', error);
-        alert('Error deleting creature');
+        console.error('Error deleting art image:', error);
+        alert('Error deleting art image: ' + (error.message || 'Unknown error'));
+        // Recargar las imágenes si hubo un error
+        await loadArtImages();
       }
     }
     
     // Subir nueva imagen de arte
     async function uploadArtImage() {
       if (isLocalMode) {
-        alert('Art images upload not avaliable in local mode.\n\nTo upload images run  Node.js server with:\n\nnpm start');
+        alert('Art images upload not available in local mode.\n\nTo upload images, run Node.js server with:\n\nnpm start');
         return;
       }
       
@@ -877,69 +880,50 @@
         return;
       }
 
+      let uploadBtn;
+      let originalText;
+      
       try {
-        // Subir a Cloudinary
         const file = fileInput.files[0];
-        const fileName = file.name.replace(/\\.[^/.]+$/, '');
+        const fileName = file.name.replace(/\.[^/.]+$/, '');
         
+        // Mostrar indicador de carga
+        uploadBtn = document.querySelector('.upload-btn') || document.querySelector('button[onclick*="uploadArtImage"]');
+        if (uploadBtn) {
+          originalText = uploadBtn.textContent;
+          uploadBtn.disabled = true;
+          uploadBtn.textContent = 'Uploading...';
+        }
+        
+        // Subir a Cloudinary
         const imageUrl = await uploadToCloudinary(file, 'image', 'imageart', fileName);
         
-        // Crear la imagen de arte
+        // Crear la miniatura en la interfaz
         const art = {
           name: fileName,
           img: imageUrl.secure_url,
-          id: `art_${Date.now()}`
+          id: `art_${Date.now()}`,
+          public_id: imageUrl.public_id
         };
-
-        // Guardar la imagen de arte
-        const response = await fetch('/upload-art', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(art)
-        });
-
-        const result = await response.json();
         
-        if (result.success) {
-          alert('Art image uploaded successfully');
-          fileInput.value = '';
-          await loadArtImages();
-        } else {
-          alert('Error: ' + result.error);
-        }
+        // Añadir a la lista de miniaturas
+        addArtThumbnail(art);
+        
+        // Limpiar el input
+        fileInput.value = '';
+        
+        // Mostrar mensaje de éxito
+        alert('¡Imagen subida exitosamente a Cloudinary!');
+        
       } catch (error) {
         console.error('Error uploading art image:', error);
-        alert('Error uploading art image: ' + error.message);
-      }
-    }
-    
-    // Eliminar imagen de arte
-    async function deleteArtImage(id) {
-      if (isLocalMode) {
-        alert('Delete art images not avaliable in local mode.\n\nTo delete art images, run Node.js server with:\n\nnpm start');
-        return;
-      }
-      
-      if (!confirm('Are you sure you want to delete this art image?')) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`/art/${id}`, {
-          method: 'DELETE'
-        });
-
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Art image deleted successfully');
-          await loadArtImages();
-        } else {
-          alert('Error: ' + result.error);
+        alert('Error al subir la imagen: ' + (error.message || 'Error desconocido'));
+      } finally {
+        // Restaurar el botón
+        if (uploadBtn) {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = originalText || 'Upload Image';
         }
-      } catch (error) {
-        console.error('Error deleting art image:', error);
-        alert('Error deleting art image');
       }
     }
 
