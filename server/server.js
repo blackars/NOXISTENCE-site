@@ -12,24 +12,64 @@ const cors = require('cors');
 const app = express();
 const port = 3100;
 
-// Configuración CORS
-app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3100'],
+// Configuración CORS para desarrollo
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permitir solicitudes sin origen (como aplicaciones móviles o curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'El origen de la petición no está permitido por CORS';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+// Aplicar CORS a todas las rutas
+app.use(cors(corsOptions));
+
+// Manejar preflight para todas las rutas
+app.options('*', cors(corsOptions));
+
+// Servir archivos estáticos desde la carpeta public
+app.use(express.static(path.join(__dirname, '../public'), {
+  setHeaders: (res, path) => {
+    // Configurar headers para archivos específicos si es necesario
+    if (path.endsWith('.js')) {
+      res.set('Content-Type', 'application/javascript');
+    }
+  }
 }));
 
-// Para manejar solicitudes preflight (OPTIONS)
-app.options('*', cors());
+// Middleware para parsear JSON
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
 const cloudinary = require('cloudinary').v2;
 
+// Verificar variables de entorno de Cloudinary
+console.log('Configurando Cloudinary con las siguientes credenciales:');
+console.log('Cloud Name:', process.env.CLOUDINARY_CLOUD_NAME ? '*** Configurado ***' : 'No configurado');
+console.log('API Key:', process.env.CLOUDINARY_API_KEY ? '*** Configurado ***' : 'No configurado');
+console.log('API Secret:', process.env.CLOUDINARY_API_SECRET ? '*** Configurado ***' : 'No configurado');
+
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.error('ERROR: Faltan credenciales de Cloudinary en las variables de entorno');
+}
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
 });
 
 // Función auxiliar para limpiar tags de criaturas
@@ -389,6 +429,74 @@ app.post('/admin/generate-thumbnails', basicAuth({
 });
 
 // Endpoint para obtener firma de subida segura
+// Ruta para obtener recursos de Cloudinary
+app.get('/cloudinary-resources', async (req, res) => {
+  console.log('Solicitud recibida en /cloudinary-resources');
+  console.log('Query params:', req.query);
+  console.log('Headers:', req.headers);
+  
+  try {
+    const { folder } = req.query;
+    
+    if (!folder) {
+      console.log('Error: No se proporcionó el parámetro folder');
+      return res.status(400).json({ error: 'Se requiere el parámetro folder' });
+    }
+
+    console.log(`Solicitando recursos de Cloudinary para la carpeta: ${folder}`);
+    
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: `${folder}/`,  // Asegurarse de que la carpeta termine con /
+      max_results: 500,
+      context: true,
+      tags: true
+    });
+
+    console.log(`Recursos encontrados en Cloudinary (${folder}):`, result.resources ? result.resources.length : 0);
+    
+    if (!result.resources || result.resources.length === 0) {
+      console.log('No se encontraron recursos. Verifica que la carpeta exista y tenga contenido.');
+      console.log('Intenta verificar en el dashboard de Cloudinary si la carpeta y las imágenes existen.');
+      return res.status(404).json({ 
+        error: 'No se encontraron recursos',
+        folder: folder,
+        resources: []
+      });
+    }
+    
+    // Devolver los recursos encontrados
+    return res.json({
+      success: true,
+      folder: folder,
+      resources: result.resources,
+      total: result.resources.length
+    });
+
+    res.json(result);
+  } catch (error) {
+    console.error('Error al obtener recursos de Cloudinary:', error);
+    console.error('Detalles completos del error:', {
+      message: error.message,
+      name: error.name,
+      status: error.http_code,
+      headers: error.http_headers,
+      request_id: error.request_id
+    });
+    
+    res.status(500).json({ 
+      error: 'Error al obtener recursos de Cloudinary', 
+      message: error.message,
+      details: {
+        name: error.name,
+        status: error.http_code,
+        folder: req.query.folder,
+        request_id: error.request_id
+      }
+    });
+  }
+});
+
 app.post('/cloudinary-signature', (req, res) => {
   const { folder, resource_type, public_id } = req.body;
   const timestamp = Math.round((new Date).getTime() / 1000);
@@ -439,6 +547,55 @@ app.post('/cloudinary-signature', (req, res) => {
     resource_type: resource_type || 'auto',
     public_id: public_id // Usar el public_id proporcionado o undefined
   });
+});
+
+// Endpoint para generar firmas de Cloudinary
+app.post('/cloudinary-signature', (req, res) => {
+  try {
+    const { folder = 'uploads', resource_type = 'auto', public_id } = req.body;
+    const timestamp = Math.round((new Date).getTime() / 1000);
+
+    console.log('Solicitando firma para:', { folder, resource_type, public_id });
+
+    // Solo incluir en la firma los parámetros que realmente se enviarán a Cloudinary
+    const params = {
+      timestamp,
+      folder: folder,
+      resource_type: resource_type
+    };
+
+    // Solo agregar public_id si se proporciona
+    if (public_id) {
+      params.public_id = public_id;
+    }
+
+    // Generar la firma
+    const signature = cloudinary.utils.api_sign_request(params, process.env.CLOUDINARY_API_SECRET);
+    
+    // Devolver los datos necesarios para la carga directa
+    const response = {
+      signature,
+      timestamp,
+      folder: params.folder,
+      resource_type: params.resource_type,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      ...(public_id && { public_id })
+    };
+
+    console.log('Firma generada correctamente');
+    res.json(response);
+  } catch (error) {
+    console.error('Error al generar la firma de Cloudinary:', error);
+    res.status(500).json({
+      error: 'Error al generar la firma',
+      message: error.message,
+      details: {
+        name: error.name,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }
+    });
+  }
 });
 
 app.use('/', fontsRoutes);

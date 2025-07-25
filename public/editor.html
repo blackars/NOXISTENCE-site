@@ -710,35 +710,87 @@
 
     // Función para cargar imágenes de arte
     async function loadArtImages() {
+      const artList = document.getElementById('artList');
+      
       if (isLocalMode) {
-        document.getElementById('artList').innerHTML = '<p style="color: #666; font-style: italic;">Art images not available in local mode.</p>';
+        artList.innerHTML = '<p style="color: #666; font-style: italic;">Art images not available in local mode.</p>';
         return [];
-      } else {
-        try {
-          // Obtener recursos de la carpeta 'imageart' en Cloudinary
-          const response = await fetch('/cloudinary-resources?folder=imageart');
-          if (!response.ok) {
-            throw new Error('Error al cargar las imágenes');
+      }
+
+      try {
+        console.log('Cargando imágenes de arte desde Cloudinary...');
+        const apiUrl = 'http://localhost:3100/cloudinary-resources?folder=imageart';
+        console.log('URL de la API:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'include', // Incluir credenciales (cookies, autenticación)
+          headers: {
+            'Content-Type': 'application/json'
           }
-          const data = await response.json();
-          
-          // Mapear los recursos al formato esperado
-          const artImages = data.resources.map(resource => ({
-            id: `art_${resource.asset_id}`,
+        });
+        console.log('Respuesta del servidor:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error en la respuesta del servidor:', errorText);
+          throw new Error(`Error al cargar las imágenes: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json().catch(err => {
+          console.error('Error al analizar la respuesta JSON:', err);
+          throw new Error('La respuesta del servidor no es un JSON válido');
+        });
+        
+        console.log('Datos recibidos de Cloudinary:', data);
+        
+        if (!data.resources) {
+          console.error('La respuesta no contiene la propiedad "resources":', data);
+          throw new Error('Formato de respuesta inesperado del servidor');
+        }
+        
+        // Mapear los recursos al formato esperado
+        const artImages = data.resources.map(resource => {
+          if (!resource.secure_url || !resource.public_id) {
+            console.warn('Recurso sin URL o ID público:', resource);
+            return null;
+          }
+          return {
+            id: `art_${resource.asset_id || Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             name: resource.public_id.split('/').pop(),
             img: resource.secure_url,
             public_id: resource.public_id
-          }));
-          
+          };
+        }).filter(Boolean); // Filtrar elementos nulos
+        
+        console.log('Imágenes de arte procesadas:', artImages);
+        
+        if (artImages.length === 0) {
+          console.warn('No se encontraron imágenes en la carpeta imageart');
+          artList.innerHTML = '<p style="color: #ff9800; font-style: italic;">No se encontraron imágenes en la galería.</p>';
+        } else {
           displayArtImages(artImages);
-          return artImages;
-        } catch (error) {
-          console.error('Error loading art images:', error);
-          document.getElementById('artList').innerHTML = 
-            '<p style="color: #ff4444; font-style: italic;">Error loading art images: ' + 
-            (error.message || 'Unknown error') + '</p>';
-          return [];
         }
+        
+        return artImages;
+      } catch (error) {
+        console.error('Error cargando imágenes de arte:', error);
+        const errorMessage = error.message || 'Error desconocido al cargar las imágenes';
+        artList.innerHTML = `
+          <div style="color: #ff4444; padding: 10px; background: #ffeeee; border-radius: 4px; margin: 10px 0;">
+            <strong>Error:</strong> ${errorMessage}
+            <div style="font-size: 0.9em; margin-top: 5px; color: #666;">
+              Por favor, verifica la consola para más detalles.
+            </div>
+          </div>
+        `;
+        return [];
       }
     }
     
@@ -863,6 +915,89 @@
         alert('Error deleting art image: ' + (error.message || 'Unknown error'));
         // Recargar las imágenes si hubo un error
         await loadArtImages();
+      }
+    }
+    
+    // Subir nueva criatura
+    async function uploadCreature() {
+      if (isLocalMode) {
+        alert('La subida de criaturas no está disponible en modo local.\n\nPara subir criaturas, ejecuta el servidor Node.js con:\n\nnpm start');
+        return;
+      }
+      
+      const fileInput = document.getElementById('singleImageLoader');
+      const nameInput = document.getElementById('creatureName');
+      const worldSelect = document.getElementById('creatureWorld');
+
+      if (!fileInput.files[0]) {
+        alert('Por favor selecciona una imagen');
+        return;
+      }
+      
+      if (!nameInput.value.trim()) {
+        alert('Por favor ingresa un nombre para la criatura');
+        return;
+      }
+
+      let uploadBtn;
+      let originalText;
+      
+      try {
+        const file = fileInput.files[0];
+        const fileName = nameInput.value.trim().toLowerCase().replace(/\s+/g, '-');
+        
+        // Mostrar indicador de carga
+        uploadBtn = document.querySelector('button[onclick*="uploadCreature"]');
+        if (uploadBtn) {
+          originalText = uploadBtn.textContent;
+          uploadBtn.disabled = true;
+          uploadBtn.textContent = 'Subiendo...';
+        }
+        
+        // Subir a Cloudinary
+        const imageUrl = await uploadToCloudinary(file, 'image', 'creatures', fileName);
+        
+        // Crear el objeto de la criatura
+        const creature = {
+          id: `creature_${Date.now()}`,
+          name: nameInput.value.trim(),
+          world: worldSelect.value,
+          img: imageUrl.secure_url
+        };
+        
+        // Guardar en el servidor
+        const response = await fetch('http://localhost:3100/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(creature)
+        });
+        
+        if (!response.ok) {
+          throw new Error('Error al guardar la criatura en el servidor');
+        }
+        
+        // Limpiar el formulario
+        fileInput.value = '';
+        nameInput.value = '';
+        
+        // Recargar la lista de criaturas
+        await loadCreatures();
+        
+        // Mostrar mensaje de éxito
+        alert('¡Criatura creada exitosamente!');
+        
+      } catch (error) {
+        console.error('Error creando criatura:', error);
+        alert('Error al crear la criatura: ' + (error.message || 'Error desconocido'));
+      } finally {
+        // Restaurar el botón
+        if (uploadBtn) {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = originalText || 'Create';
+        }
       }
     }
     

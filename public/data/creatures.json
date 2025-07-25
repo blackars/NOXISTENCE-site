@@ -58,5 +58,17 @@
     "name": "Fumor",
     "world": "Planet X",
     "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417926/creatures/Fumor.png"
+  },
+  {
+    "id": "creature_1753421778687",
+    "name": "diablillo",
+    "world": "Planet X",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421778/creatures/diablillo.png"
+  },
+  {
+    "id": "creature_1753421931321",
+    "name": "cacteye",
+    "world": "Planet X",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421931/creatures/cacteye.png"
   }
 ]
