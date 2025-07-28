@@ -1396,34 +1396,22 @@
       allItems.forEach(el => {
         const imgEl = el.querySelector('img');
         const imgSrc = imgEl?.src || '';
-        // Convertir a ruta relativa si es necesario
-        let relativeImg = imgSrc;
-        if (imgSrc.startsWith(window.location.origin + '/')) {
-          relativeImg = imgSrc.replace(window.location.origin + '/', '');
-        } else if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://')) {
-          // Si por alguna razón tiene otro host, solo tomar la parte después del último /
-          const parts = imgSrc.split('/');
-          const lastTwo = parts.slice(-2).join('/');
-          if (imgSrc.includes('/imgart/')) {
-            relativeImg = 'imgart/' + lastTwo.split('imgart/')[1];
-          } else if (imgSrc.includes('/img/')) {
-            relativeImg = 'img/' + lastTwo.split('img/')[1];
-          }
-        }
-        if (relativeImg.startsWith('imgart/')) {
+        
+        // Usar la URL completa de la imagen sin convertirla a ruta relativa
+        if (imgSrc.includes('/imgart/')) {
           artimages.push({
-            img: relativeImg,
+            img: imgSrc, // Usar la URL completa
             left: el.style.left,
             top: el.style.top,
             scale: el.dataset.scale || '1',
             rotate: el.dataset.rotate || '0'
           });
-        } else if (relativeImg.startsWith('img/')) {
+        } else if (imgSrc) { // Cualquier otra imagen que no sea arte
           const titleElement = el.querySelector('.item-title');
           const computed = titleElement ? window.getComputedStyle(titleElement) : {};
           images.push({
             name: titleElement?.textContent || '',
-            img: relativeImg,
+            img: imgSrc, // Usar la URL completa
             left: el.style.left,
             top: el.style.top,
             scale: el.dataset.scale || '1',

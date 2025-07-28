@@ -2,33 +2,37 @@
   "images": [
     {
       "name": "cacteye",
-      "img": "http://localhost:3000/img/1751503556030.png",
-      "left": "16.6833px",
-      "top": "-14px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "AwalanBoxing",
-      "fontSize": "38px",
-      "color": "rgb(255, 255, 255)"
-    },
-    {
-      "name": "kk",
-      "img": "http://localhost:3000/img/1751503569461.png",
-      "left": "558.638px",
-      "top": "325px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "AwalanBoxing",
-      "fontSize": "38px",
-      "color": "rgb(255, 255, 255)"
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421931/creatures/cacteye.png",
+      "left": "812.847px",
+      "top": "245.842px",
+      "scale": "3.300000000000002",
+      "rotate": "15",
+      "fontFamily": "sans-serif",
+      "fontSize": "46px",
+      "color": "rgb(3, 2, 2)",
+      "flipped": false,
+      "showTitles": true
     }
   ],
-  "texts": [],
-  "backgroundColor": "#c44f5b",
+  "artimages": [],
+  "texts": [
+    {
+      "content": "CACTEYE",
+      "left": "522.778px",
+      "top": "231.398px",
+      "scale": "1.9000000000000004",
+      "rotate": "-30",
+      "fontFamily": "AwalanBoxing",
+      "fontSize": "46px",
+      "color": "rgb(23, 55, 217)"
+    }
+  ],
+  "backgroundColor": "#dd00ff",
   "fontSettings": {
     "family": "AwalanBoxing",
-    "size": "38",
-    "color": "#ffffff"
+    "size": "46",
+    "color": "#1737d9"
   },
-  "exportDate": "2025-07-03T00:46:49.162Z"
+  "exportDate": "2025-07-28T20:02:14.570Z",
+  "showTitles": false
 }

@@ -218,17 +218,15 @@ class EditTools {
     item.style.top = `${y}px`;
     item.dataset.scale = '1';
     item.dataset.rotate = '0';
-    // Asegurar ruta relativa correcta para imágenes de criaturas
-    let imgSrc = creature.img;
-    if (!imgSrc.startsWith('img/')) {
-      imgSrc = 'img/' + imgSrc.replace(/^.*[\\\/]/, '');
-    }
+    // Usar la URL de la imagen directamente de los datos de la criatura
+    // Asumimos que creature.img ya contiene la URL completa de Cloudinary
+    const imgSrc = creature.img;
     const fontSelector = document.getElementById('fontSelector');
     const fontSizeSlider = document.getElementById('fontSize');
     const fontColorPicker = document.getElementById('fontColor');
     item.innerHTML = `
       <div class="item-content">
-        <img src="${imgSrc}" alt="${creature.name}" />
+        <img src="${imgSrc}" alt="${creature.name}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
         <div class="item-title" style="font-family: ${fontSelector.value}; font-size: ${fontSizeSlider.value}px; color: ${fontColorPicker.value};">${creature.name}</div>
       </div>`;
     this.makeInteractive(item);
@@ -244,14 +242,12 @@ class EditTools {
     item.style.top = `${y}px`;
     item.dataset.scale = '1';
     item.dataset.rotate = '0';
-    // Asegurar ruta relativa correcta para imágenes de arte
-    let imgSrc = art.img;
-    if (!imgSrc.startsWith('imgart/')) {
-      imgSrc = 'imgart/' + imgSrc.replace(/^.*[\\\/]/, '');
-    }
+    // Usar la URL de la imagen directamente de los datos del arte
+    // Asumimos que art.img ya contiene la URL completa de Cloudinary
+    const imgSrc = art.img;
     item.innerHTML = `
       <div class="item-content">
-        <img src="${imgSrc}" alt="art" />
+        <img src="${imgSrc}" alt="art" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
       </div>`;
     this.makeInteractive(item);
     this.gridElement.appendChild(item);
