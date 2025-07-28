@@ -14,7 +14,7 @@ async function generateThumbnailForFile(file) {
   const url = VIEWER_URL_BASE + encodeURIComponent(file);
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
   await page.waitForSelector('#grid', { visible: true, timeout: 60000 });
-  await new Promise(r => setTimeout(r, 800));
+  await new Promise(r => setTimeout(r, 1000));
   // Screenshot de toda la página
   const thumbPath = path.join(THUMBNAILS_DIR, file.replace(/\.json$/, '.png'));
   await page.screenshot({ path: thumbPath, fullPage: true });
