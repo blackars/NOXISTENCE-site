@@ -21,6 +21,12 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .grid {
@@ -47,7 +53,7 @@
       outline: none;
       box-shadow: none;
       width: 100%;
-      transition: transform 0.2s ease, filter 0.2s ease;
+      transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
       border-radius: 0px;
       padding: 8px;
     }
@@ -56,9 +62,10 @@
       scale: 1.25;
     }
     .creature-btn:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       filter: brightness(1.05);
       background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .creature-btn:active {
       transform: translateY(0);
@@ -67,6 +74,12 @@
     .creature-btn:focus-visible {
       outline: 2px solid #007bff;
       outline-offset: 2px;
+    }
+    .creature-btn img {
+      transition: transform 0.3s ease;
+    }
+    .creature-btn:hover img {
+      transform: scale(1.05);
     }
     .creature-img {
       width: 100%;
