@@ -6,7 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <style>
+            /* Simple fade-in for page load */
+            @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
     body {
+      animation: fadeIn 0.1s ease-out;
       margin: 0;
       background: #f0f0f0;
       font-family: sans-serif;
