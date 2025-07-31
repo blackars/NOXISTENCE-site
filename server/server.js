@@ -12,6 +12,12 @@ const cors = require('cors');
 const app = express();
 const port = 3100;
 
+// Importar rutas de lore
+const loreRouter = require('./routes/lore');
+
+// Montar rutas de la API
+app.use('/api/lore', loreRouter);
+
 // Configuración CORS para desarrollo
 const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 
@@ -48,9 +54,12 @@ app.use(express.static(path.join(__dirname, '../public'), {
   }
 }));
 
-// Middleware para parsear JSON
+// Middleware para parsear JSON y datos de formulario
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Middleware para parsear multipart/form-data (usando multer)
+// Esto se manejará en las rutas específicas que lo necesiten
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
 const cloudinary = require('cloudinary').v2;
@@ -130,6 +139,32 @@ const uploadArt = multer({
       cb(null, true);
     } else {
       cb(new Error('Solo se permiten imágenes (PNG, SVG, JPG, etc.)'), false);
+    }
+  }
+});
+
+// Configurar multer para subir imágenes de lore
+const loreStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'public/uploads/lore';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadLore = multer({ 
+  storage: loreStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten imágenes'));
     }
   }
 });
@@ -600,10 +635,27 @@ app.post('/cloudinary-signature', (req, res) => {
 
 app.use('/', fontsRoutes);
 
+// Usar rutas de lore
+app.use('/api/lore', uploadLore.single('thumbnail'), loreRouter);
+
 generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
 
+// Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+  console.log(`Servidor ejecutándose en http://localhost:${port}`);
+  
+  // Crear directorio para lore si no existe
+  const loreDir = path.join(__dirname, '../public/data');
+  if (!fs.existsSync(loreDir)) {
+    fs.mkdirSync(loreDir, { recursive: true });
+  }
+  
+  // Crear archivo lore.json si no existe
+  const loreFile = path.join(loreDir, 'lore.json');
+  if (!fs.existsSync(loreFile)) {
+    fs.writeFileSync(loreFile, JSON.stringify({ articles: [] }, null, 2));
+  }
+  
   console.log('Editor disponible en: http://localhost:3000/editor.html');
   console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
-}); 
+});
