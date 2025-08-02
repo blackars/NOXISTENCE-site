@@ -12,30 +12,30 @@ const cors = require('cors');
 const app = express();
 const port = 3100;
 
-// Importar rutas de lore
-const loreRouter = require('./routes/lore');
-
-// Montar rutas de la API
-app.use('/api/lore', loreRouter);
-
 // Configuración CORS para desarrollo
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3100'];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir solicitudes sin origen (como aplicaciones móviles o curl)
-    if (!origin) return callback(null, true);
+    // En desarrollo, permitir todos los orígenes
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
     
-    if (allowedOrigins.indexOf(origin) === -1) {
+    // En producción, verificar contra la lista blanca
+    if (origin && allowedOrigins.indexOf(origin) === -1) {
       const msg = 'El origen de la petición no está permitido por CORS';
+      console.warn(`Origen no permitido: ${origin}`);
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Disposition'],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 };
 
 // Aplicar CORS a todas las rutas
@@ -43,6 +43,12 @@ app.use(cors(corsOptions));
 
 // Manejar preflight para todas las rutas
 app.options('*', cors(corsOptions));
+
+// Importar rutas de lore DESPUÉS de configurar CORS
+const loreRouter = require('./routes/lore');
+
+// Montar rutas de la API
+app.use('/api/lore', loreRouter);
 
 // Servir archivos estáticos desde la carpeta public
 app.use(express.static(path.join(__dirname, '../public'), {
@@ -55,7 +61,7 @@ app.use(express.static(path.join(__dirname, '../public'), {
 }));
 
 // Middleware para parsear JSON y datos de formulario
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Middleware para parsear multipart/form-data (usando multer)
@@ -658,4 +664,21 @@ app.listen(port, () => {
   
   console.log('Editor disponible en: http://localhost:3000/editor.html');
   console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
+});
+
+// Endpoint para borrar imágenes de lore en Cloudinary
+app.delete('/delete-lore-image', async (req, res) => {
+  const public_id = req.query.public_id;
+  if (!public_id) {
+    return res.status(400).json({ error: 'Falta el parámetro public_id' });
+  }
+  try {
+    const result = await cloudinary.uploader.destroy(public_id, { resource_type: 'image' });
+    if (result.result !== 'ok' && result.result !== 'not found') {
+      return res.status(500).json({ error: 'No se pudo eliminar la imagen en Cloudinary', details: result });
+    }
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar la imagen en Cloudinary', details: error.message });
+  }
 });
