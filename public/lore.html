@@ -135,14 +135,18 @@
     // Load articles
     async function loadArticles() {
       try {
-        const response = await fetch('/api/lore');
-        const data = await response.json();
-        displayArticles(data.articles);
-        setupSearch(data.articles);
+        // Cargar artículos desde el archivo JSON local
+        const response = await fetch('/data/lore-articles.json');
+        if (!response.ok) {
+          throw new Error('No se pudieron cargar los artículos');
+        }
+        const articles = await response.json();
+        displayArticles(articles);
+        setupSearch(articles);
       } catch (error) {
         console.error('Error loading articles:', error);
         document.getElementById('articlesGrid').innerHTML = 
-          '<p>Error al cargar los artículos. Por favor, inténtalo de nuevo más tarde.</p>';
+          '<p>No se encontraron artículos. Usa el editor para crear contenido.</p>';
       }
     }
 

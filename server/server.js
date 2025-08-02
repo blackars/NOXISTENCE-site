@@ -44,12 +44,6 @@ app.use(cors(corsOptions));
 // Manejar preflight para todas las rutas
 app.options('*', cors(corsOptions));
 
-// Importar rutas de lore DESPUÉS de configurar CORS
-const loreRouter = require('./routes/lore');
-
-// Montar rutas de la API
-app.use('/api/lore', loreRouter);
-
 // Servir archivos estáticos desde la carpeta public
 app.use(express.static(path.join(__dirname, '../public'), {
   setHeaders: (res, path) => {
@@ -149,31 +143,6 @@ const uploadArt = multer({
   }
 });
 
-// Configurar multer para subir imágenes de lore
-const loreStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = 'public/uploads/lore';
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const uploadLore = multer({ 
-  storage: loreStorage,
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Solo se permiten imágenes'));
-    }
-  }
-});
 
 // Proteger el acceso a /editor.html antes de servir archivos estáticos
 app.get('/editor.html', basicAuth({
@@ -641,26 +610,11 @@ app.post('/cloudinary-signature', (req, res) => {
 
 app.use('/', fontsRoutes);
 
-// Usar rutas de lore
-app.use('/api/lore', uploadLore.single('thumbnail'), loreRouter);
 
 generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
-
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor ejecutándose en http://localhost:${port}`);
-  
-  // Crear directorio para lore si no existe
-  const loreDir = path.join(__dirname, '../public/data');
-  if (!fs.existsSync(loreDir)) {
-    fs.mkdirSync(loreDir, { recursive: true });
-  }
-  
-  // Crear archivo lore.json si no existe
-  const loreFile = path.join(loreDir, 'lore.json');
-  if (!fs.existsSync(loreFile)) {
-    fs.writeFileSync(loreFile, JSON.stringify({ articles: [] }, null, 2));
-  }
   
   console.log('Editor disponible en: http://localhost:3000/editor.html');
   console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
