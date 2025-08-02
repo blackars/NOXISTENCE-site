@@ -13,23 +13,29 @@ const app = express();
 const port = 3100;
 
 // Configuración CORS para desarrollo
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3100'];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Permitir solicitudes sin origen (como aplicaciones móviles o curl)
-    if (!origin) return callback(null, true);
+    // En desarrollo, permitir todos los orígenes
+    if (process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
     
-    if (allowedOrigins.indexOf(origin) === -1) {
+    // En producción, verificar contra la lista blanca
+    if (origin && allowedOrigins.indexOf(origin) === -1) {
       const msg = 'El origen de la petición no está permitido por CORS';
+      console.warn(`Origen no permitido: ${origin}`);
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Disposition'],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 };
 
 // Aplicar CORS a todas las rutas
@@ -37,6 +43,12 @@ app.use(cors(corsOptions));
 
 // Manejar preflight para todas las rutas
 app.options('*', cors(corsOptions));
+
+// Importar rutas de lore DESPUÉS de configurar CORS
+const loreRouter = require('./routes/lore');
+
+// Montar rutas de la API
+app.use('/api/lore', loreRouter);
 
 // Servir archivos estáticos desde la carpeta public
 app.use(express.static(path.join(__dirname, '../public'), {
@@ -48,9 +60,12 @@ app.use(express.static(path.join(__dirname, '../public'), {
   }
 }));
 
-// Middleware para parsear JSON
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Middleware para parsear JSON y datos de formulario
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Middleware para parsear multipart/form-data (usando multer)
+// Esto se manejará en las rutas específicas que lo necesiten
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
 const cloudinary = require('cloudinary').v2;
@@ -130,6 +145,32 @@ const uploadArt = multer({
       cb(null, true);
     } else {
       cb(new Error('Solo se permiten imágenes (PNG, SVG, JPG, etc.)'), false);
+    }
+  }
+});
+
+// Configurar multer para subir imágenes de lore
+const loreStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'public/uploads/lore';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadLore = multer({ 
+  storage: loreStorage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Solo se permiten imágenes'));
     }
   }
 });
@@ -600,10 +641,44 @@ app.post('/cloudinary-signature', (req, res) => {
 
 app.use('/', fontsRoutes);
 
+// Usar rutas de lore
+app.use('/api/lore', uploadLore.single('thumbnail'), loreRouter);
+
 generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
 
+// Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+  console.log(`Servidor ejecutándose en http://localhost:${port}`);
+  
+  // Crear directorio para lore si no existe
+  const loreDir = path.join(__dirname, '../public/data');
+  if (!fs.existsSync(loreDir)) {
+    fs.mkdirSync(loreDir, { recursive: true });
+  }
+  
+  // Crear archivo lore.json si no existe
+  const loreFile = path.join(loreDir, 'lore.json');
+  if (!fs.existsSync(loreFile)) {
+    fs.writeFileSync(loreFile, JSON.stringify({ articles: [] }, null, 2));
+  }
+  
   console.log('Editor disponible en: http://localhost:3000/editor.html');
   console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
-}); 
+});
+
+// Endpoint para borrar imágenes de lore en Cloudinary
+app.delete('/delete-lore-image', async (req, res) => {
+  const public_id = req.query.public_id;
+  if (!public_id) {
+    return res.status(400).json({ error: 'Falta el parámetro public_id' });
+  }
+  try {
+    const result = await cloudinary.uploader.destroy(public_id, { resource_type: 'image' });
+    if (result.result !== 'ok' && result.result !== 'not found') {
+      return res.status(500).json({ error: 'No se pudo eliminar la imagen en Cloudinary', details: result });
+    }
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar la imagen en Cloudinary', details: error.message });
+  }
+});

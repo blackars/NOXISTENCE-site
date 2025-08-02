@@ -455,9 +455,13 @@
         <input type="file" id="singleImageLoader" accept="image/png, image/jpeg, image/webp" />
         <input type="text" id="creatureName" placeholder="Creature Name" />
         <select id="creatureWorld">
-          <option value="Planet X">Planet X</option>
-          <option value="Universe X">Universe X</option>
-          <option value="Uknown">Uknown</option>
+          <option value="Maxkodia">Maxkodia</option>
+          <option value="AnothEarth">AnothEarth</option>
+          <option value="Planet E">Planet E</option>
+          <option value="NOXISTENCE">NOXISTENCE</option>
+          <option value="LUXISTENCE">LUXISTENCE</option>
+          <option value="LUXANOX">LUXANOX</option>
+          <option value="Unknown">Unknown</option>
         </select>
         <button onclick="uploadCreature()">Create</button>
       </div>
@@ -548,6 +552,18 @@
         <div class="creatures-list">
           <h3>Art Images</h3>
           <div id="artList"></div>
+        </div>
+      </div>
+      <!-- Sección de imágenes de lore -->
+      <div class="lore-section" style="margin-top: 20px;">
+        <div class="upload-form">
+          <h3>Subir Imagen de Lore</h3>
+          <input type="file" id="loreImageLoader" accept="image/png, image/jpeg, image/svg+xml, image/gif, image/webp" />
+          <button onclick="uploadLoreImage()">Subir Lore</button>
+        </div>
+        <div class="creatures-list">
+          <h3>Imágenes de Lore</h3>
+          <div id="loreList"></div>
         </div>
       </div>
     </div>
@@ -1513,6 +1529,7 @@
       
       await loadCreatures();
       await loadArtImages();
+      await loadLoreImages(); // Cargar imágenes de lore
       await loadCustomFonts();
       
       // Configurar controles
@@ -1858,6 +1875,154 @@
       }
       e.target.value = '';
     });
+
+    // --- LÓGICA DE LORE: igual que ART pero para imágenes ---
+    async function loadLoreImages() {
+      const loreList = document.getElementById('loreList');
+      if (isLocalMode) {
+        loreList.innerHTML = '<p style="color: #666; font-style: italic;">Imágenes de lore no disponibles en modo local.</p>';
+        return [];
+      }
+      try {
+        const apiUrl = 'http://localhost:3100/cloudinary-resources?folder=lore';
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          mode: 'cors',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error al cargar las imágenes: ${response.status} ${response.statusText}\n${errorText}`);
+        }
+        const data = await response.json();
+        if (!data.resources) {
+          loreList.innerHTML = '<p style="color: #ff9800; font-style: italic;">No se encontraron imágenes de lore.</p>';
+          return [];
+        }
+        const loreImages = data.resources.map(resource => ({
+          id: `lore_${resource.asset_id || Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: resource.public_id.split('/').pop(),
+          img: resource.secure_url,
+          public_id: resource.public_id
+        }));
+        displayLoreImages(loreImages);
+        return loreImages;
+      } catch (error) {
+        loreList.innerHTML = `<div style=\"color: #ff4444; padding: 10px; background: #ffeeee; border-radius: 4px; margin: 10px 0;\"><strong>Error:</strong> ${error.message}</div>`;
+        return [];
+      }
+    }
+    function displayLoreImages(loreImages) {
+      const list = document.getElementById('loreList');
+      list.innerHTML = '';
+      if (loreImages.length === 0) {
+        list.innerHTML = '<p style="color: #666; font-style: italic;">No hay imágenes de lore.</p>';
+        return;
+      }
+      loreImages.forEach(lore => {
+        const item = document.createElement('div');
+        item.className = 'art-item';
+        item.draggable = true;
+        item.dataset.lore = JSON.stringify(lore);
+        item.innerHTML = `
+          <img src="${lore.img}" alt="${lore.name}" />
+          <button class="delete-btn" onclick="deleteLoreImage('${lore.public_id}')">×</button>
+        `;
+        item.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', JSON.stringify({ ...lore, type: 'lore' }));
+          e.dataTransfer.effectAllowed = 'copy';
+        });
+        list.appendChild(item);
+      });
+    }
+    async function uploadLoreImage() {
+      if (isLocalMode) {
+        alert('La subida de imágenes de lore no está disponible en modo local.');
+        return;
+      }
+      const fileInput = document.getElementById('loreImageLoader');
+      if (!fileInput.files[0]) {
+        alert('Selecciona una imagen');
+        return;
+      }
+      let uploadBtn = document.querySelector('button[onclick*="uploadLoreImage"]');
+      let originalText;
+      try {
+        const file = fileInput.files[0];
+        const fileName = file.name.replace(/\.[^/.]+$/, '');
+        if (uploadBtn) {
+          originalText = uploadBtn.textContent;
+          uploadBtn.disabled = true;
+          uploadBtn.textContent = 'Subiendo...';
+        }
+        const imageUrl = await uploadToCloudinary(file, 'image', 'lore', fileName);
+        const lore = {
+          name: fileName,
+          img: imageUrl.secure_url,
+          id: `lore_${Date.now()}`,
+          public_id: imageUrl.public_id
+        };
+        addLoreThumbnail(lore);
+        fileInput.value = '';
+        alert('¡Imagen de lore subida exitosamente a Cloudinary!');
+      } catch (error) {
+        alert('Error al subir la imagen de lore: ' + (error.message || 'Error desconocido'));
+      } finally {
+        if (uploadBtn) {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = originalText || 'Subir Lore';
+        }
+      }
+    }
+    function addLoreThumbnail(lore) {
+      const loreList = document.getElementById('loreList');
+      if (!loreList) return;
+      if (document.querySelector(`.art-item[data-lore-id="${lore.id}"]`)) return;
+      const item = document.createElement('div');
+      item.className = 'art-item';
+      item.draggable = true;
+      item.dataset.loreId = lore.id;
+      item.dataset.lore = JSON.stringify(lore);
+      item.innerHTML = `
+        <img src="${lore.img}" alt="${lore.name}" loading="lazy" />
+        <div class="art-item-overlay">
+          <button class="delete-btn" onclick="deleteLoreImage('${lore.public_id}')">×</button>
+        </div>
+      `;
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({ ...lore, type: 'lore', img: lore.img, id: lore.id }));
+        e.dataTransfer.effectAllowed = 'copy';
+      });
+      if (loreList.firstChild) {
+        loreList.insertBefore(item, loreList.firstChild);
+      } else {
+        loreList.appendChild(item);
+      }
+      const emptyMessage = loreList.querySelector('p');
+      if (emptyMessage) emptyMessage.remove();
+    }
+    async function deleteLoreImage(public_id) {
+      if (isLocalMode) {
+        alert('Eliminar imágenes de lore no está disponible en modo local.');
+        return;
+      }
+      if (!confirm('¿Seguro que quieres eliminar esta imagen de lore?')) return;
+      try {
+        // Petición real al backend para borrar la imagen de Cloudinary
+        const response = await fetch(`http://localhost:3100/delete-lore-image?public_id=${encodeURIComponent(public_id)}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('No se pudo eliminar la imagen en el servidor');
+        // Eliminar de la interfaz
+        const loreItem = document.querySelector(`.art-item button[onclick*="${public_id}"]`).parentElement.parentElement;
+        if (loreItem) loreItem.remove();
+        const loreList = document.getElementById('loreList');
+        if (loreList && loreList.children.length === 0) {
+          loreList.innerHTML = '<p style="color: #666; font-style: italic;">No hay imágenes de lore.</p>';
+        }
+      } catch (error) {
+        alert('Error al eliminar la imagen de lore: ' + (error.message || 'Error desconocido'));
+      }
+    }
 
     // --- Sidebar flotante y plegable ---
     const toggleSidebarBtn = document.getElementById('toggleSidebarBtn');

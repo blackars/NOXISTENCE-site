@@ -7,7 +7,11 @@
   <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.4/dist/lenis.css">
   <style>
-
+        /* Simple fade-in for page load */
+        @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
         @font-face {
       font-family: 'Gobold';
       src: url('fonts/Gobold.otf');
@@ -15,6 +19,7 @@
     }
 
     body {
+      animation: fadeIn 0.1s ease-out;
       margin: 0;
       background: #ffffff;
       font-family: 'Gobold';
