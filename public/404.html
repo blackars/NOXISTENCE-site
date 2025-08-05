@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Página no encontrada</title>
+    <style>
+        @font-face {
+    font-family: 'Gobold';
+    src: url('fonts/Gobold.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            font-family: 'Gobold';
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .error-container {
+            max-width: 600px;
+            padding: 20px;
+        }
+        .logo {
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+        h1 {
+            font-size: 3rem;
+            color: #000000;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2rem;
+            color: #171616;
+            margin-bottom: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 6px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+        .btn:hover {
+            scale: 1.2;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <a href="/index.html" class="btn">
+            <img src="/icons/triforma.webp" alt="NOXISTENCE Logo" class="logo">
+        </a>
+        <h1>404</h1>
+        <p>You've reached an edge of absolute absence. This fragment of NOXISTENCE has never existed—or has vanished beyond recall</p>
+    </div>
+</body>
+</html>

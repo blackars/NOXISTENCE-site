@@ -608,18 +608,6 @@ app.post('/cloudinary-signature', (req, res) => {
   }
 });
 
-app.use('/', fontsRoutes);
-
-
-generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
-// Iniciar el servidor
-app.listen(port, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${port}`);
-  
-  console.log('Editor disponible en: http://localhost:3000/editor.html');
-  console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
-});
-
 // Endpoint para borrar imágenes de lore en Cloudinary
 app.delete('/delete-lore-image', async (req, res) => {
   const public_id = req.query.public_id;
@@ -635,4 +623,22 @@ app.delete('/delete-lore-image', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Error al eliminar la imagen en Cloudinary', details: error.message });
   }
+});
+
+// Manejador para rutas no encontradas (404)
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, '../public/404.html'));
+});
+
+// Manejador de errores global
+app.use((err, req, res, next) => {
+  console.error('Error:', err.stack);
+  res.status(500).send('¡Algo salió mal!');
+});
+
+// Iniciar el servidor
+app.listen(port, () => {
+  console.log(`Servidor ejecutándose en http://localhost:${port}`);
+  console.log('Editor disponible en: http://localhost:3000/editor.html');
+  console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
 });
