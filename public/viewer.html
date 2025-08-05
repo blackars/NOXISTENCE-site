@@ -197,17 +197,34 @@
       return params.get('creature');
     }
 
-    function loadJSON(file, callback) {
-      fetch(file)
-        .then(res => {
-          if (!res.ok) throw new Error("Archivo no encontrado");
-          return res.json();
-        })
-        .then(callback)
-        .catch(err => {
-          console.log('ERROR EN FETCH O CALLBACK', err);
-          document.body.innerHTML = `<p style="padding:20px;font-size:1.2rem;color:red;">Error: ${err.message}</p>`;
-        });
+    function loadJSON(file, successCallback, errorCallback) {
+      const xhr = new XMLHttpRequest();
+      xhr.overrideMimeType('application/json');
+      xhr.open('GET', file, true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              if (successCallback) successCallback(data);
+            } catch (e) {
+              console.error('Error al parsear JSON:', e);
+              if (errorCallback) errorCallback(e);
+              else redirectTo404();
+            }
+          } else {
+            console.error('Error al cargar el archivo:', xhr.status, xhr.statusText);
+            if (errorCallback) errorCallback(new Error(`Error ${xhr.status}: ${xhr.statusText}`));
+            else redirectTo404();
+          }
+        }
+      };
+      xhr.onerror = function() {
+        console.error('Error de red al cargar:', file);
+        if (errorCallback) errorCallback(new Error('Error de red'));
+        else redirectTo404();
+      };
+      xhr.send(null);
     }
 
     function renderLayout(data) {
@@ -415,28 +432,52 @@
 
     const fileName = getFileNameFromURL();
     const creatureName = getCreatureNameFromURL();
-    if (creatureName) {
-      // Mostrar criatura individual desde data/creatures.json
-      loadCustomFonts().then(() => {
-        loadJSON('data/creatures.json', function(allCreatures) {
-          const creature = allCreatures.find(c => c.name === creatureName);
-          if (creature) {
-            renderCreature(creature);
+    
+    // Cargar fuentes primero
+    loadCustomFonts().then(() => {
+      if (creatureName) {
+        // Mostrar criatura individual desde data/creatures.json
+        loadJSON('data/creatures.json', function(data) {
+          if (data && Array.isArray(data)) {
+            const creature = data.find(c => c.name === creatureName);
+            if (creature) {
+              renderCreature(creature);
+            } else {
+              showError('Criatura no encontrada');
+            }
           } else {
-            document.body.innerHTML = `<p style="padding:20px;font-size:1.2rem;color:red;">No se encontró la criatura "${creatureName}" en el catálogo.</p>`;
+            showError('Error al cargar los datos de las criaturas');
           }
+        }, function(error) {
+          console.error('Error al cargar criaturas:', error);
+          redirectTo404();
         });
-      });
-    } else if (fileName) {
-      // Cargar fuentes primero, luego renderizar
-      loadCustomFonts().then(() => {
-        loadJSON(`hojas/${fileName}`, renderLayout);
-      }).catch(() => {
-        // Si falla la carga de fuentes, renderizar de todas formas
-        loadJSON(`hojas/${fileName}`, renderLayout);
-      });
-    } else {
-      document.body.innerHTML = `<p style="padding:20px;font-size:1.2rem;">No se especificó ningún archivo para visualizar.</p>`;
+      } else if (fileName) {
+        // Cargar el diseño guardado
+        loadJSON(`hojas/${fileName}`, function(data) {
+          if (data) {
+            renderLayout(data);
+          } else {
+            showError('El archivo está vacío o es inválido');
+          }
+        }, function(error) {
+          console.error('Error al cargar el archivo:', error);
+          redirectTo404();
+        });
+      } else {
+        showError('No se especificó archivo ni criatura');
+      }
+    });
+
+    // Función para redirigir a la página 404 personalizada
+    function redirectTo404() {
+      window.location.href = '/404.html?from=' + encodeURIComponent(window.location.pathname + window.location.search);
+    }
+
+    // Función para mostrar error
+    function showError(message) {
+      console.error(message);
+      redirectTo404();
     }
 
     function renderCreature(creature) {

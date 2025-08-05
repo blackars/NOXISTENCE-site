@@ -44,15 +44,30 @@ app.use(cors(corsOptions));
 // Manejar preflight para todas las rutas
 app.options('*', cors(corsOptions));
 
-// Servir archivos estáticos desde la carpeta public
-app.use(express.static(path.join(__dirname, '../public'), {
+// Configuración de archivos estáticos
+const staticOptions = {
   setHeaders: (res, path) => {
     // Configurar headers para archivos específicos si es necesario
     if (path.endsWith('.js')) {
       res.set('Content-Type', 'application/javascript');
     }
   }
+};
+
+// Servir archivos estáticos desde la carpeta public
+app.use(express.static(path.join(__dirname, '../public'), {
+  ...staticOptions,
+  fallthrough: false // Evitar que pase al siguiente middleware si el archivo no existe
 }));
+
+// Manejar rutas específicas antes del manejador de archivos estáticos
+app.get('/editor.html', basicAuth({
+  users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },
+  challenge: true,
+  realm: 'Admin Area'
+}), (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/editor.html'));
+});
 
 // Middleware para parsear JSON y datos de formulario
 app.use(express.json({ limit: '50mb' }));
@@ -142,20 +157,6 @@ const uploadArt = multer({
     }
   }
 });
-
-
-// Proteger el acceso a /editor.html antes de servir archivos estáticos
-app.get('/editor.html', basicAuth({
-  users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },
-  challenge: true,
-  realm: 'Editor Area'
-}), (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/editor.html'));
-});
-
-// Servir archivos estáticos
-app.use(express.static('public'));
-app.use(express.json());
 
 // Proteger el acceso a rutas sensibles (pero ya no /editor.html)
 app.use(['public/fonts', 'public/hojas', 'public/imageart'], basicAuth({
@@ -626,8 +627,14 @@ app.delete('/delete-lore-image', async (req, res) => {
 });
 
 // Manejador para rutas no encontradas (404)
-app.use((req, res) => {
-  res.status(404).sendFile(path.join(__dirname, '../public/404.html'));
+app.use((req, res, next) => {
+  console.log(`Ruta no encontrada: ${req.originalUrl}`);
+  res.status(404).sendFile(path.join(__dirname, '../public/404.html'), (err) => {
+    if (err) {
+      console.error('Error al enviar 404:', err);
+      res.status(404).send('Página no encontrada');
+    }
+  });
 });
 
 // Manejador de errores global
