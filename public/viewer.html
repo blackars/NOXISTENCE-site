@@ -30,6 +30,7 @@
       min-height: 100%;
       background: white;
       overflow: hidden;
+      touch-action: none; /* Importante para permitir drag táctil personalizado */
       /* Oculta el scrollbar pero permite el scroll */
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none;  /* IE y Edge */
@@ -532,6 +533,67 @@
       // Puedes agregar más campos aquí si tu JSON tiene más información
       grid.appendChild(container);
     }
+
+    // --- NUEVO: Drag táctil para mover el grid en móviles ---
+    (function enableTouchPan() {
+      const grid = document.getElementById('grid');
+      let isTouching = false;
+      let lastX = 0, lastY = 0;
+      let startScrollLeft = 0, startScrollTop = 0;
+
+      // Para desktop: permitir arrastrar con el mouse si se mantiene presionado el botón central o shift
+      let isMouseDragging = false;
+
+      // Touch events
+      grid.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 1) {
+          isTouching = true;
+          lastX = e.touches[0].clientX;
+          lastY = e.touches[0].clientY;
+          startScrollLeft = grid.scrollLeft;
+          startScrollTop = grid.scrollTop;
+        }
+      }, { passive: false });
+
+      grid.addEventListener('touchmove', function(e) {
+        if (!isTouching) return;
+        e.preventDefault();
+        const dx = e.touches[0].clientX - lastX;
+        const dy = e.touches[0].clientY - lastY;
+        grid.scrollLeft = startScrollLeft - dx;
+        grid.scrollTop = startScrollTop - dy;
+      }, { passive: false });
+
+      grid.addEventListener('touchend', function(e) {
+        isTouching = false;
+      });
+
+      // Mouse drag (opcional: solo si se mantiene shift o botón central)
+      grid.addEventListener('mousedown', function(e) {
+        if (e.button === 1 || e.shiftKey) {
+          isMouseDragging = true;
+          lastX = e.clientX;
+          lastY = e.clientY;
+          startScrollLeft = grid.scrollLeft;
+          startScrollTop = grid.scrollTop;
+          document.body.style.cursor = 'grabbing';
+          e.preventDefault();
+        }
+      });
+      window.addEventListener('mousemove', function(e) {
+        if (!isMouseDragging) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        grid.scrollLeft = startScrollLeft - dx;
+        grid.scrollTop = startScrollTop - dy;
+      });
+      window.addEventListener('mouseup', function(e) {
+        if (isMouseDragging) {
+          isMouseDragging = false;
+          document.body.style.cursor = '';
+        }
+      });
+    })();
   </script>
 </body>
 </html>

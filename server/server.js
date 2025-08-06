@@ -13,29 +13,23 @@ const app = express();
 const port = 3100;
 
 // Configuración CORS para desarrollo
-const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000', 'http://localhost:3100'];
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // En desarrollo, permitir todos los orígenes
-    if (process.env.NODE_ENV !== 'production') {
-      return callback(null, true);
-    }
+    // Permitir solicitudes sin origen (como aplicaciones móviles o curl)
+    if (!origin) return callback(null, true);
     
-    // En producción, verificar contra la lista blanca
-    if (origin && allowedOrigins.indexOf(origin) === -1) {
+    if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'El origen de la petición no está permitido por CORS';
-      console.warn(`Origen no permitido: ${origin}`);
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['Content-Disposition'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
-  optionsSuccessStatus: 200,
-  preflightContinue: false
+  optionsSuccessStatus: 200
 };
 
 // Aplicar CORS a todas las rutas
@@ -44,37 +38,19 @@ app.use(cors(corsOptions));
 // Manejar preflight para todas las rutas
 app.options('*', cors(corsOptions));
 
-// Configuración de archivos estáticos
-const staticOptions = {
+// Servir archivos estáticos desde la carpeta public
+app.use(express.static(path.join(__dirname, '../public'), {
   setHeaders: (res, path) => {
     // Configurar headers para archivos específicos si es necesario
     if (path.endsWith('.js')) {
       res.set('Content-Type', 'application/javascript');
     }
   }
-};
-
-// Servir archivos estáticos desde la carpeta public
-app.use(express.static(path.join(__dirname, '../public'), {
-  ...staticOptions,
-  fallthrough: false // Evitar que pase al siguiente middleware si el archivo no existe
 }));
 
-// Manejar rutas específicas antes del manejador de archivos estáticos
-app.get('/editor.html', basicAuth({
-  users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },
-  challenge: true,
-  realm: 'Admin Area'
-}), (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/editor.html'));
-});
-
-// Middleware para parsear JSON y datos de formulario
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// Middleware para parsear multipart/form-data (usando multer)
-// Esto se manejará en las rutas específicas que lo necesiten
+// Middleware para parsear JSON
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const fontsRoutes = require('../src/fonts');
 const { generateAllThumbnails } = require('../src/generate-thumbnails');
 const cloudinary = require('cloudinary').v2;
@@ -157,6 +133,19 @@ const uploadArt = multer({
     }
   }
 });
+
+// Proteger el acceso a /editor.html antes de servir archivos estáticos
+app.get('/editor.html', basicAuth({
+  users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },
+  challenge: true,
+  realm: 'Editor Area'
+}), (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/editor.html'));
+});
+
+// Servir archivos estáticos
+app.use(express.static('public'));
+app.use(express.json());
 
 // Proteger el acceso a rutas sensibles (pero ya no /editor.html)
 app.use(['public/fonts', 'public/hojas', 'public/imageart'], basicAuth({
@@ -424,6 +413,19 @@ app.get('/hojas-list', (req, res) => {
   }
 });
 
+// Endpoint para listar archivos .json en /hojas/lore (solo archivos en esa carpeta, NO recursivo)
+app.get('/hojas-list-lore', (req, res) => {
+  const loreDir = path.join(__dirname, '../public/hojas/lore');
+  try {
+    if (!fs.existsSync(loreDir)) return res.json([]);
+    const files = fs.readdirSync(loreDir)
+      .filter(f => f.endsWith('.json'));
+    res.json(files);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al leer la carpeta de lore' });
+  }
+});
+
 // Endpoint protegido para generar miniaturas de todas las colecciones
 app.post('/admin/generate-thumbnails', basicAuth({
   users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },
@@ -609,43 +611,12 @@ app.post('/cloudinary-signature', (req, res) => {
   }
 });
 
-// Endpoint para borrar imágenes de lore en Cloudinary
-app.delete('/delete-lore-image', async (req, res) => {
-  const public_id = req.query.public_id;
-  if (!public_id) {
-    return res.status(400).json({ error: 'Falta el parámetro public_id' });
-  }
-  try {
-    const result = await cloudinary.uploader.destroy(public_id, { resource_type: 'image' });
-    if (result.result !== 'ok' && result.result !== 'not found') {
-      return res.status(500).json({ error: 'No se pudo eliminar la imagen en Cloudinary', details: result });
-    }
-    res.json({ success: true, result });
-  } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar la imagen en Cloudinary', details: error.message });
-  }
-});
+app.use('/', fontsRoutes);
 
-// Manejador para rutas no encontradas (404)
-app.use((req, res, next) => {
-  console.log(`Ruta no encontrada: ${req.originalUrl}`);
-  res.status(404).sendFile(path.join(__dirname, '../public/404.html'), (err) => {
-    if (err) {
-      console.error('Error al enviar 404:', err);
-      res.status(404).send('Página no encontrada');
-    }
-  });
-});
+generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
 
-// Manejador de errores global
-app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
-  res.status(500).send('¡Algo salió mal!');
-});
-
-// Iniciar el servidor
 app.listen(port, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${port}`);
+  console.log(`Servidor corriendo en http://localhost:${port}`);
   console.log('Editor disponible en: http://localhost:3000/editor.html');
   console.log('Catálogo disponible en: http://localhost:3000/catalog.html');
 });
