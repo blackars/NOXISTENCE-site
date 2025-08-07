@@ -1,0 +1,27 @@
+{
+  "images": [
+    {
+      "name": "Fumor",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417926/creatures/Fumor.png",
+      "left": "573px",
+      "top": "198px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "flipped": false,
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "texts": [],
+  "backgroundColor": "#ffffff",
+  "fontSettings": {
+    "family": "sans-serif",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2025-08-06T00:58:53.954Z",
+  "showTitles": true
+}

@@ -11,9 +11,11 @@
         <option value="">By Origin</option>
       </select>
       <select id="sheetSelect">
-        <option value="">Go to a Collection</optioSn>
+        <option value="">By Collection</option>
       </select>
-      <button id="goToCollections" onclick="window.location.href='collections.html'">See All Collections</button>
+      <button id="goToCollections" onclick="window.location.href='collections.html'">Collections</button>
+      <button id="goToLore" onclick="window.location.href='lore.html'">Lore</button>
+
     </div>  
   </div>
 </header>
@@ -78,7 +80,7 @@
   gap: 1rem;
   flex-wrap: wrap;
 }
-#searchInput, #worldSelect, #sheetSelect, #goToCollections {
+#searchInput, #worldSelect, #sheetSelect, #goToCollections, #goToLore {
   padding: 0.5rem 0.5rem;
   border-radius:0px;
   font-size: 1rem;
@@ -87,14 +89,14 @@
   font-family: 'Gobold';
 
 }
-#goToCollections {
+#goToCollections, #goToLore {
   transition: background 0.2s, color 0.2s;
 }
-#goToCollections:hover {
+#goToCollections:hover, #goToLore:hover {
   background: #000000;
   color: #fff;
 }
-#worldSelect, #sheetSelect {
+#worldSelect, #sheetSelect, #goToCollections, #goToLore {
   min-width: 160px;
 }
 

@@ -52,7 +52,7 @@ app.use(express.static(path.join(__dirname, '../public'), {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const fontsRoutes = require('../src/fonts');
-const { generateAllThumbnails } = require('../src/generate-thumbnails');
+const { generateAllThumbnailsCollections, generateAllThumbnailsLore } = require('../src/generate-thumbnails');
 const cloudinary = require('cloudinary').v2;
 
 // Verificar variables de entorno de Cloudinary
@@ -485,7 +485,8 @@ app.post('/admin/generate-thumbnails', basicAuth({
   realm: 'Admin Area'
 }), async (req, res) => {
   try {
-    await generateAllThumbnails();
+    await generateAllThumbnailsCollections();
+    await generateAllThumbnailsLore();
     res.json({ success: true, message: 'Miniaturas generadas correctamente.' });
   } catch (error) {
     console.error('Error al generar miniaturas:', error);
@@ -774,7 +775,10 @@ app.get('/api/cloudinary-all-debug', async (req, res) => {
   res.json({ found: results.length, public_ids: results, errors });
 });
 
-generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
+// Generate thumbnails on server start
+generateAllThumbnailsCollections()
+  .then(() => generateAllThumbnailsLore())
+  .catch(err => console.error('Error generating thumbnails:', err));
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);

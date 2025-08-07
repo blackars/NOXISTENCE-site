@@ -112,13 +112,26 @@
     .creature-world {
       display: none;
     }
-    .no-results {
+    .no-results, .loading, .error {
+      grid-column: 1 / -1;
       text-align: center;
-      color: #888;
-      font-size: 1.2rem;
-      margin-top: 2rem;
+      padding: 2rem;
+      color: #666;
+      font-style: italic;
     }
- 
+    
+    .error {
+      color: #d32f2f;
+    }
+    
+    .creature-btn {
+      transition: transform 0.2s;
+    }
+    
+    .creature-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
     .magic-title {
       animation: magicFade 4s ease-in-out infinite;
       text-align: center;
@@ -206,21 +219,16 @@
         });
       }
 
-      // Renderizar criaturas filtradas
-      function renderCreatures() {
-        const filterName = searchInput.value.trim().toLowerCase();
-        const filterWorld = worldSelect.value;
-        const filtered = allCreatures.filter(c => {
-          const matchName = c.name && c.name.toLowerCase().includes(filterName);
-          const matchWorld = !filterWorld || c.world === filterWorld;
-          return matchName && matchWorld;
-        });
+      // Renderizar lista de criaturas
+      function renderCreatureList(creatures) {
         grid.innerHTML = '';
-        if (filtered.length === 0) {
+        
+        if (creatures.length === 0) {
           grid.innerHTML = '<div class="no-results">No se encontraron criaturas.</div>';
           return;
         }
-        for (const c of filtered) {
+        
+        for (const c of creatures) {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'creature-btn';
@@ -243,19 +251,39 @@
           img.className = 'creature-img';
           img.src = c.img || '';
           img.alt = c.name || '';
+          img.loading = 'lazy';
           btn.appendChild(img);
+          
           const name = document.createElement('div');
           name.className = 'creature-name';
           name.textContent = c.name || '';
           btn.appendChild(name);
+          
           if (c.world) {
             const world = document.createElement('div');
             world.className = 'creature-world';
             world.textContent = c.world;
             btn.appendChild(world);
           }
+          
           grid.appendChild(btn);
         }
+      }
+
+      // Renderizar criaturas filtradas
+      function renderCreatures() {
+        const filterName = searchInput.value.trim().toLowerCase();
+        const filterWorld = worldSelect.value;
+        let creaturesToRender = allCreatures;
+        
+        // Aplicar filtros
+        const filtered = creaturesToRender.filter(c => {
+          const matchName = c.name && c.name.toLowerCase().includes(filterName);
+          const matchWorld = !filterWorld || c.world === filterWorld;
+          return matchName && matchWorld;
+        });
+        
+        renderCreatureList(filtered);
       }
 
       // Función para abrir la página HTML de una criatura específica
@@ -281,6 +309,14 @@
         try {
           const res = await fetch('data/catalog.json');
           const files = await res.json();
+          
+          // Add default option
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = '';
+          defaultOpt.textContent = 'All Collections';
+          sheetSelect.appendChild(defaultOpt);
+          
+          // Add collections
           files.forEach(file => {
             const opt = document.createElement('option');
             opt.value = file;
@@ -288,7 +324,7 @@
             sheetSelect.appendChild(opt);
           });
         } catch (e) {
-          // Si no hay hojas, solo opción por defecto
+          console.error('Error loading collections:', e);
         }
       }
 
@@ -296,10 +332,92 @@
       searchInput.addEventListener('input', renderCreatures);
       worldSelect.addEventListener('change', renderCreatures);
 
-      // Evento para navegar a una hoja/colección
-      sheetSelect.addEventListener('change', function() {
-        if (this.value) {
-          window.location.href = `viewer.html?file=${encodeURIComponent(this.value)}`;
+      // Función para normalizar nombres (quitar espacios, convertir a minúsculas, etc.)
+      function normalizeName(name) {
+        return name ? name.toString().trim().toLowerCase().replace(/\s+/g, ' ') : '';
+      }
+
+      // Evento para filtrar por colección
+      sheetSelect.addEventListener('change', async function() {
+        const selectedFile = this.value;
+        
+        if (!selectedFile) {
+          // Si se selecciona "All Collections", mostrar todas las criaturas
+          renderCreatures();
+          return;
+        }
+        
+        try {
+          // Mostrar estado de carga
+          grid.innerHTML = '<div class="loading">Cargando colección...</div>';
+          
+          // Cargar la colección seleccionada
+          const res = await fetch(`hojas/${selectedFile}`);
+          const collectionData = await res.json();
+          
+          // Extraer nombres de criaturas de la colección
+          const creatureNames = new Set();
+          
+          // Buscar en arrays de imágenes
+          if (collectionData.images) {
+            collectionData.images.forEach(img => {
+              if (img.name) {
+                // Agregar el nombre normalizado al conjunto
+                creatureNames.add(normalizeName(img.name));
+              }
+            });
+          }
+          
+          // Buscar en arrays de arte
+          if (collectionData.artimages) {
+            collectionData.artimages.forEach(art => {
+              if (art.name) {
+                // Agregar el nombre normalizado al conjunto
+                creatureNames.add(normalizeName(art.name));
+              }
+            });
+          }
+          
+          console.log('Nombres de criaturas en la colección:', Array.from(creatureNames));
+          console.log('Total de criaturas cargadas:', allCreatures.length);
+          
+          // Filtrar criaturas para mostrar solo las de esta colección
+          const filteredCreatures = allCreatures.filter(creature => {
+            const normalizedCreatureName = normalizeName(creature.name);
+            const isInCollection = creatureNames.has(normalizedCreatureName);
+            console.log(`Comprobando ${creature.name} (${normalizedCreatureName}): ${isInCollection}`);
+            return isInCollection;
+          });
+          
+          console.log('Criaturas filtradas:', filteredCreatures);
+          
+          // Aplicar filtros actuales (búsqueda y mundo)
+          const filterName = searchInput.value.trim().toLowerCase();
+          const filterWorld = worldSelect.value;
+          
+          const filtered = filteredCreatures.filter(c => {
+            const matchName = c.name && c.name.toLowerCase().includes(filterName);
+            const matchWorld = !filterWorld || c.world === filterWorld;
+            return matchName && matchWorld;
+          });
+          
+          // Mostrar la lista filtrada
+          if (filtered.length === 0) {
+            grid.innerHTML = `
+              <div class="no-results">
+                No se encontraron criaturas en esta colección.<br>
+                <small>Nombres en la colección: ${Array.from(creatureNames).join(', ')}</small>
+              </div>`;
+          } else {
+            renderCreatureList(filtered);
+          }
+        } catch (error) {
+          console.error('Error al cargar la colección:', error);
+          grid.innerHTML = `
+            <div class="error">
+              Error al cargar la colección: ${error.message}
+              ${error.stack ? `<pre>${error.stack}</pre>` : ''}
+            </div>`;
         }
       });
 

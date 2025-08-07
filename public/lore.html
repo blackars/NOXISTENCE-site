@@ -297,12 +297,12 @@
             // Intentar cargar el thumbnail específico
             const imgLoader = new Image();
             imgLoader.onload = function() {
-              thumbImg.src = `${API_BASE_URL}/thumbnails/lore/${file.replace('.json','.png')}`;
+              thumbImg.src = `${API_BASE_URL}/thumbnails/ss-lore/${file.replace('.json','.png')}`;
             };
             imgLoader.onerror = function() {
               // No thumbnail found, keep placeholder
             };
-            imgLoader.src = `${API_BASE_URL}/thumbnails/lore/${file.replace('.json','.png')}`;
+            imgLoader.src = `${API_BASE_URL}/thumbnails/ss-lore/${file.replace('.json','.png')}`;
 
             mini.appendChild(thumbImg);
             card.appendChild(mini);
