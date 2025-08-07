@@ -157,6 +157,31 @@
       transform: none !important;
       box-shadow: none !important;
     }
+    
+    /* Estilos para textos clickeables con efecto hover */
+    .clickable {
+      transition: all 0.2s ease;
+      display: inline-block;
+      position: relative;
+    }
+    
+    .clickable::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      transform: scaleX(0);
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background-color: currentColor;
+      transform-origin: bottom right;
+      transition: transform 0.25s ease-out;
+    }
+    
+    .clickable:hover::after {
+      transform: scaleX(1);
+      transform-origin: bottom left;
+    }
   </style>
 </head>
 <body>
@@ -460,9 +485,12 @@
           // Si tiene linkTo, hacerlo clickeable
           if (textData.linkTo) {
             const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(textData.linkTo)}`;
+            // Agregar clase clickable al contenedor
+            textItem.classList.add('clickable');
+            // Crear el contenido con un span para el efecto de subrayado
             textItem.innerHTML = `
-              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
-                ${textData.content}
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:inline-block;position:relative;padding-bottom:2px;">
+                <span>${textData.content}</span>
               </a>`;
             
             // Interceptar el click para navegación interna
@@ -471,9 +499,6 @@
               e.preventDefault();
               window.location.href = viewerUrl;
             });
-            
-            // Agregar clase para efecto hover
-            textItem.classList.add('clickable');
           } else {
             textItem.textContent = textData.content;
           }
