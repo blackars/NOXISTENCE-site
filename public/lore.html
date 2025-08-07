@@ -253,7 +253,7 @@
         noLore.style.display = '';
 
         // Obtener archivos .json en /hojas/lore/
-        const res = await fetch('/api/hojas-list-lore', {
+        const res = await fetch(`${API_BASE_URL}/api/hojas-list-lore`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

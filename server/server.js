@@ -472,7 +472,7 @@ app.get('/api/hojas-list-lore', (req, res) => {
   }
   try {
     const hojas = getJsonFiles(loreDir);
-    res.json({ hojas });
+    res.json(hojas);
   } catch (err) {
     res.status(500).json({ error: 'Error al leer la carpeta de hojas de lore' });
   }
