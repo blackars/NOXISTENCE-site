@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Hoja del Bestiario</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.4/dist/lenis.css">
+  <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
   <style>
             /* Simple fade-in for page load */
             @keyframes fadeIn {
@@ -12,14 +13,14 @@
       to { opacity: 1; }
     }
     body {
-      animation: fadeIn 0.1s ease-out;
+      animation: fadeIn 0.5s ease-out;
       margin: 0;
       padding: 0;
       background: #f0f0f0;
       font-family: sans-serif;
       width: 100vw;
       height: 100vh;
-      overflow: hidden;
+      overflow: hidden; /* Mantenemos hidden en el body para evitar doble scroll */
     }
     
     #grid {
@@ -29,9 +30,10 @@
       right: 0;
       bottom: 0;
       background: white;
-      overflow: auto;
+      overflow: hidden; /* Cambiado de auto a hidden para que Lenis maneje el scroll */
       touch-action: pan-x pan-y;
       -webkit-overflow-scrolling: touch; /* Mejor scroll en iOS */
+      overscroll-behavior: none; /* Previene el bounce effect en iOS */
     }
     
     /* Estilos para la barra de desplazamiento */
@@ -41,12 +43,11 @@
     }
     
     #grid::-webkit-scrollbar-thumb {
-      background: #888;
-      border-radius: 5px;
+      background: transparent;
     }
     
     #grid::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background:transparent;
     }
     .item {
       position: absolute;
@@ -198,8 +199,29 @@
   <div id="grid"></div>
   <button class="volver" onclick="window.history.back()">←</button>
   
-
+  <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"></script>
   <script>
+    // Inicializar Lenis para scroll suave en el contenedor #grid
+    const grid = document.getElementById('grid');
+    const lenis = new Lenis({
+      wrapper: grid, // Usamos el grid como contenedor
+      content: grid, // El contenido que se desplazará
+      duration: 1.2,
+      smoothTouch: true,
+      smoothWheel: true,
+      autoRaf: true,
+      wheelMultiplier: 1.2,
+      touchMultiplier: 2,
+      infinite: false
+    });
+
+    // Función de animación de Lenis
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
     // Cargar fuentes personalizadas
     async function loadCustomFonts() {
       try {
@@ -711,7 +733,7 @@
 
     // --- Scroll y arrastre mejorado ---
     (function enablePanAndScroll() {
-      const grid = document.getElementById('grid');
+      // grid ya está definido arriba
       let isDragging = false;
       let startX, startY, scrollLeft, scrollTop;
 
@@ -734,21 +756,32 @@
         const y = e.pageY - grid.offsetTop;
         const walkX = (x - startX) * 1.5; // Ajusta la sensibilidad del arrastre
         const walkY = (y - startY) * 1.5;
-        grid.scrollLeft = scrollLeft - walkX;
-        grid.scrollTop = scrollTop - walkY;
+        
+        // Usamos Lenis para el desplazamiento suave
+        lenis.scrollTo({
+          x: scrollLeft - walkX,
+          y: scrollTop - walkY,
+          immediate: true // Sin animación durante el arrastre
+        });
       };
 
       // Función para finalizar el arrastre
       const endDrag = () => {
-        isDragging = false;
-        grid.style.cursor = 'grab';
-        grid.style.removeProperty('user-select');
+        if (isDragging) {
+          isDragging = false;
+          grid.style.cursor = 'grab';
+          grid.style.removeProperty('user-select');
+          // Reactivamos el scroll suave de Lenis
+          lenis.start();
+        }
       };
 
       // Eventos de ratón
       grid.addEventListener('mousedown', (e) => {
         // Solo inicia el arrastre con el botón izquierdo + Shift o el botón central
         if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
+          // Detenemos temporalmente el scroll suave de Lenis durante el arrastre
+          lenis.stop();
           startDrag(e);
         }
       });
