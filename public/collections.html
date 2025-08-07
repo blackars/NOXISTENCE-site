@@ -273,7 +273,7 @@
         noCollections.textContent = 'Cargando colecciones...';
         noCollections.style.display = '';
         
-        const res = await fetch('/api/hojas-list', {
+        const res = await fetch(`${API_BASE_URL}/api/hojas-list-collections`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

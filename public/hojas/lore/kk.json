@@ -1,84 +1,43 @@
 {
   "texts": [
     {
-      "content": "fdsaas",
-      "left": "100px",
-      "top": "100px",
-      "scale": "4.5",
+      "content": "cosas del diablo",
+      "left": "354px",
+      "top": "93px",
+      "scale": "1",
       "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(143, 50, 50)",
-      "linkTo": "asd.json"
+      "fontFamily": "Kitisakkullian",
+      "fontSize": "33px",
+      "color": "rgb(23, 55, 217)"
     }
   ],
-  "backgroundColor": "#14ffef",
+  "backgroundColor": "#9d18aa",
   "fontSettings": {
-    "family": "sans-serif",
-    "size": "14",
-    "color": "#8f3232"
+    "family": "Kitisakkullian",
+    "size": "33",
+    "color": "#1737d9"
   },
-  "exportDate": "2025-08-07T00:08:41.168Z",
+  "exportDate": "2025-08-07T03:35:32.576Z",
   "showTitles": true,
   "images": [
     {
-      "name": "cacteye",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421931/creatures/cacteye.png",
-      "left": "305px",
-      "top": "229px",
+      "name": "bichtoa",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754527026/creatures/bichtoa.png",
+      "left": "368.6px",
+      "top": "625.6px",
       "scale": "1",
       "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(143, 50, 50)",
-      "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "cacteye 2",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753423712/creatures/cacteye-2.png",
-      "left": "190px",
-      "top": "347px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(143, 50, 50)",
-      "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "diablillo",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421778/creatures/diablillo.png",
-      "left": "178px",
-      "top": "125px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(143, 50, 50)",
+      "fontFamily": "AwalanBoxing",
+      "fontSize": "33px",
+      "color": "rgb(23, 55, 217)",
       "flipped": false,
       "showTitles": true
     },
     {
       "name": "art",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421896/imageart/ChatGPT%20Image%2027%20jun%202025%2C%2005_36_08%20a.m..png",
-      "left": "474px",
-      "top": "251px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(17, 17, 17)",
-      "flipped": false,
-      "showTitles": true,
-      "linkTo": "asd.json"
-    },
-    {
-      "name": "art",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753420243/imageart/ChatGPT%20Image%20Jul%204%2C%202025%2C%2011_39_37%20PM.png",
-      "left": "462px",
-      "top": "510px",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417973/imageart/ChatGPT%20Image%20Jun%2027%2C%202025%2C%2005_01_57%20AM.png.png",
+      "left": "447px",
+      "top": "290px",
       "scale": "1",
       "rotate": "0",
       "fontFamily": "sans-serif",
@@ -86,35 +45,56 @@
       "color": "rgb(17, 17, 17)",
       "flipped": false,
       "showTitles": true
-    },
-    {
-      "name": "Apesun",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754158143/lore/Apesun.png",
-      "left": "40px",
-      "top": "271px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(143, 50, 50)",
-      "flipped": false,
-      "showTitles": true,
-      "linkTo": "asd.json"
     },
     {
       "name": "ChatGPT Image 4 jul 2025, 01_28_32 (2)",
       "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754415060/lore/ChatGPT%20Image%204%20jul%202025%2C%2001_28_32%20%282%29.png",
-      "left": "162px",
-      "top": "678px",
+      "left": "346px",
+      "top": "1074.8px",
       "scale": "1",
       "rotate": "0",
-      "fontFamily": "sans-serif",
-      "fontSize": "14px",
-      "color": "rgb(143, 50, 50)",
+      "fontFamily": "Kitisakkullian",
+      "fontSize": "33px",
+      "color": "rgb(23, 55, 217)",
       "flipped": false,
-      "showTitles": true,
-      "linkTo": "asd.json"
+      "showTitles": true
+    },
+    {
+      "name": "ChatGPT Image Jul 5, 2025, 04_09_59 AM",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754527506/lore/ChatGPT%20Image%20Jul%205%2C%202025%2C%2004_09_59%20AM.png",
+      "left": "754px",
+      "top": "790px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Kitisakkullian",
+      "fontSize": "33px",
+      "color": "rgb(23, 55, 217)",
+      "flipped": false,
+      "showTitles": true
     }
   ],
-  "artimages": []
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421896/imageart/ChatGPT%20Image%2027%20jun%202025%2C%2005_36_08%20a.m..png",
+      "left": "836px",
+      "top": "143px",
+      "scale": "1",
+      "rotate": "0",
+      "linkTo": "ddd.json"
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754531010/imageart/ChatGPT%20Image%2027%20jun%202025%2C%2005_51_23%20%282%29.png",
+      "left": "635px",
+      "top": "1287px",
+      "scale": "1",
+      "rotate": "0"
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753419657/imageart/ChatGPT%20Image%20Jul%205%2C%202025%2C%2003_51_03%20AM.png",
+      "left": "768px",
+      "top": "509.8px",
+      "scale": "1",
+      "rotate": "0"
+    }
+  ]
 }

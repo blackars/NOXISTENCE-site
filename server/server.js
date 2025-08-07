@@ -430,6 +430,54 @@ app.get('/api/hojas-list', (req, res) => {
 });
 
 
+// Endpoint para listar solo las hojas de la raíz de 'hojas' (para collections)
+app.get('/api/hojas-list-collections', (req, res) => {
+  const hojasDir = path.join(__dirname, '../public/hojas');
+  function getJsonFiles(dir) {
+    let results = [];
+    if (!fs.existsSync(dir)) return results;
+    const list = fs.readdirSync(dir);
+    list.forEach(file => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat && stat.isFile() && file.endsWith('.json')) {
+        results.push(file);
+      }
+    });
+    return results;
+  }
+  try {
+    const hojas = getJsonFiles(hojasDir);
+    res.json(hojas);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al leer la carpeta de hojas' });
+  }
+});
+
+// Endpoint para listar solo las hojas de lore
+app.get('/api/hojas-list-lore', (req, res) => {
+  const loreDir = path.join(__dirname, '../public/hojas/lore');
+  function getJsonFiles(dir) {
+    let results = [];
+    if (!fs.existsSync(dir)) return results;
+    const list = fs.readdirSync(dir);
+    list.forEach(file => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      if (stat && stat.isFile() && file.endsWith('.json')) {
+        results.push(file);
+      }
+    });
+    return results;
+  }
+  try {
+    const hojas = getJsonFiles(loreDir);
+    res.json({ hojas });
+  } catch (err) {
+    res.status(500).json({ error: 'Error al leer la carpeta de hojas de lore' });
+  }
+});
+
 // Endpoint protegido para generar miniaturas de todas las colecciones
 app.post('/admin/generate-thumbnails', basicAuth({
   users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },
