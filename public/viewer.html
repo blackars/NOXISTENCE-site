@@ -371,7 +371,7 @@
           
           // Si tiene linkTo, hacerlo clickeable
           if (artData.linkTo) {
-            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(artData.linkTo)}`;
+            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(artData.linkTo)}`;
             item.innerHTML = `
               <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
                 ${imgHtml}
@@ -431,7 +431,7 @@
           
           // Si tiene linkTo, envolver en un enlace
           if (loreData.linkTo) {
-            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(loreData.linkTo)}`;
+            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(loreData.linkTo)}`;
             item.innerHTML = `
               <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
                 ${imgHtml}
@@ -484,7 +484,7 @@
           
           // Si tiene linkTo, hacerlo clickeable
           if (textData.linkTo) {
-            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(textData.linkTo)}`;
+            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(textData.linkTo)}`;
             // Agregar clase clickable al contenedor
             textItem.classList.add('clickable');
             // Crear el contenido con un span para el efecto de subrayado
