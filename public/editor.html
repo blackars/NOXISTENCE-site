@@ -102,7 +102,6 @@
       border: none;
       border-radius: 0px;
       cursor: pointer;
-      margin-top: 10px;
     }
     
     .upload-form button:hover {
@@ -510,7 +509,7 @@
             <button onclick="addTextElement()">Add</button>
           </div>
           <div style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-            💡 Drag, scale (Shift + wheel) and rotate (Alt + wheel) texts
+            Drag, scale (Shift + wheel) and rotate (Alt + wheel) texts
           </div>
         </div>
 
@@ -519,18 +518,18 @@
           <h4 style="margin: 0 0 10px 0; color: #333;">Canvas Actions</h4>
           <div style="display: flex; gap: 10px;">
             <button onclick="exportLayout()" style="flex: 1; padding: 10px; background: #28a745; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
-              💾 Save Sheet
+              Save Sheet
             </button>
             <label for="importJsonInput" style="font: 0.7em sans-serif; flex: 1; padding: 10px; background: #007bff; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s; text-align: center; margin: 0; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'">
-              📂 Import JSON
+              Import JSON
               <input type="file" id="importJsonInput" accept="application/json" style="display: none;">
             </label>
             <button onclick="restoreCanvas()" style="flex: 1; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-              🔄 Restore Canvas
+              Restore Canvasx
             </button>
           </div>        
           <div style="font-size: 0.9rem; color: #666; margin-top: 10px;">
-            💡 Restore Canvas deletes all and starts with a blank canvas
+            Restore Canvas deletes all and starts with a blank canvas
           </div>
         </div>
       </div>
@@ -1164,6 +1163,7 @@
         <div style="margin-bottom:4px;font-weight:bold;">Capas</div>
         <button onclick="bringToFront(this)">Traer al frente</button>
         <button onclick="sendToBack(this)">Enviar al fondo</button>
+        <button onclick="linkLayerDialog(this)">Enlazar capas</button>
       `;
       document.body.appendChild(menu);
       menu.textItem = textItem;
@@ -1398,6 +1398,18 @@
 
     // Función para exportar layout
     function exportLayout() {
+      console.log('[EXPORT][INICIO] Exportando layout...');
+      // Mostrar todos los .item y .text-item antes de exportar
+      const allItems = Array.from(document.querySelectorAll('.item'));
+      const allTextItems = Array.from(document.querySelectorAll('.text-item'));
+      console.log('[EXPORT][PRE] .item encontrados:', allItems.length);
+      allItems.forEach((el, i) => {
+        console.log(`[EXPORT][PRE] .item[${i}]`, el, 'data-linked-hoja:', el.getAttribute('data-linked-hoja'));
+      });
+      console.log('[EXPORT][PRE] .text-item encontrados:', allTextItems.length);
+      allTextItems.forEach((el, i) => {
+        console.log(`[EXPORT][PRE] .text-item[${i}]`, el, 'data-linked-hoja:', el.getAttribute('data-linked-hoja'));
+      });
       const defaultName = `layout_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}`;
       const fileName = prompt('File name (without extension):', defaultName);
       
@@ -1406,28 +1418,21 @@
       const cleanFileName = fileName.replace(/[<>:"/\\|?*]/g, '_').trim();
       
       // --- SEPARAR IMÁGENES Y ARTE ---
-      const allItems = Array.from(document.querySelectorAll('.item'));
       const images = [];
       const artimages = [];
+      // DEBUG: Mostrar todos los .item y su data-linked-hoja
       allItems.forEach(el => {
         const imgEl = el.querySelector('img');
         const imgSrc = imgEl?.src || '';
-        
-        // Usar la URL completa de la imagen sin convertirla a ruta relativa
-        if (imgSrc.includes('/imgart/')) {
-          artimages.push({
-            img: imgSrc, // Usar la URL completa
-            left: el.style.left,
-            top: el.style.top,
-            scale: el.dataset.scale || '1',
-            rotate: el.dataset.rotate || '0'
-          });
-        } else if (imgSrc) { // Cualquier otra imagen que no sea arte
-          const titleElement = el.querySelector('.item-title');
-          const computed = titleElement ? window.getComputedStyle(titleElement) : {};
-          images.push({
-            name: titleElement?.textContent || '',
-            img: imgSrc, // Usar la URL completa
+        const titleElement = el.querySelector('.item-title');
+        const hasCreatureTitle = titleElement && titleElement.textContent && titleElement.textContent.trim().length > 0;
+
+        if (hasCreatureTitle) {
+          // Es una criatura: va en images
+          const computed = window.getComputedStyle(titleElement);
+          const obj = {
+            name: titleElement.textContent.trim(),
+            img: imgSrc,
             left: el.style.left,
             top: el.style.top,
             scale: el.dataset.scale || '1',
@@ -1437,17 +1442,38 @@
             color: computed.color || '',
             flipped: el.dataset.flipped === 'true',
             showTitles: el.dataset.showTitles !== 'false'
-          });
+          };
+          if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+            obj.linkTo = el.dataset.linkedHoja;
+          }
+          images.push(obj);
+        } else if (imgSrc) {
+          // Todo lo demás va a artimages
+          const obj = {
+            img: imgSrc,
+            left: el.style.left,
+            top: el.style.top,
+            scale: el.dataset.scale || '1',
+            rotate: el.dataset.rotate || '0'
+          };
+          if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+            obj.linkTo = el.dataset.linkedHoja;
+          }
+          artimages.push(obj);
         }
       });
-      // --- FIN SEPARACIÓN ---
+
       const exportData = {
-        images,
-        artimages,
         texts: Array.from(document.querySelectorAll('.text-item')).map(el => {
+          // DEBUG: Mostrar cada .text-item y su data-linked-hoja
+          if (el.hasAttribute('data-linked-hoja')) {
+            console.log('[EXPORT] .text-item', el, 'data-linked-hoja:', el.dataset.linkedHoja);
+          } else {
+            console.log('[EXPORT] .text-item', el, 'SIN data-linked-hoja');
+          }
           const fontFamily = el.style.fontFamily;
           const fontObj = (window.uploadedFonts || []).find(f => f.name === fontFamily || fontFamily.includes(f.name));
-          return {
+          const obj = {
             content: el.innerText,
             left: el.style.left,
             top: el.style.top,
@@ -1458,6 +1484,10 @@
             color: el.style.color,
             fontUrl: fontObj ? fontObj.url : undefined // Aquí se guarda la URL de Cloudinary
           };
+          if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+            obj.linkTo = el.dataset.linkedHoja;
+          }
+          return obj;
         }),
         backgroundColor: currentBackgroundColor,
         fontSettings: {
@@ -1466,8 +1496,11 @@
           color: currentFontColor
         },
         exportDate: new Date().toISOString(),
-        showTitles: document.getElementById('toggleTitles').checked
+        showTitles: document.getElementById('toggleTitles').checked,
+        images,
+        artimages
       };
+      console.log('[EXPORT][FINAL] exportData:', exportData);
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1720,6 +1753,10 @@
             titleElement.style.color = itemData.color || '#111111';
           }
           item.style.transform = `scale(${itemData.scale}) rotate(${itemData.rotate}deg)`;
+          if (itemData.linkTo) {
+            item.setAttribute('data-linked-hoja', itemData.linkTo);
+            item.style.background = '#e0f7fa';
+          }
           editTools.makeInteractive(item);
           gridElement.appendChild(item);
         });
@@ -1738,6 +1775,10 @@
               <img src='${artData.img}' />
             </div>`;
           item.style.transform = `scale(${artData.scale}) rotate(${artData.rotate}deg)`;
+          if (artData.linkTo) {
+            item.setAttribute('data-linked-hoja', artData.linkTo);
+            item.style.background = '#e0f7fa';
+          }
           editTools.makeInteractive(item);
           gridElement.appendChild(item);
         });
@@ -1756,6 +1797,10 @@
           textItem.style.fontSize = textData.fontSize || `${currentFontSize}px`;
           textItem.style.color = textData.color || currentFontColor;
           textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
+          if (textData.linkTo) {
+            textItem.setAttribute('data-linked-hoja', textData.linkTo);
+            textItem.style.background = '#e0f7fa';
+          }
           const textarea = document.createElement('textarea');
           textarea.value = textData.content;
           textarea.rows = 1;
@@ -2046,6 +2091,60 @@
 
     toggleSidebarBtn.addEventListener('click', () => {
       floatingSidebar.style.display = 'block';
+      toggleSidebarBtn.style.display = 'none';
+    });
+    closeSidebarBtn.addEventListener('click', () => {
+      floatingSidebar.style.display = 'none';
+      toggleSidebarBtn.style.display = 'block';
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && floatingSidebar.style.display === 'block') {
+        floatingSidebar.style.display = 'none';
+        toggleSidebarBtn.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
+      }
+    });
+  </script>
+</body>
+</html>
+      floatingSidebar.style.display = 'none';
+      toggleSidebarBtn.style.display = 'block';
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && floatingSidebar.style.display === 'block') {
+        floatingSidebar.style.display = 'none';
+        toggleSidebarBtn.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && floatingSidebar.style.display === 'block') {
+        floatingSidebar.style.display = 'none';
+        toggleSidebarBtn.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
+      floatingSidebar.style.display = 'none';
+      toggleSidebarBtn.style.display = 'block';
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && floatingSidebar.style.display === 'block') {
+        floatingSidebar.style.display = 'none';
+        toggleSidebarBtn.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
       toggleSidebarBtn.style.display = 'none';
     });
     closeSidebarBtn.addEventListener('click', () => {

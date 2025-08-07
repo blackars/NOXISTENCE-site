@@ -298,20 +298,53 @@ class EditTools {
   }
   
   saveState() {
-    const fullLayout = {
-      images: Array.from(document.querySelectorAll('.item')).map(el => ({
-        name: el.querySelector('.item-title')?.textContent || 'art',
-        img: el.querySelector('img').src,
-        left: el.style.left,
-        top: el.style.top,
-        scale: el.dataset.scale || '1',
-        rotate: el.dataset.rotate || '0',
-        fontFamily: el.querySelector('.item-title')?.style.fontFamily || 'sans-serif',
-        fontSize: el.querySelector('.item-title')?.style.fontSize || '14px',
-        color: el.querySelector('.item-title')?.style.color || '#111111'
-      })),
-      texts: Array.from(document.querySelectorAll('.text-item')).map(el => ({
-        content: el.querySelector('textarea').value,
+    // DEBUG: Mostrar todos los elementos y sus atributos de enlace
+    const allItems = Array.from(document.querySelectorAll('.item, .item.art, .text-item'));
+    allItems.forEach(e => {
+      if (e.dataset.linkedHoja) {
+        console.log('ENLAZADO:', e.className, '->', e.dataset.linkedHoja);
+      }
+    });
+    // Recorrer TODOS los .item y clasificarlos
+    const allItemNodes = Array.from(document.querySelectorAll('.item'));
+    const images = [];
+    const artimages = [];
+    allItemNodes.forEach(el => {
+      // Si tiene la clase 'art', va a artimages
+      if (el.classList.contains('art')) {
+        const obj = {
+          img: el.querySelector('img')?.src || '',
+          left: el.style.left,
+          top: el.style.top,
+          scale: el.dataset.scale || '1',
+          rotate: el.dataset.rotate || '0'
+        };
+        if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+          obj.linkTo = el.dataset.linkedHoja;
+        }
+        artimages.push(obj);
+      } else {
+        // Imagen principal
+        const obj = {
+          name: el.querySelector('.item-title')?.textContent || 'art',
+          img: el.querySelector('img')?.src || '',
+          left: el.style.left,
+          top: el.style.top,
+          scale: el.dataset.scale || '1',
+          rotate: el.dataset.rotate || '0',
+          fontFamily: el.querySelector('.item-title')?.style.fontFamily || 'sans-serif',
+          fontSize: el.querySelector('.item-title')?.style.fontSize || '14px',
+          color: el.querySelector('.item-title')?.style.color || '#111111'
+        };
+        if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+          obj.linkTo = el.dataset.linkedHoja;
+        }
+        images.push(obj);
+      }
+    });
+    const texts = Array.from(document.querySelectorAll('.text-item')).map(el => {
+      const obj = {
+        content: el.textContent,
         left: el.style.left,
         top: el.style.top,
         scale: el.dataset.scale || '1',
@@ -320,7 +353,16 @@ class EditTools {
         fontSize: el.style.fontSize,
         color: el.style.color,
         textId: el.dataset.textId
-      })),
+      };
+      if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+        obj.linkTo = el.dataset.linkedHoja;
+      }
+      return obj;
+    });
+    const fullLayout = {
+      images,
+      artimages,
+      texts,
       backgroundColor: localStorage.getItem('backgroundColor') || '#ffffff',
       fontSettings: {
         family: localStorage.getItem('currentFont') || 'sans-serif',
@@ -417,5 +459,81 @@ class EditTools {
   }
 }
 
+// Función global para enlazar capas
+window.linkLayerDialog = async function(btn) {
+  // Obtener el menú contextual y el elemento asociado
+  const menu = document.getElementById('textContextMenu');
+  const textItem = menu && menu.textItem;
+  if (!textItem) return alert('No hay elemento seleccionado.');
+
+  // Pedir lista de hojas al backend
+  let hojas = [];
+  try {
+    const resp = await fetch('/api/hojas-list');
+    const data = await resp.json();
+    hojas = data.hojas || [];
+  } catch (err) {
+    alert('No se pudieron obtener las hojas: ' + err.message);
+    return;
+  }
+
+  if (!hojas.length) {
+    alert('No hay hojas disponibles para enlazar.');
+    return;
+  }
+
+  // Mostrar selector simple (prompt o select)
+  const hoja = prompt('Selecciona hoja destino (escribe el nombre exacto):\n' + hojas.join('\n'));
+  if (!hoja || !hojas.includes(hoja)) return;
+
+  // Buscar el contenedor principal (.item, .text-item)
+  let container = textItem.closest('.item, .text-item');
+  if (!container) container = textItem;
+
+  // --- CORRECCIÓN: Para textos, no envolver el textarea, solo el div de texto visible ---
+  let content;
+  if (container.classList.contains('text-item')) {
+    // Si hay un textarea visible (modo edición), no permitir enlazar
+    const textarea = container.querySelector('textarea');
+    if (textarea && textarea.offsetParent !== null) {
+      alert('Termina de editar el texto antes de enlazar.');
+      return;
+    }
+    // Buscar el div que contiene el texto (no textarea)
+    // Si hay un <a>, usarlo, si no, usar el contenedor directamente
+    content = container;
+  } else {
+    content = container.querySelector('.item-content') || container;
+  }
+
+  let alreadyLinked = content.querySelector && content.querySelector('a[data-link-layer]');
+
+  if (alreadyLinked) {
+    alreadyLinked.href = `hojas/${hoja}`;
+    alreadyLinked.setAttribute('target', '_blank');
+  } else {
+    // Crear el <a> y envolver el contenido real
+    const a = document.createElement('a');
+    a.href = `hojas/${hoja}`;
+    a.target = '_blank';
+    a.style.color = 'inherit';
+    a.style.textDecoration = 'underline';
+    a.setAttribute('data-link-layer', '1');
+    // Mover todos los hijos actuales dentro del <a>
+    while (content.firstChild) a.appendChild(content.firstChild);
+    content.appendChild(a);
+  }
+
+  // Asignar el atributo de enlace al contenedor principal
+  container.dataset.linkedHoja = hoja;
+  // Marcar visualmente
+  container.style.background = '#e0f7fa';
+  // Guardar estado
+  if (window.editTools && typeof window.editTools.saveState === 'function') {
+    window.editTools.saveState();
+  }
+  if (menu) menu.remove();
+};
+
 // Exportar para uso global
-window.EditTools = EditTools; 
+window.EditTools = EditTools;

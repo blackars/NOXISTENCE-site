@@ -615,6 +615,32 @@ app.use('/', fontsRoutes);
 
 generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
 
+// Endpoint para listar todos los archivos .json en public/hojas y subdirectorios
+app.get('/api/hojas-list', (req, res) => {
+  const hojasDir = path.join(__dirname, '../public/hojas');
+  function getJsonFiles(dir, baseDir = '') {
+    let results = [];
+    const list = fs.readdirSync(dir);
+    list.forEach(file => {
+      const filePath = path.join(dir, file);
+      const relPath = path.join(baseDir, file);
+      const stat = fs.statSync(filePath);
+      if (stat && stat.isDirectory()) {
+        results = results.concat(getJsonFiles(filePath, relPath));
+      } else if (file.endsWith('.json')) {
+        results.push(relPath.replace(/\\/g, '/'));
+      }
+    });
+    return results;
+  }
+  try {
+    const files = getJsonFiles(hojasDir);
+    res.json({ hojas: files });
+  } catch (err) {
+    res.status(500).json({ error: 'No se pudieron listar las hojas', details: err.message });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
   console.log('Editor disponible en: http://localhost:3000/editor.html');

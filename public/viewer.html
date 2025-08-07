@@ -264,10 +264,32 @@
           if (data.showTitles !== false) {
             titleDiv = `<div>${itemData.name}</div>`;
           }
-          item.innerHTML = `\n            <div class=\"item-content\">\n              <img src=\"${itemData.img}\" onerror=\"this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'\" />\n              ${titleDiv}\n            </div>`;
+          if (itemData.linkTo) {
+            // Usar un enlace interno al viewer
+            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(itemData.linkTo)}`;
+            item.innerHTML = `
+              <a href="${viewerUrl}" style="text-decoration:underline;color:inherit;">
+                <div class="item-content">
+                  <img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+                  ${titleDiv}
+                </div>
+              </a>`;
+            // Interceptar el click para navegación interna
+            const link = item.querySelector('a');
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.location.href = viewerUrl;
+            });
+          } else {
+            item.innerHTML = `
+              <div class="item-content">
+                <img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+                ${titleDiv}
+              </div>`;
+          }
           const titleElement = item.querySelector('div:last-child');
           if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
-            titleElement.style.fontFamily = `\"${itemData.fontFamily || 'sans-serif'}\", Arial, sans-serif`;
+            titleElement.style.fontFamily = `"${itemData.fontFamily || 'sans-serif'}", Arial, sans-serif`;
             titleElement.style.fontSize = itemData.fontSize || '14px';
             titleElement.style.color = itemData.color || '#111111';
           }
