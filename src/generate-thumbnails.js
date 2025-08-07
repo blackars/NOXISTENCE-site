@@ -105,6 +105,7 @@ async function generateThumbnailForFile(file, outputDir, outputFilename = null) 
     });
     
     console.log('Miniatura generada exitosamente');
+    return thumbPath;
     
   } catch (error) {
     console.error('Error al generar la miniatura:', error);
@@ -113,7 +114,6 @@ async function generateThumbnailForFile(file, outputDir, outputFilename = null) 
     // Cerrar el navegador
     await browser.close();
   }
-  return thumbPath;
 }
 
 async function generateAllThumbnailsCollections() {
