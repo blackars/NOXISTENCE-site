@@ -316,19 +316,57 @@
           console.log('Renderizando criatura', itemData);
         });
       }
-      // Renderizar imágenes de arte (solo artimages, sin título ni interacción)
+      // Renderizar imágenes de arte (con soporte para linkTo)
       if (data.artimages && Array.isArray(data.artimages)) {
         data.artimages.forEach(artData => {
           const item = document.createElement('div');
-          item.classList.add('item', 'art-static');
-          item.tabIndex = -1;
+          // Solo agregar la clase art-static si NO tiene linkTo
+          const classes = ['item'];
+          if (!artData.linkTo) {
+            classes.push('art-static');
+          }
+          item.className = classes.join(' ');
+          
+          item.tabIndex = artData.linkTo ? 0 : -1; // Hacer enfocable solo si tiene linkTo
           item.style.left = artData.left;
           item.style.top = artData.top;
           item.style.transform = `scale(${artData.scale}) rotate(${artData.rotate}deg)`;
-          item.style.cursor = 'default';
-          // Nunca crear ni mostrar div de nombre en artimages
-          item.innerHTML = `\n            <div class=\"item-content\">\n              <img src=\"${artData.img}\" onerror=\"this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'\" />\n            </div>`;
+          item.style.cursor = artData.linkTo ? 'pointer' : 'default';
+          
+          // Manejar flip si está definido
+          if (artData.flipped) {
+            item.style.transform += ' scaleX(-1)';
+          }
+          
+          // Crear el contenido de la imagen
+          const imgHtml = `
+            <div class="item-content">
+              <img src="${artData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+            </div>`;
+          
+          // Si tiene linkTo, hacerlo clickeable
+          if (artData.linkTo) {
+            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(artData.linkTo)}`;
+            item.innerHTML = `
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
+                ${imgHtml}
+              </a>`;
+            
+            // Interceptar el click para navegación interna
+            const link = item.querySelector('a');
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.location.href = viewerUrl;
+            });
+            
+            // Agregar clase para efecto hover
+            item.classList.add('clickable');
+          } else {
+            item.innerHTML = imgHtml;
+          }
+          
           contentContainer.appendChild(item);
+          
           // Calcular dimensiones del contenido
           const left = parseFloat(artData.left) || 0;
           const top = parseFloat(artData.top) || 0;
@@ -339,11 +377,69 @@
           maxY = Math.max(maxY, top + itemHeight);
           minX = Math.min(minX, left);
           minY = Math.min(minY, top);
+          
           console.log('Renderizando arte', artData);
         });
       }
       
-      // Renderizar textos
+      // Renderizar imágenes de lore (con soporte para linkTo)
+      if (data.loreimages && Array.isArray(data.loreimages)) {
+        data.loreimages.forEach(loreData => {
+          const item = document.createElement('div');
+          item.classList.add('item', 'lore-item');
+          item.tabIndex = 0; // Hacerlo enfocable para accesibilidad
+          item.style.left = loreData.left;
+          item.style.top = loreData.top;
+          item.style.transform = `scale(${loreData.scale || 1}) rotate(${loreData.rotate || 0}deg)`;
+          item.style.cursor = loreData.linkTo ? 'pointer' : 'default';
+          
+          // Manejar flip si está definido
+          if (loreData.flipped) {
+            item.style.transform += ' scaleX(-1)';
+          }
+          
+          // Crear el contenido de la imagen
+          const imgHtml = `
+            <div class="item-content">
+              <img src="${loreData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+            </div>`;
+          
+          // Si tiene linkTo, envolver en un enlace
+          if (loreData.linkTo) {
+            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(loreData.linkTo)}`;
+            item.innerHTML = `
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
+                ${imgHtml}
+              </a>`;
+            
+            // Interceptar el click para navegación interna
+            const link = item.querySelector('a');
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.location.href = viewerUrl;
+            });
+          } else {
+            item.innerHTML = imgHtml;
+          }
+          
+          contentContainer.appendChild(item);
+          
+          // Calcular dimensiones del contenido
+          const left = parseFloat(loreData.left) || 0;
+          const top = parseFloat(loreData.top) || 0;
+          const scale = parseFloat(loreData.scale) || 1;
+          const itemWidth = 150 * scale;
+          const itemHeight = 150 * scale;
+          maxX = Math.max(maxX, left + itemWidth);
+          maxY = Math.max(maxY, top + itemHeight);
+          minX = Math.min(minX, left);
+          minY = Math.min(minY, top);
+          
+          console.log('Renderizando lore', loreData);
+        });
+      }
+      
+      // Renderizar textos (con soporte para linkTo)
       if (data.texts && Array.isArray(data.texts)) {
         data.texts.forEach(textData => {
           const textItem = document.createElement('div');
@@ -356,10 +452,32 @@
           textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
           textItem.style.fontSize = textData.fontSize || '14px';
           textItem.style.color = textData.color || '#000';
-          textItem.style.pointerEvents = 'none';
-          textItem.style.userSelect = 'none';
+          textItem.style.pointerEvents = textData.linkTo ? 'auto' : 'none';
+          textItem.style.userSelect = textData.linkTo ? 'auto' : 'none';
           textItem.style.fontDisplay = 'swap';
-          textItem.textContent = textData.content;
+          textItem.style.cursor = textData.linkTo ? 'pointer' : 'default';
+          
+          // Si tiene linkTo, hacerlo clickeable
+          if (textData.linkTo) {
+            const viewerUrl = `viewer.html?file=hojas/${encodeURIComponent(textData.linkTo)}`;
+            textItem.innerHTML = `
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
+                ${textData.content}
+              </a>`;
+            
+            // Interceptar el click para navegación interna
+            const link = textItem.querySelector('a');
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.location.href = viewerUrl;
+            });
+            
+            // Agregar clase para efecto hover
+            textItem.classList.add('clickable');
+          } else {
+            textItem.textContent = textData.content;
+          }
+          
           contentContainer.appendChild(textItem);
           
           // Calcular dimensiones del texto

@@ -525,7 +525,7 @@
               <input type="file" id="importJsonInput" accept="application/json" style="display: none;">
             </label>
             <button onclick="restoreCanvas()" style="flex: 1; padding: 10px; background: #dc3545; color: white; border: none; border-radius: 0px; cursor: pointer; transition: background-color 0.2s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
-              Restore Canvasx
+              Restore Canvas
             </button>
           </div>        
           <div style="font-size: 0.9rem; color: #666; margin-top: 10px;">
@@ -1417,78 +1417,96 @@
       
       const cleanFileName = fileName.replace(/[<>:"/\\|?*]/g, '_').trim();
       
-      // --- SEPARAR IMÁGENES Y ARTE ---
-      const images = [];
-      const artimages = [];
-      // DEBUG: Mostrar todos los .item y su data-linked-hoja
+      // Inicializar arrays para cada tipo de elemento
+      const images = []; // Solo para criaturas
+      const artimages = []; // Para imágenes de arte
+      const loreimages = []; // Para imágenes de lore
+      
+      // Procesar elementos .item (imágenes)
       allItems.forEach(el => {
         const imgEl = el.querySelector('img');
         const imgSrc = imgEl?.src || '';
         const titleElement = el.querySelector('.item-title');
-        const hasCreatureTitle = titleElement && titleElement.textContent && titleElement.textContent.trim().length > 0;
+        const isCreature = el.getAttribute('data-type') === 'creature';
+        const isArt = el.getAttribute('data-type') === 'art' || el.classList.contains('art-item');
+        const isLore = el.getAttribute('data-type') === 'lore' || el.classList.contains('lore-item');
+        
+        const commonProps = {
+          img: imgSrc,
+          left: el.style.left,
+          top: el.style.top,
+          scale: el.dataset.scale || '1',
+          rotate: el.dataset.rotate || '0',
+          flipped: el.dataset.flipped === 'true'
+        };
+        
+        // Añadir linkTo si existe
+        if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+          commonProps.linkTo = el.dataset.linkedHoja;
+        }
 
-        if (hasCreatureTitle) {
+        if (isCreature && titleElement) {
           // Es una criatura: va en images
           const computed = window.getComputedStyle(titleElement);
-          const obj = {
+          images.push({
+            ...commonProps,
             name: titleElement.textContent.trim(),
-            img: imgSrc,
-            left: el.style.left,
-            top: el.style.top,
-            scale: el.dataset.scale || '1',
-            rotate: el.dataset.rotate || '0',
             fontFamily: computed.fontFamily || '',
             fontSize: computed.fontSize || '',
             color: computed.color || '',
-            flipped: el.dataset.flipped === 'true',
             showTitles: el.dataset.showTitles !== 'false'
-          };
-          if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
-            obj.linkTo = el.dataset.linkedHoja;
-          }
-          images.push(obj);
+          });
+        } else if (isLore && imgSrc) {
+          // Es una imagen de lore: va en loreimages
+          loreimages.push(commonProps);
+        } else if (isArt && imgSrc) {
+          // Es una imagen de arte: va en artimages
+          artimages.push(commonProps);
         } else if (imgSrc) {
-          // Todo lo demás va a artimages
-          const obj = {
-            img: imgSrc,
-            left: el.style.left,
-            top: el.style.top,
-            scale: el.dataset.scale || '1',
-            rotate: el.dataset.rotate || '0'
-          };
-          if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
-            obj.linkTo = el.dataset.linkedHoja;
+          // Por compatibilidad con elementos existentes sin data-type
+          if (titleElement && titleElement.textContent && titleElement.textContent.trim().length > 0) {
+            // Tiene título, asumimos que es una criatura
+            const computed = window.getComputedStyle(titleElement);
+            images.push({
+              ...commonProps,
+              name: titleElement.textContent.trim(),
+              fontFamily: computed.fontFamily || '',
+              fontSize: computed.fontSize || '',
+              color: computed.color || '',
+              showTitles: el.dataset.showTitles !== 'false'
+            });
+          } else {
+            // No tiene título, asumimos que es arte
+            artimages.push(commonProps);
           }
-          artimages.push(obj);
         }
       });
 
+      // Procesar textos
+      const texts = Array.from(document.querySelectorAll('.text-item')).map(el => {
+        const fontFamily = el.style.fontFamily;
+        const fontObj = (window.uploadedFonts || []).find(f => f.name === fontFamily || fontFamily.includes(f.name));
+        const textObj = {
+          content: el.innerText,
+          left: el.style.left,
+          top: el.style.top,
+          scale: el.dataset.scale || '1',
+          rotate: el.dataset.rotate || '0',
+          fontFamily: fontFamily,
+          fontSize: el.style.fontSize,
+          color: el.style.color,
+          fontUrl: fontObj ? fontObj.url : undefined
+        };
+        
+        if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
+          textObj.linkTo = el.dataset.linkedHoja;
+        }
+        
+        return textObj;
+      });
+
       const exportData = {
-        texts: Array.from(document.querySelectorAll('.text-item')).map(el => {
-          // DEBUG: Mostrar cada .text-item y su data-linked-hoja
-          if (el.hasAttribute('data-linked-hoja')) {
-            console.log('[EXPORT] .text-item', el, 'data-linked-hoja:', el.dataset.linkedHoja);
-          } else {
-            console.log('[EXPORT] .text-item', el, 'SIN data-linked-hoja');
-          }
-          const fontFamily = el.style.fontFamily;
-          const fontObj = (window.uploadedFonts || []).find(f => f.name === fontFamily || fontFamily.includes(f.name));
-          const obj = {
-            content: el.innerText,
-            left: el.style.left,
-            top: el.style.top,
-            scale: el.dataset.scale || '1',
-            rotate: el.dataset.rotate || '0',
-            fontFamily: fontFamily,
-            fontSize: el.style.fontSize,
-            color: el.style.color,
-            fontUrl: fontObj ? fontObj.url : undefined // Aquí se guarda la URL de Cloudinary
-          };
-          if (el.hasAttribute('data-linked-hoja') && el.dataset.linkedHoja) {
-            obj.linkTo = el.dataset.linkedHoja;
-          }
-          return obj;
-        }),
+        texts: texts,
         backgroundColor: currentBackgroundColor,
         fontSettings: {
           family: currentFont,
@@ -1498,7 +1516,8 @@
         exportDate: new Date().toISOString(),
         showTitles: document.getElementById('toggleTitles').checked,
         images,
-        artimages
+        artimages,
+        loreimages
       };
       console.log('[EXPORT][FINAL] exportData:', exportData);
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
@@ -1766,6 +1785,7 @@
         jsonData.artimages.forEach(artData => {
           const item = document.createElement('div');
           item.classList.add('item');
+          item.setAttribute('data-type', 'art');
           item.style.left = artData.left;
           item.style.top = artData.top;
           item.dataset.scale = artData.scale;
@@ -1783,6 +1803,31 @@
           gridElement.appendChild(item);
         });
       }
+      
+      // Cargar imágenes de lore
+      if (jsonData.loreimages && Array.isArray(jsonData.loreimages)) {
+        jsonData.loreimages.forEach(loreData => {
+          const item = document.createElement('div');
+          item.classList.add('item', 'lore-item');
+          item.setAttribute('data-type', 'lore');
+          item.style.left = loreData.left;
+          item.style.top = loreData.top;
+          item.dataset.scale = loreData.scale;
+          item.dataset.rotate = loreData.rotate;
+          item.innerHTML = `
+            <div class='item-content'>
+              <img src='${loreData.img}' />
+            </div>`;
+          item.style.transform = `scale(${loreData.scale}) rotate(${loreData.rotate}deg)`;
+          if (loreData.linkTo) {
+            item.setAttribute('data-linked-hoja', loreData.linkTo);
+            item.style.background = '#e0f7fa';
+          }
+          editTools.makeInteractive(item);
+          gridElement.appendChild(item);
+        });
+      }
+      
       // Cargar textos
       if (jsonData.texts && Array.isArray(jsonData.texts)) {
         jsonData.texts.forEach(textData => {
@@ -1971,7 +2016,7 @@
         item.draggable = true;
         item.dataset.lore = JSON.stringify(lore);
         item.innerHTML = `
-          <img src="${lore.img}" alt="${lore.name}" />
+          <img src="${lore.img}" alt="${lore.name}" loading="lazy" />
           <button class="delete-btn" onclick="deleteLoreImage('${lore.public_id}')">×</button>
         `;
         item.addEventListener('dragstart', (e) => {
@@ -2023,12 +2068,13 @@
     function addLoreThumbnail(lore) {
       const loreList = document.getElementById('loreList');
       if (!loreList) return;
-      if (document.querySelector(`.art-item[data-lore-id="${lore.id}"]`)) return;
+      if (document.querySelector(`.lore-item[data-lore-id="${lore.id}"]`)) return;
       const item = document.createElement('div');
-      item.className = 'art-item';
+      item.className = 'lore-item art-item';
       item.draggable = true;
       item.dataset.loreId = lore.id;
       item.dataset.lore = JSON.stringify(lore);
+      item.setAttribute('data-type', 'lore');
       item.innerHTML = `
         <img src="${lore.img}" alt="${lore.name}" loading="lazy" />
         <div class="art-item-overlay">

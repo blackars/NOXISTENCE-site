@@ -1,100 +1,70 @@
 {
   "texts": [
     {
-      "content": "cosas del diablo",
-      "left": "354px",
-      "top": "93px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "Kitisakkullian",
-      "fontSize": "33px",
-      "color": "rgb(23, 55, 217)"
-    }
-  ],
-  "backgroundColor": "#9d18aa",
-  "fontSettings": {
-    "family": "Kitisakkullian",
-    "size": "33",
-    "color": "#1737d9"
-  },
-  "exportDate": "2025-08-07T03:35:32.576Z",
-  "showTitles": true,
-  "images": [
-    {
-      "name": "bichtoa",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754527026/creatures/bichtoa.png",
-      "left": "368.6px",
-      "top": "625.6px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "AwalanBoxing",
-      "fontSize": "33px",
-      "color": "rgb(23, 55, 217)",
-      "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "art",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417973/imageart/ChatGPT%20Image%20Jun%2027%2C%202025%2C%2005_01_57%20AM.png.png",
-      "left": "447px",
-      "top": "290px",
+      "content": "kakkakak",
+      "left": "100px",
+      "top": "100px",
       "scale": "1",
       "rotate": "0",
       "fontFamily": "sans-serif",
+      "fontSize": "25px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "acjasknckjsbc<",
+      "left": "530px",
+      "top": "137px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "Kitisakkullian",
+      "fontSize": "25px",
+      "color": "rgb(17, 17, 17)",
+      "linkTo": "ddd.json"
+    }
+  ],
+  "backgroundColor": "#ffffff",
+  "fontSettings": {
+    "family": "Kitisakkullian",
+    "size": "25",
+    "color": "#111111"
+  },
+  "exportDate": "2025-08-07T15:55:37.461Z",
+  "showTitles": true,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421931/creatures/cacteye.png",
+      "left": "129px",
+      "top": "318px",
+      "scale": "1",
+      "rotate": "0",
+      "flipped": false,
+      "name": "cacteye",
+      "fontFamily": "sans-serif",
       "fontSize": "14px",
       "color": "rgb(17, 17, 17)",
-      "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "ChatGPT Image 4 jul 2025, 01_28_32 (2)",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754415060/lore/ChatGPT%20Image%204%20jul%202025%2C%2001_28_32%20%282%29.png",
-      "left": "346px",
-      "top": "1074.8px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "Kitisakkullian",
-      "fontSize": "33px",
-      "color": "rgb(23, 55, 217)",
-      "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "ChatGPT Image Jul 5, 2025, 04_09_59 AM",
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754527506/lore/ChatGPT%20Image%20Jul%205%2C%202025%2C%2004_09_59%20AM.png",
-      "left": "754px",
-      "top": "790px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "Kitisakkullian",
-      "fontSize": "33px",
-      "color": "rgb(23, 55, 217)",
-      "flipped": false,
       "showTitles": true
     }
   ],
   "artimages": [
     {
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753421896/imageart/ChatGPT%20Image%2027%20jun%202025%2C%2005_36_08%20a.m..png",
-      "left": "836px",
-      "top": "143px",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753417973/imageart/ChatGPT%20Image%20Jun%2027%2C%202025%2C%2005_01_57%20AM.png.png",
+      "left": "776px",
+      "top": "291px",
       "scale": "1",
       "rotate": "0",
+      "flipped": false,
       "linkTo": "ddd.json"
-    },
+    }
+  ],
+  "loreimages": [
     {
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754531010/imageart/ChatGPT%20Image%2027%20jun%202025%2C%2005_51_23%20%282%29.png",
-      "left": "635px",
-      "top": "1287px",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754527506/lore/ChatGPT%20Image%20Jul%205%2C%202025%2C%2004_09_59%20AM.png",
+      "left": "411px",
+      "top": "330px",
       "scale": "1",
-      "rotate": "0"
-    },
-    {
-      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753419657/imageart/ChatGPT%20Image%20Jul%205%2C%202025%2C%2003_51_03%20AM.png",
-      "left": "768px",
-      "top": "509.8px",
-      "scale": "1",
-      "rotate": "0"
+      "rotate": "0",
+      "flipped": false,
+      "linkTo": "ddd.json"
     }
   ]
 }

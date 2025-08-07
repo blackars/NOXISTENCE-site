@@ -139,6 +139,8 @@ class EditTools {
         
         if (item.type === 'art') {
           this.addArtToGrid(item, x, y);
+        } else if (item.type === 'lore') {
+          this.addLoreToGrid(item, x, y);
         } else {
           this.addCreatureToGrid(item, x, y);
         }
@@ -289,6 +291,7 @@ class EditTools {
   addCreatureToGrid(creature, x, y) {
     const item = document.createElement('div');
     item.classList.add('item');
+    item.setAttribute('data-type', 'creature');
     item.style.left = `${x}px`;
     item.style.top = `${y}px`;
     item.dataset.scale = '1';
@@ -313,6 +316,7 @@ class EditTools {
   addArtToGrid(art, x, y) {
     const item = document.createElement('div');
     item.classList.add('item');
+    item.setAttribute('data-type', 'art');
     item.style.left = `${x}px`;
     item.style.top = `${y}px`;
     item.dataset.scale = '1';
@@ -322,7 +326,28 @@ class EditTools {
     const imgSrc = art.img;
     item.innerHTML = `
       <div class="item-content">
-        <img src="${imgSrc}" alt="art" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+        <img src="${imgSrc}" alt="art" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+      </div>`;
+    this.makeInteractive(item);
+    this.gridElement.appendChild(item);
+    this.saveState();
+    this.expandCanvas();
+  }
+  
+  addLoreToGrid(lore, x, y) {
+    const item = document.createElement('div');
+    item.classList.add('item', 'lore-item');
+    item.setAttribute('data-type', 'lore');
+    item.style.left = `${x}px`;
+    item.style.top = `${y}px`;
+    item.dataset.scale = '1';
+    item.dataset.rotate = '0';
+    // Usar la URL de la imagen directamente de los datos del lore
+    // Asumimos que lore.img ya contiene la URL completa de Cloudinary
+    const imgSrc = lore.img;
+    item.innerHTML = `
+      <div class="item-content">
+        <img src="${imgSrc}" alt="lore" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
       </div>`;
     this.makeInteractive(item);
     this.gridElement.appendChild(item);

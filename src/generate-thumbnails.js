@@ -9,19 +9,110 @@ const THUMBNAILS_LORE_DIR = path.join(__dirname, '../public/thumbnails/ss-lore')
 const VIEWER_URL_BASE = 'http://localhost:3000/viewer.html?file='; // Ajusta el puerto si es diferente
 const VIEWPORT_SIZE = 400; // Debe coincidir con el tamaño de miniatura
 
+// Función para esperar a que todas las imágenes se carguen
+async function waitForImages(page) {
+  return page.evaluate(async () => {
+    const selectors = Array.from(document.querySelectorAll('img'));
+    
+    await Promise.all(selectors.map(img => {
+      if (img.complete) return;
+      return new Promise((resolve, reject) => {
+        img.addEventListener('load', resolve);
+        img.addEventListener('error', () => {
+          console.error(`Error loading image: ${img.src}`);
+          resolve(); // Continuar aunque falle alguna imagen
+        });
+      });
+    }));
+  });
+}
+
 async function generateThumbnailForFile(file, outputDir, outputFilename = null) {
-  const browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({ 
+    headless: 'new', 
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu'
+    ] 
+  });
+  
   const page = await browser.newPage();
-  await page.setViewport({ width: 1600, height: 900 });
-  const url = VIEWER_URL_BASE + encodeURIComponent(file);
-  await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-  await page.waitForSelector('#grid', { visible: true, timeout: 60000 });
-  await new Promise(r => setTimeout(r, 1200));
-  // Screenshot de toda la página
-  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-  const thumbPath = path.join(outputDir, (outputFilename || file).replace(/\.json$/, '.png'));
-  await page.screenshot({ path: thumbPath, fullPage: true });
-  await browser.close();
+  
+  try {
+    // Configurar el viewport
+    await page.setViewport({ 
+      width: 1600, 
+      height: 900,
+      deviceScaleFactor: 1
+    });
+    
+    // Habilitar request interception para manejar peticiones de recursos
+    await page.setRequestInterception(true);
+    
+    // Manejar peticiones para evitar cargar recursos innecesarios
+    page.on('request', (request) => {
+      // Bloquear ciertos tipos de recursos que no son necesarios para las miniaturas
+      const resourceType = request.resourceType();
+      if (['font', 'media', 'websocket'].includes(resourceType)) {
+        request.abort();
+      } else {
+        request.continue();
+      }
+    });
+    
+    // Navegar a la página
+    const url = VIEWER_URL_BASE + encodeURIComponent(file);
+    console.log(`Navegando a: ${url}`);
+    
+    await page.goto(url, { 
+      waitUntil: ['domcontentloaded', 'networkidle0'],
+      timeout: 120000 // Aumentar el timeout a 2 minutos
+    });
+    
+    // Esperar a que el grid esté visible
+    console.log('Esperando a que el grid esté visible...');
+    await page.waitForSelector('#grid', { 
+      visible: true, 
+      timeout: 30000 
+    });
+    
+    // Esperar a que todas las imágenes se carguen
+    console.log('Esperando a que las imágenes se carguen...');
+    await waitForImages(page);
+    
+    // Esperar un poco más para asegurar que todo esté renderizado
+    console.log('Esperando renderizado adicional...');
+    await new Promise(r => setTimeout(r, 3000));
+    
+    // Crear el directorio de salida si no existe
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    
+    // Tomar el screenshot
+    const thumbPath = path.join(outputDir, (outputFilename || file).replace(/\.json$/, '.png'));
+    console.log(`Guardando miniatura en: ${thumbPath}`);
+    
+    // Tomar screenshot de toda la página
+    await page.screenshot({ 
+      path: thumbPath, 
+      fullPage: true,
+      type: 'png',
+      omitBackground: true
+    });
+    
+    console.log('Miniatura generada exitosamente');
+    
+  } catch (error) {
+    console.error('Error al generar la miniatura:', error);
+    throw error; // Relanzar el error para manejarlo en el llamador
+  } finally {
+    // Cerrar el navegador
+    await browser.close();
+  }
   return thumbPath;
 }
 
