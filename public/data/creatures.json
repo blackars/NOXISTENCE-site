@@ -28,5 +28,23 @@
     "name": "cacteye 2",
     "world": "Planet X",
     "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1753423712/creatures/cacteye-2.png"
+  },
+  {
+    "id": "creature_1754526976823",
+    "name": "sdfsfs",
+    "world": "Maxkodia",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754526976/creatures/sdfsfs.png"
+  },
+  {
+    "id": "creature_1754527025844",
+    "name": "bichtoa",
+    "world": "Maxkodia",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754527026/creatures/bichtoa.png"
+  },
+  {
+    "id": "creature_1754530998278",
+    "name": "tumor",
+    "world": "Maxkodia",
+    "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1754530998/creatures/tumor.png"
   }
 ]

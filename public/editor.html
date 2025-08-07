@@ -648,7 +648,7 @@
     // Función para cargar criaturas desde el archivo JSON local
     async function loadCreatures() {
       try {
-        const response = await fetch('data/creatures.json');
+        const response = await fetch('/api/creatures');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -754,7 +754,7 @@
 
       try {
         console.log('Cargando imágenes de arte desde Cloudinary...');
-        const apiUrl = 'http://localhost:3100/cloudinary-resources?folder=imageart';
+        const apiUrl = '/api/cloudinary-resources?folder=imageart';
         console.log('URL de la API:', apiUrl);
         
         const response = await fetch(apiUrl, {
@@ -1001,7 +1001,7 @@
         };
         
         // Guardar en el servidor
-        const response = await fetch('http://localhost:3100/upload', {
+        const response = await fetch('/api/upload', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1845,7 +1845,7 @@
         folder = 'fonts';
       }
       
-      const res = await fetch('/cloudinary-signature', {
+      const res = await fetch('/api/cloudinary-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ folder, resource_type, public_id })
@@ -1929,7 +1929,7 @@
         return [];
       }
       try {
-        const apiUrl = 'http://localhost:3100/cloudinary-resources?folder=lore';
+        const apiUrl = '/api/cloudinary-resources?folder=lore';
         const response = await fetch(apiUrl, {
           method: 'GET',
           mode: 'cors',

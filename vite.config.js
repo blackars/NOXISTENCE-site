@@ -16,8 +16,8 @@ export default defineConfig({
     proxy: {
       // Redirige todas las peticiones que empiecen con /cloudinary-signature a tu backend
       '/cloudinary-signature': 'http://localhost:3100',
-      // Puedes agregar más rutas si tienes más endpoints backend
-      // '/api': 'http://localhost:3000'
+      // Proxy para todas las rutas de API a Express
+      '/api': 'http://localhost:3100'
     }
   },
   resolve: {

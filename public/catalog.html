@@ -184,7 +184,7 @@
       // Cargar criaturas y mundos únicos
       async function loadCreatures() {
         try {
-          const res = await fetch('data/creatures.json');
+          const res = await fetch('/api/creatures');
           allCreatures = await res.json();
           renderWorldOptions();
           renderCreatures();

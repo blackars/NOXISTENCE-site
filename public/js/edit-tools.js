@@ -1,5 +1,80 @@
 // edit-tools.js - Herramientas de edición para el editor de criaturas
 
+// ====== CLOUD FONTS ======
+async function fillFontSelectorUnified() {
+  const select = document.getElementById('fontSelector');
+  if (!select) return;
+  // Guardar opciones locales existentes
+  const localFonts = Array.from(select.options).map(opt => ({ value: opt.value, text: opt.textContent }));
+  select.innerHTML = '';
+  // Agregar locales primero
+  localFonts.forEach(f => {
+    const opt = document.createElement('option');
+    opt.value = f.value;
+    opt.textContent = f.text;
+    select.appendChild(opt);
+  });
+  // Ahora agregar cloud fonts
+  try {
+    const res = await fetch('/api/cloudinary-fonts-search?folder=fonts');
+    const data = await res.json();
+    const fonts = (data && Array.isArray(data.resources)) ? data.resources : [];
+    let added = 0;
+    fonts.forEach(font => {
+      if (!font.secure_url) return;
+      const ext = font.secure_url.split('.').pop().toLowerCase();
+      if (["ttf","otf","woff","woff2"].includes(ext)) {
+        const fontName = font.public_id.split('/').pop().replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
+        // Evitar duplicados
+        if (![...select.options].some(opt => opt.value === fontName)) {
+          const opt = document.createElement('option');
+          opt.value = fontName;
+          opt.textContent = fontName + ' (cloud)';
+          opt.dataset.url = font.secure_url;
+          select.appendChild(opt);
+          added++;
+        }
+      }
+    });
+    if (!added && fonts.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = 'No cloud fonts found';
+      select.appendChild(opt);
+    }
+  } catch (e) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'Error loading cloud fonts';
+    select.appendChild(opt);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', fillFontSelectorUnified);
+
+// Cuando el usuario selecciona una fuente, si es cloud la carga dinámicamente
+const fontSelector = document.getElementById('fontSelector');
+if (fontSelector) {
+  fontSelector.addEventListener('change', async function() {
+    const selected = this.selectedOptions[0];
+    if (!selected) return;
+    const url = selected.dataset.url;
+    if (url) {
+      // Es una fuente cloud, cargarla dinámicamente
+      const fontName = selected.value;
+      try {
+        const fontFace = new FontFace(fontName, `url(${url})`);
+        await fontFace.load();
+        document.fonts.add(fontFace);
+      } catch (e) {
+        alert('Error loading cloud font');
+      }
+    }
+    // Si es local, no hace falta nada especial
+  });
+}
+// ===== END CLOUD FONTS ======
+
 class EditTools {
   constructor(gridElement) {
     this.gridElement = gridElement;

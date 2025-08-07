@@ -155,7 +155,7 @@ app.use(['public/fonts', 'public/hojas', 'public/imageart'], basicAuth({
 }));
 
 // Ruta para subir imágenes
-app.post('/upload', (req, res) => {
+app.post('/api/upload', (req, res) => {
   try {
     console.log('Datos recibidos en /upload:', {
       body: req.body,
@@ -240,7 +240,7 @@ app.post('/upload', (req, res) => {
 });
 
 // Ruta para subir imágenes de arte
-app.post('/upload-art', uploadArt.single('image'), (req, res) => {
+app.post('/api/upload-art', uploadArt.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No se subió ningún archivo' });
@@ -273,7 +273,7 @@ app.post('/upload-art', uploadArt.single('image'), (req, res) => {
 });
 
 // Ruta para obtener todas las criaturas
-app.get('/creatures', (req, res) => {
+app.get('/api/creatures', (req, res) => {
   try {
     const jsonPath = 'public/data/creatures.json';
     const jsonData = fs.readFileSync(jsonPath, 'utf8');
@@ -291,7 +291,7 @@ app.get('/creatures', (req, res) => {
 });
 
 // Ruta para obtener todas las imágenes de arte
-app.get('/art', (req, res) => {
+app.get('/api/art', (req, res) => {
   try {
     const artDir = 'public/imgart/';
     const artFiles = [];
@@ -319,7 +319,7 @@ app.get('/art', (req, res) => {
 });
 
 // Ruta para eliminar una criatura
-app.delete('/creatures/:id', (req, res) => {
+app.delete('/api/creatures/:id', (req, res) => {
   try {
     const creatureId = req.params.id;
     const jsonPath = 'public/data/creatures.json';
@@ -365,7 +365,7 @@ app.delete('/creatures/:id', (req, res) => {
 });
 
 // Ruta para eliminar una imagen de arte
-app.delete('/art/:id', (req, res) => {
+app.delete('/api/art/:id', (req, res) => {
   try {
     const artId = req.params.id;
     const artDir = 'imgart/';
@@ -400,31 +400,35 @@ app.delete('/art/:id', (req, res) => {
   }
 });
 
-// Endpoint para listar archivos .json en /hojas
-app.get('/hojas-list', (req, res) => {
+// Endpoint recursivo para listar todos los archivos .json en /hojas y subcarpetas
+app.get('/api/hojas-list', (req, res) => {
   const hojasDir = path.join(__dirname, '../public/hojas');
+
+  function getJsonFilesRecursive(dir, base = '') {
+    let results = [];
+    if (!fs.existsSync(dir)) return results;
+    const list = fs.readdirSync(dir);
+    list.forEach(file => {
+      const filePath = path.join(dir, file);
+      const relPath = path.join(base, file);
+      const stat = fs.statSync(filePath);
+      if (stat && stat.isDirectory()) {
+        results = results.concat(getJsonFilesRecursive(filePath, relPath));
+      } else if (file.endsWith('.json')) {
+        results.push(relPath.replace(/\\/g, '/'));
+      }
+    });
+    return results;
+  }
+
   try {
-    if (!fs.existsSync(hojasDir)) return res.json([]);
-    const files = fs.readdirSync(hojasDir)
-      .filter(f => f.endsWith('.json'));
-    res.json(files);
+    const hojas = getJsonFilesRecursive(hojasDir);
+    res.json({ hojas });
   } catch (err) {
     res.status(500).json({ error: 'Error al leer la carpeta de hojas' });
   }
 });
 
-// Endpoint para listar archivos .json en /hojas/lore (solo archivos en esa carpeta, NO recursivo)
-app.get('/hojas-list-lore', (req, res) => {
-  const loreDir = path.join(__dirname, '../public/hojas/lore');
-  try {
-    if (!fs.existsSync(loreDir)) return res.json([]);
-    const files = fs.readdirSync(loreDir)
-      .filter(f => f.endsWith('.json'));
-    res.json(files);
-  } catch (err) {
-    res.status(500).json({ error: 'Error al leer la carpeta de lore' });
-  }
-});
 
 // Endpoint protegido para generar miniaturas de todas las colecciones
 app.post('/admin/generate-thumbnails', basicAuth({
@@ -442,8 +446,55 @@ app.post('/admin/generate-thumbnails', basicAuth({
 });
 
 // Endpoint para obtener firma de subida segura
+// Endpoint para listar archivos a enlazar
+app.get('/api/list-files', (req, res) => {
+  const targetDir = path.join(__dirname, '../public/hojas/lore');
+  fs.readdir(targetDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'No se pudo leer la carpeta', details: err.message });
+    }
+    res.json({ files });
+  });
+});
+
+// Ruta para obtener solo fuentes de Cloudinary
+app.get('/api/cloudinary-fonts', async (req, res) => {
+  const { folder = 'fonts' } = req.query;
+  try {
+    let uploadRes = { resources: [] }, rawRes = { resources: [] };
+    try {
+      uploadRes = await cloudinary.api.resources({
+        type: 'upload',
+        prefix: `${folder}/`,
+        max_results: 500,
+        context: true,
+        tags: true
+      });
+    } catch (e) { /* ignora error de upload */ }
+    try {
+      rawRes = await cloudinary.api.resources({
+        type: 'raw',
+        prefix: `${folder}/`,
+        max_results: 500,
+        context: true,
+        tags: true
+      });
+    } catch (e) { /* ignora error de raw */ }
+    const all = [...(uploadRes.resources || []), ...(rawRes.resources || [])];
+    const validExt = ['ttf', 'otf', 'woff', 'woff2'];
+    const fonts = all.filter(f => {
+      if (!f.secure_url) return false;
+      const ext = f.secure_url.split('.').pop().toLowerCase();
+      return validExt.includes(ext);
+    });
+    res.json({ success: true, folder, resources: fonts, total: fonts.length });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener fuentes de Cloudinary', message: error.message });
+  }
+});
+
 // Ruta para obtener recursos de Cloudinary
-app.get('/cloudinary-resources', async (req, res) => {
+app.get('/api/cloudinary-resources', async (req, res) => {
   console.log('Solicitud recibida en /cloudinary-resources');
   console.log('Query params:', req.query);
   console.log('Headers:', req.headers);
@@ -510,7 +561,7 @@ app.get('/cloudinary-resources', async (req, res) => {
   }
 });
 
-app.post('/cloudinary-signature', (req, res) => {
+app.post('/api/cloudinary-signature', (req, res) => {
   const { folder, resource_type, public_id } = req.body;
   const timestamp = Math.round((new Date).getTime() / 1000);
 
@@ -563,7 +614,7 @@ app.post('/cloudinary-signature', (req, res) => {
 });
 
 // Endpoint para generar firmas de Cloudinary
-app.post('/cloudinary-signature', (req, res) => {
+app.post('/api/cloudinary-signature', (req, res) => {
   try {
     const { folder = 'uploads', resource_type = 'auto', public_id } = req.body;
     const timestamp = Math.round((new Date).getTime() / 1000);
@@ -613,33 +664,69 @@ app.post('/cloudinary-signature', (req, res) => {
 
 app.use('/', fontsRoutes);
 
-generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
-
-// Endpoint para listar todos los archivos .json en public/hojas y subdirectorios
-app.get('/api/hojas-list', (req, res) => {
-  const hojasDir = path.join(__dirname, '../public/hojas');
-  function getJsonFiles(dir, baseDir = '') {
-    let results = [];
-    const list = fs.readdirSync(dir);
-    list.forEach(file => {
-      const filePath = path.join(dir, file);
-      const relPath = path.join(baseDir, file);
-      const stat = fs.statSync(filePath);
-      if (stat && stat.isDirectory()) {
-        results = results.concat(getJsonFiles(filePath, relPath));
-      } else if (file.endsWith('.json')) {
-        results.push(relPath.replace(/\\/g, '/'));
-      }
-    });
-    return results;
+// Ruta de depuración para listar todos los public_id encontrados en la carpeta fonts
+app.get('/api/cloudinary-fonts-debug', async (req, res) => {
+  const { folder = 'fonts' } = req.query;
+  let results = [];
+  let errors = [];
+  for (const type of ['upload', 'raw']) {
+    try {
+      const r = await cloudinary.api.resources({
+        type,
+        prefix: `${folder}/`,
+        max_results: 500,
+      });
+      results = results.concat((r.resources || []).map(f => ({ public_id: f.public_id, format: f.format, secure_url: f.secure_url })));
+    } catch (e) {
+      errors.push({ type, message: e.message });
+    }
   }
+  res.json({ folder, found: results.length, public_ids: results, errors });
+});
+
+// Endpoint para buscar fuentes en Cloudinary usando la API de búsqueda avanzada
+app.get('/api/cloudinary-fonts-search', async (req, res) => {
+  const { folder = 'fonts' } = req.query;
   try {
-    const files = getJsonFiles(hojasDir);
-    res.json({ hojas: files });
-  } catch (err) {
-    res.status(500).json({ error: 'No se pudieron listar las hojas', details: err.message });
+    const expression = `resource_type:raw AND folder:${folder} AND (format:ttf OR format:otf OR format:woff OR format:woff2)`;
+    const result = await cloudinary.search.expression(expression)
+      .max_results(500)
+      .execute();
+    const fonts = (result.resources || []).map(f => ({
+      public_id: f.public_id,
+      format: f.format,
+      secure_url: f.secure_url
+    }));
+    res.json({ success: true, folder, resources: fonts, total: fonts.length });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al buscar fuentes en Cloudinary', message: error.message });
   }
 });
+
+// Endpoint de depuración para listar todos los recursos de Cloudinary, sin filtro de carpeta ni tipo
+app.get('/api/cloudinary-all-debug', async (req, res) => {
+  let results = [];
+  let errors = [];
+  for (const type of ['upload', 'raw', 'image', 'video']) {
+    try {
+      const r = await cloudinary.api.resources({
+        type,
+        max_results: 500,
+      });
+      results = results.concat((r.resources || []).map(f => ({
+        public_id: f.public_id,
+        format: f.format,
+        resource_type: f.resource_type,
+        secure_url: f.secure_url
+      })));
+    } catch (e) {
+      errors.push({ type, message: e.message });
+    }
+  }
+  res.json({ found: results.length, public_ids: results, errors });
+});
+
+generateAllThumbnails(); // Esto generará las miniaturas al iniciar el servidor
 
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
