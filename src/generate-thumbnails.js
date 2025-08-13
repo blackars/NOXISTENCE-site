@@ -98,7 +98,7 @@ async function generateThumbnailForFile(file, outputDir, outputFilename = null) 
     
     // Tomar screenshot de toda la página
     await page.screenshot({ 
-      path: thumbPath, 
+      path: thumbPath,  
       fullPage: true,
       type: 'png',
       omitBackground: true
