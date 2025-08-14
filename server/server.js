@@ -38,15 +38,28 @@ app.use(cors(corsOptions));
 // Manejar preflight para todas las rutas
 app.options('*', cors(corsOptions));
 
-// Servir archivos estáticos desde la carpeta public
-app.use(express.static(path.join(__dirname, '../public'), {
+// Servir archivos estáticos desde la carpeta dist (build de Vite)
+app.use(express.static(path.join(__dirname, '../dist'), {
   setHeaders: (res, path) => {
-    // Configurar headers para archivos específicos si es necesario
+    // Configurar headers para archivos específicos
     if (path.endsWith('.js')) {
       res.set('Content-Type', 'application/javascript');
+    } else if (path.endsWith('.css')) {
+      res.set('Content-Type', 'text/css');
+    } else if (path.endsWith('.json')) {
+      res.set('Content-Type', 'application/json');
     }
-  }
+  },
+  // Cachear archivos estáticos por 1 año
+  maxAge: '1y',
+  // Permitir que se sirva index.html cuando la ruta no existe (para SPA)
+  fallthrough: true
 }));
+
+// Para cualquier otra ruta, servir index.html (útil para SPA)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+});
 
 // Middleware para parsear JSON
 app.use(express.json());

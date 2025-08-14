@@ -1,7 +1,7 @@
 node_modules
 npm-debug.log
-dist
-.DS_Store
-.env
 .git
 .gitignore
+.vscode
+dist
+!dist/**
