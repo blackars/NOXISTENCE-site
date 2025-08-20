@@ -6,7 +6,9 @@ const HOJAS_DIR = path.join(__dirname, '../public/hojas');
 const LORE_DIR = path.join(__dirname, '../public/hojas/lore');
 const THUMBNAILS_COLLECTIONS_DIR = path.join(__dirname, '../public/thumbnails/ss-collections');
 const THUMBNAILS_LORE_DIR = path.join(__dirname, '../public/thumbnails/ss-lore');
-const VIEWER_URL_BASE = 'http://localhost:3000/viewer.html?file='; // Ajusta el puerto si es diferente
+const VIEWER_URL_BASE = process.env.NODE_ENV === 'production' 
+  ? 'http://localhost:3000/viewer.html?file=' 
+  : 'http://localhost:3000/viewer.html?file='; // Mismo puerto pero ahora manejado por la variable de entorno
 const VIEWPORT_SIZE = 400; // Debe coincidir con el tamaño de miniatura
 
 // Función para esperar a que todas las imágenes se carguen

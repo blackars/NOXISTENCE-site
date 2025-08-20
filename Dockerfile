@@ -1,63 +1,38 @@
 # Usa una imagen con soporte para Puppeteer
-FROM node:18-slim
+FROM node:18-alpine
 
 # Instala dependencias del sistema para Puppeteer
-RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
     ca-certificates \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libc6 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libexpat1 \
-    libfontconfig1 \
-    libgbm1 \
-    libgcc1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    lsb-release \
-    wget \
-    xdg-utils \
-    --no-install-recommends
-
-# Instala Chrome para Puppeteer
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+    ttf-freefont \
+    nodejs \
+    yarn
 
 # Configura Puppeteer
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    NODE_ENV=production \
+    PORT=3000
 
-# Resto de tu Dockerfile..  
+# Crea el directorio de la aplicación
 WORKDIR /usr/src/app
+
+# Instala dependencias
 COPY package*.json ./
 RUN npm ci
+
+# Copia el código fuente
 COPY . .
+
+# Construye la aplicación
 RUN npm run build
+
+# Expone el puerto
 EXPOSE 3000
+
+# Define el comando de inicio
 CMD ["node", "server/server.js"]
