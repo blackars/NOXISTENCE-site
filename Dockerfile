@@ -1,38 +1,63 @@
-# Usa una imagen con soporte para Puppeteer
-FROM node:18-alpine
+# --- Etapa 1: Build ---
+# Usa una imagen de Node completa para tener todas las herramientas de build
+FROM node:20 as builder
 
-# Instala dependencias del sistema para Puppeteer
+# Establece el directorio de trabajo
+WORKDIR /usr/src/app
+
+# Copia los archivos de definición de paquetes y dependencias
+COPY package*.json ./
+
+# Instala todas las dependencias (incluyendo devDependencies para el build)
+RUN npm ci
+
+# Copia el resto del código fuente de la aplicación
+COPY . .
+
+# Ejecuta el script de build para generar los archivos de producción en /dist
+RUN npm run build
+
+
+# --- Etapa 2: Production ---
+# Empieza desde una imagen Alpine ligera para producción
+FROM node:20-alpine
+
+# Instala solo las dependencias de sistema necesarias para Puppeteer en producción
 RUN apk add --no-cache \
     chromium \
     nss \
     freetype \
     harfbuzz \
     ca-certificates \
-    ttf-freefont \
-    nodejs \
-    yarn
+    ttf-freefont
 
-# Configura Puppeteer
+# Configura las variables de entorno para producción
+# - PUPPETEER_* para usar el Chromium del sistema
+# - NODE_ENV=production para optimizaciones de Node
+# - PORT se tomará de Cloud Run, pero definimos un EXPOSE para documentación/local
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=production \
-    PORT=3000
+    NODE_ENV=production
 
-# Crea el directorio de la aplicación
+# Establece el directorio de trabajo
 WORKDIR /usr/src/app
 
-# Instala dependencias
-COPY package*.json ./
-RUN npm ci
+# Copia los archivos de definición de paquetes desde la etapa de build
+COPY --from=builder /usr/src/app/package*.json ./
 
-# Copia el código fuente
-COPY . .
+# Instala ÚNICAMENTE las dependencias de producción
+RUN npm ci --omit=dev
 
-# Construye la aplicación
-RUN npm run build
+# Copia los artefactos de build (la carpeta dist) desde la etapa de build
+COPY --from=builder /usr/src/app/dist ./dist
 
-# Expone el puerto
-EXPOSE 3000
+# Copia el código del servidor y los scripts que necesita para correr
+COPY --from=builder /usr/src/app/server ./server
+COPY --from=builder /usr/src/app/src ./src
 
-# Define el comando de inicio
+# Expone el puerto 8080, el default que usa Cloud Run. 
+# Tu app escuchará en el valor de process.env.PORT
+EXPOSE 8080
+
+# Define el comando de inicio del servidor
 CMD ["node", "server/server.js"]

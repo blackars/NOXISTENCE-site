@@ -64,8 +64,41 @@ async function deleteFromCloudinary(publicId) {
   }
 }
 
+/**
+ * Sube un buffer de imagen a Cloudinary.
+ * @param {Buffer} buffer - El buffer de la imagen a subir.
+ * @param {string} folder - La carpeta de destino en Cloudinary.
+ * @param {string} publicId - El ID público para el recurso en Cloudinary.
+ * @returns {Promise<object>} El resultado de la operación de subida.
+ */
+function uploadBufferToCloudinary(buffer, folder, publicId) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      folder: folder,
+      public_id: publicId,
+      resource_type: 'image',
+      overwrite: true,
+    };
+
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) {
+        console.error('Error al subir buffer a Cloudinary:', error);
+        return reject(error);
+      }
+      resolve(result);
+    });
+
+    const readableStream = new Readable();
+    readableStream._read = () => {};
+    readableStream.push(buffer);
+    readableStream.push(null);
+    readableStream.pipe(stream);
+  });
+}
+
 module.exports = {
   uploadToCloudinary,
   deleteFromCloudinary,
+  uploadBufferToCloudinary,
   cloudinary
 };

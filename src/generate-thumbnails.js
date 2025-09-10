@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
+const { uploadBufferToCloudinary } = require('../server/cloudinary');
 
 const HOJAS_DIR = path.join(__dirname, '../public/hojas');
 const LORE_DIR = path.join(__dirname, '../public/hojas/lore');
-const THUMBNAILS_COLLECTIONS_DIR = path.join(__dirname, '../public/thumbnails/ss-collections');
-const THUMBNAILS_LORE_DIR = path.join(__dirname, '../public/thumbnails/ss-lore');
+
 const VIEWER_URL_BASE = process.env.NODE_ENV === 'production' 
   ? 'http://localhost:3000/viewer.html?file=' 
   : 'http://localhost:3000/viewer.html?file='; // Mismo puerto pero ahora manejado por la variable de entorno
@@ -29,7 +29,7 @@ async function waitForImages(page) {
   });
 }
 
-async function generateThumbnailForFile(file, outputDir, outputFilename = null) {
+async function generateThumbnailForFile(file, cloudinaryFolder) {
   const browser = await puppeteer.launch({ 
     headless: 'new', 
     args: [
@@ -44,19 +44,14 @@ async function generateThumbnailForFile(file, outputDir, outputFilename = null) 
   const page = await browser.newPage();
   
   try {
-    // Configurar el viewport
     await page.setViewport({ 
       width: 1600, 
       height: 900,
       deviceScaleFactor: 1
     });
     
-    // Habilitar request interception para manejar peticiones de recursos
     await page.setRequestInterception(true);
-    
-    // Manejar peticiones para evitar cargar recursos innecesarios
     page.on('request', (request) => {
-      // Bloquear ciertos tipos de recursos que no son necesarios para las miniaturas
       const resourceType = request.resourceType();
       if (['font', 'media', 'websocket'].includes(resourceType)) {
         request.abort();
@@ -65,91 +60,82 @@ async function generateThumbnailForFile(file, outputDir, outputFilename = null) 
       }
     });
     
-    // Navegar a la página
     const url = VIEWER_URL_BASE + encodeURIComponent(file);
     console.log(`Navegando a: ${url}`);
     
     await page.goto(url, { 
       waitUntil: ['domcontentloaded', 'networkidle0'],
-      timeout: 120000 // Aumentar el timeout a 2 minutos
+      timeout: 120000
     });
     
-    // Esperar a que el grid esté visible
     console.log('Esperando a que el grid esté visible...');
     await page.waitForSelector('#grid', { 
       visible: true, 
       timeout: 30000 
     });
     
-    // Esperar a que todas las imágenes se carguen
     console.log('Esperando a que las imágenes se carguen...');
     await waitForImages(page);
     
-    // Esperar un poco más para asegurar que todo esté renderizado
     console.log('Esperando renderizado adicional...');
     await new Promise(r => setTimeout(r, 3000));
-    
-    // Crear el directorio de salida si no existe
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-    
-    // Tomar el screenshot
-    const thumbPath = path.join(outputDir, (outputFilename || file).replace(/\.json$/, '.png'));
-    console.log(`Guardando miniatura en: ${thumbPath}`);
-    
-    // Tomar screenshot de toda la página
-    await page.screenshot({ 
-      path: thumbPath,  
-      fullPage: true,
+
+    // Tomar screenshot en un buffer
+    const buffer = await page.screenshot({ 
       type: 'png',
-      omitBackground: true
+      omitBackground: true,
+      fullPage: true
     });
+
+    // Subir el buffer a Cloudinary
+    const publicId = path.basename(file, '.json');
+    console.log(`Subiendo miniatura a Cloudinary: ${cloudinaryFolder}/${publicId}`);
     
-    console.log('Miniatura generada exitosamente');
-    return thumbPath;
+    const result = await uploadBufferToCloudinary(buffer, cloudinaryFolder, publicId);
+    
+    console.log('Miniatura subida exitosamente a Cloudinary:', result.secure_url);
+    return result.secure_url;
     
   } catch (error) {
-    console.error('Error al generar la miniatura:', error);
-    throw error; // Relanzar el error para manejarlo en el llamador
+    console.error('Error al generar y subir la miniatura:', error);
+    throw error;
   } finally {
-    // Cerrar el navegador
     await browser.close();
   }
 }
 
 async function generateAllThumbnailsCollections() {
-  if (!fs.existsSync(THUMBNAILS_COLLECTIONS_DIR)) fs.mkdirSync(THUMBNAILS_COLLECTIONS_DIR, { recursive: true });
+  if (!fs.existsSync(HOJAS_DIR)) {
+      console.log('No existe la carpeta /public/hojas, no se generan miniaturas de colecciones.');
+      return;
+  }
   const files = fs.readdirSync(HOJAS_DIR).filter(f => f.endsWith('.json'));
   for (const file of files) {
     try {
-      console.log('[collections] Generando miniatura para', file);
-      await generateThumbnailForFile(file, THUMBNAILS_COLLECTIONS_DIR);
+      console.log('[collections] Procesando miniatura para', file);
+      await generateThumbnailForFile(file, 'ss-collections');
     } catch (e) {
       console.error('Error con', file, e);
     }
   }
-  console.log('Miniaturas de colecciones generadas.');
+  console.log('Proceso de miniaturas de colecciones completado.');
 }
 
 async function generateAllThumbnailsLore() {
-  if (!fs.existsSync(THUMBNAILS_LORE_DIR)) fs.mkdirSync(THUMBNAILS_LORE_DIR, { recursive: true });
   if (!fs.existsSync(LORE_DIR)) {
-    console.log('No existe la carpeta hojas/lore, no se generan miniaturas de lore.');
+    console.log('No existe la carpeta /public/hojas/lore, no se generan miniaturas de lore.');
     return;
   }
   const files = fs.readdirSync(LORE_DIR).filter(f => f.endsWith('.json'));
   for (const file of files) {
     try {
-      console.log('[lore] Generando miniatura para', file);
-      // Remove 'lore/' from the output filename
-      const outputFilename = file.replace(/^lore\//, '');
-      await generateThumbnailForFile('lore/' + file, THUMBNAILS_LORE_DIR, outputFilename);
+      console.log('[lore] Procesando miniatura para', file);
+      await generateThumbnailForFile('lore/' + file, 'ss-lore');
     } catch (e) {
       console.error('Error con', file, e);
     }
   }
-  console.log('Miniaturas de lore generadas.');
+  console.log('Proceso de miniaturas de lore completado.');
 }
 
 if (require.main === module) {
