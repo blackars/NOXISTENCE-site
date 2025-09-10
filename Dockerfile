@@ -20,31 +20,28 @@ RUN npm run build
 
 # --- Etapa 2: Production ---
 # Empieza desde una imagen Alpine ligera para producción
-FROM node:20-alpine
+FROM node:20
 
-# Instala solo las dependencias de sistema necesarias para Puppeteer en producción
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont
+# Elimina las instalaciones de Puppeteer/Chromium y sus variables de entorno
+# RUN apk add --no-cache \
+#     chromium \
+#     nss \
+#     freetype \
+#     harfbuzz \
+#     ca-certificates \
+#     ttf-freefont
 
-# Configura las variables de entorno para producción
-# - PUPPETEER_* para usar el Chromium del sistema
-# - NODE_ENV=production para optimizaciones de Node
-# - PORT se tomará de Cloud Run, pero definimos un EXPOSE para documentación/local
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
-    NODE_ENV=production
+# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+#     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+#     NODE_ENV=production
+
+ENV NODE_ENV=production
 
 # Establece el directorio de trabajo
 WORKDIR /usr/src/app
 
 # Copia los archivos de definición de paquetes desde la etapa de build
-COPY --from=builder /usr/src/app/package*.json ./
-
+COPY --from=builder /usr/src/app/package*.json .
 # Instala ÚNICAMENTE las dependencias de producción
 RUN npm ci --omit=dev
 

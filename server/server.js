@@ -13,17 +13,8 @@ const app = express();
 const port = process.env.PORT || 3100;
 
 // Configuración CORS flexible para producción y desarrollo
-const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS ? process.env.CORS_ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://127.0.0.1:3000'];
-
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      const msg = 'El origen de la petición no está permitido por CORS';
-      callback(new Error(msg), false);
-    }
-  },
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
@@ -32,6 +23,11 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
+
+app.use((req, res, next) => {
+  console.log('Request path:', req.path);
+  next();
+});
 
 // Servir archivos estáticos desde la carpeta dist (build de Vite)
 app.use(express.static(path.join(__dirname, '../dist')));
@@ -133,36 +129,36 @@ app.delete('/api/art/:id', async (req, res) => {
 // --- y deben ser migradas a una base de datos para funcionar en Cloud Run. ---
 
 // Función auxiliar para limpiar tags de criaturas (si aplica)
-function cleanCreaturesTags(creatures) {
-  return creatures.map(creature => {
-    const { tags, ...creatureWithoutTags } = creature;
-    return creatureWithoutTags;
-  });
-}
+// function cleanCreaturesTags(creatures) {
+//   return creatures.map(creature => {
+//     const { tags, ...creatureWithoutTags } = creature;
+//     return creatureWithoutTags;
+//   });
+// }
 
-// Ruta para subir data de criaturas (escribe en creatures.json)
-app.post('/api/upload', (req, res) => {
-  try {
-    const creature = req.body;
-    if (!creature || !creature.name || !creature.img) {
-      return res.status(400).json({ error: 'Datos de criatura inválidos' });
-    }
-    const jsonPath = path.join(__dirname, '../public/data/creatures.json');
-    const dirPath = path.dirname(jsonPath);
-    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
+// Ruta para subir data de criaturas (escribe en creatures.json) - DESHABILITADA PARA CLOUD RUN
+// app.post('/api/upload', (req, res) => {
+//   try {
+//     const creature = req.body;
+//     if (!creature || !creature.name || !creature.img) {
+//       return res.status(400).json({ error: 'Datos de criatura inválidos' });
+//     }
+//     const jsonPath = path.join(__dirname, '../public/data/creatures.json');
+//     const dirPath = path.dirname(jsonPath);
+//     if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
     
-    let creatures = [];
-    if (fs.existsSync(jsonPath)) {
-      const jsonData = fs.readFileSync(jsonPath, 'utf8');
-      creatures = JSON.parse(jsonData);
-    }
-    creatures.push(creature);
-    fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
-    res.json({ success: true, creature });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+//     let creatures = [];
+//     if (fs.existsSync(jsonPath)) {
+//       const jsonData = fs.readFileSync(jsonPath, 'utf8');
+//       creatures = JSON.parse(jsonData);
+//     }
+//     creatures.push(creature);
+//     fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
+//     res.json({ success: true, creature });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 // Ruta para obtener todas las criaturas (lee de creatures.json)
 app.get('/api/creatures', (req, res) => {
@@ -179,36 +175,36 @@ app.get('/api/creatures', (req, res) => {
   }
 });
 
-// Ruta para eliminar una criatura (modifica creatures.json y borra archivo local)
-app.delete('/api/creatures/:id', (req, res) => {
-  try {
-    const creatureId = req.params.id;
-    const jsonPath = path.join(__dirname, '../public/data/creatures.json');
-    let creatures = [];
-    if (fs.existsSync(jsonPath)) {
-        const jsonData = fs.readFileSync(jsonPath, 'utf8');
-        creatures = JSON.parse(jsonData);
-    }
+// Ruta para eliminar una criatura (modifica creatures.json y borra archivo local) - DESHABILITADA PARA CLOUD RUN
+// app.delete('/api/creatures/:id', (req, res) => {
+//   try {
+//     const creatureId = req.params.id;
+//     const jsonPath = path.join(__dirname, '../public/data/creatures.json');
+//     let creatures = [];
+//     if (fs.existsSync(jsonPath)) {
+//         const jsonData = fs.readFileSync(jsonPath, 'utf8');
+//         creatures = JSON.parse(jsonData);
+//     }
 
-    const creatureIndex = creatures.findIndex(c => c.id === creatureId);
-    if (creatureIndex === -1) {
-      return res.status(404).json({ error: 'Criatura no encontrada' });
-    }
+//     const creatureIndex = creatures.findIndex(c => c.id === creatureId);
+//     if (creatureIndex === -1) {
+//       return res.status(404).json({ error: 'Criatura no encontrada' });
+//     }
 
-    const creature = creatures[creatureIndex];
-    // ATENCIÓN: Esta parte asume que creature.img es una ruta local.
-    // Si la imagen está en Cloudinary, se necesita el public_id para borrarla.
-    if (creature.img && fs.existsSync(creature.img)) {
-      fs.unlinkSync(creature.img);
-    }
+//     const creature = creatures[creatureIndex];
+//     // ATENCIÓN: Esta parte asume que creature.img es una ruta local.
+//     // Si la imagen está en Cloudinary, se necesita el public_id para borrarla.
+//     if (creature.img && fs.existsSync(creature.img)) {
+//       fs.unlinkSync(creature.img);
+//     }
 
-    creatures.splice(creatureIndex, 1);
-    fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
-    res.json({ success: true, message: 'Criatura eliminada correctamente' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error interno del servidor' });
-  }
-});
+//     creatures.splice(creatureIndex, 1);
+//     fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
+//     res.json({ success: true, message: 'Criatura eliminada correctamente' });
+//   } catch (error) {
+//     res.status(500).json({ error: 'Error interno del servidor' });
+//   }
+// });
 
 // --- Fin de las rutas que escriben en disco ---
 
@@ -234,5 +230,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+  console.log(`Servidor corriendo en el puerto ${port}`);
 });
