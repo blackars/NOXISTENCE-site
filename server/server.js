@@ -84,8 +84,13 @@ app.get('/api/list-fonts', (req, res) => {
 
 // Ruta para generar la firma de Cloudinary para subidas directas desde el frontend
 app.post('/api/cloudinary-signature', (req, res) => {
-  const { folder, resource_type, public_id } = req.body;
+  let { folder, resource_type, public_id } = req.body;
   const timestamp = Math.round((new Date).getTime() / 1000);
+
+  // Sanitize public_id: remove non-alphanumeric characters, convert to lowercase
+  if (public_id) {
+    public_id = public_id.toLowerCase().replace(/[^a-z0-9_.-]/g, '');
+  }
 
   const params = {
     timestamp: timestamp,
