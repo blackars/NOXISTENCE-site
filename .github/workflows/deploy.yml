@@ -1,0 +1,60 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - docker # O la rama que uses para tus despliegues (ej. master, develop)
+
+env:
+  PROJECT_ID: noxistence-site-v1 # Reemplaza con tu ID de proyecto de GCP
+  SERVICE_NAME: noxistence-site # Reemplaza con el nombre de tu servicio de Cloud Run
+  REGION: us-central1 # Reemplaza con la región de tu servicio de Cloud Run (ej. us-central1, europe-west1)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Authenticate to Google Cloud
+        id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Build and push Docker image
+        run: |
+          # Configura Docker para usar gcloud como asistente de credenciales
+          gcloud auth configure-docker
+
+          # Construye la imagen Docker
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
+
+          # Sube la imagen al Container Registry
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated # O --no-allow-unauthenticated si tu servicio requiere autenticación
+            # Añade aquí cualquier otra configuración de Cloud Run que necesites, ej:
+            # --port 8080 \
+            # --set-env-vars KEY=VALUE \
+            # --memory 512Mi \
+            # --cpu 1 \
+            # --min-instances 0 \
+            # --max-instances 1
