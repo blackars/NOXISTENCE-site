@@ -1884,16 +1884,13 @@
     });
 
     // --- Cloudinary Secure Upload ---
-    async function getCloudinarySignature({ folder = 'uploads', resource_type = 'auto', public_id = undefined }) {
-      // For raw resources (fonts), we need to specify the correct parameters
-      if (resource_type === 'raw') {
-        folder = 'fonts';
-      }
+    async function getCloudinarySignature({ folder = 'uploads', public_id = undefined }) {
+      // No need to check resource_type here, as it's not part of signature
       
       const res = await fetch('/api/cloudinary-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folder, resource_type, public_id })
+        body: JSON.stringify({ folder, public_id }) // Removed resource_type from body
       });
       if (!res.ok) {
         throw new Error('Error uploading to Cloudinary');
@@ -1902,10 +1899,11 @@
       return response;
     }
 
-    async function uploadToCloudinary(file, resource_type = 'auto', folder = 'uploads', public_id = undefined) {
+        async function uploadToCloudinary(file, resource_type_arg = 'auto', folder = 'uploads', public_id = undefined) { // Renamed resource_type to resource_type_arg to avoid confusion
       try {
         // 1. Obtener la firma y datos necesarios del backend
-        const params = await getCloudinarySignature({ folder, resource_type, public_id });
+        // Pass only folder and public_id to getCloudinarySignature
+        const params = await getCloudinarySignature({ folder, public_id });
 
         // 2. Crear el FormData SOLO con los campos devueltos por el backend
         const formData = new FormData();
@@ -1919,7 +1917,8 @@
         // resource_type NO se envía en el formData, solo se usa en la URL
 
         // 3. Construir la URL correcta para el tipo de recurso
-        const url = `https://api.cloudinary.com/v1_1/${params.cloudName}/${params.resource_type || 'auto'}/upload`;
+        // Use resource_type_arg directly, as it's not part of the signed params
+        const url = `https://api.cloudinary.com/v1_1/${params.cloudName}/${resource_type_arg || 'auto'}/upload`;
 
         // 4. Hacer la petición
         const res = await fetch(url, {
@@ -1928,7 +1927,7 @@
         });
 
         if (!res.ok) {
-          const error = await res.text(); // Cambiado a text() para capturar cualquier respuesta
+          const error = await res.text();
           throw new Error(`Error al subir a Cloudinary: ${error}`);
         }
 

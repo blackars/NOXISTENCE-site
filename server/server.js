@@ -95,7 +95,7 @@ app.post('/api/cloudinary-signature', (req, res) => {
   const params = {
     timestamp: timestamp,
     folder: folder,
-    resource_type: resource_type,
+    // resource_type: resource_type, // Removed from signature params
   };
   if (public_id) {
     params.public_id = public_id;
@@ -109,7 +109,7 @@ app.post('/api/cloudinary-signature', (req, res) => {
     cloudName: process.env.CLOUDINARY_CLOUD_NAME,
     apiKey: process.env.CLOUDINARY_API_KEY,
     folder: folder,
-    resource_type: resource_type,
+    resource_type: resource_type, // Still include in response if needed by client
     public_id: public_id // Incluir public_id si se proporcionó
   });
 });
