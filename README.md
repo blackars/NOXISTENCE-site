@@ -89,3 +89,4 @@ npm run dev
 - El JSON se actualiza automáticamente al subir/eliminar criaturas
 - Los layouts se guardan en localStorage del navegador
 - El sistema es compatible con tu estructura JSON existente 
+- datos extra
