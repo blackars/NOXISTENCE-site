@@ -91,81 +91,94 @@ function scrollToSection(index) {
 
 // Función para inicializar todo cuando el DOM esté listo
 function initApp() {
-  console.log('Initializing app...');
-  
-  // Inicializar Lenis
-  initLenis();
-  
-  // Buscar secciones después de que el DOM esté listo
-  sections = Array.from(document.querySelectorAll('.section'));
-  console.log('Sections found:', sections.length);
-  
-  // Dividir texto en palabras
-  splitTextToWordSpans('.smoke-text');
-  
-  // Configurar event listeners
-  setupEventListeners();
-  
-  // Revelar secciones
-  revealSections();
-  
-  // Cargar footer
+  // Only run section-specific logic on index.html
+  if (window.location.pathname.endsWith('/index.html') || window.location.pathname === '/') {
+    // Inicializar Lenis
+    initLenis();
+
+    // Buscar secciones después de que el DOM esté listo
+    sections = Array.from(document.querySelectorAll('.section'));
+
+    // Dividir texto en palabras
+    splitTextToWordSpans('.smoke-text');
+
+    // Configurar event listeners
+    setupEventListeners();
+
+    // Revelar secciones
+    revealSections();
+
+    // Al cargar, encaja en la primera sección
+    if (sections.length > 0) {
+      lenis.scrollTo(sections[0], { immediate: true });
+      currentSection = 0;
+    }
+
+    // Animación del icono The Creator
+    const creatorIcon = document.querySelector('.creator-icon');
+    if (creatorIcon) {
+      gsap.to(creatorIcon, {
+        opacity: 1,
+        duration: 1.5,
+        ease: 'power2.inOut',
+        onComplete: function() {
+          gsap.to(creatorIcon, {
+            x: 40,
+            yoyo: true,
+            repeat: -1,
+            duration: 2,
+            ease: 'sine.inOut'
+          });
+          gsap.to(creatorIcon, {
+            scale: 1.3,
+            yoyo: true,
+            repeat: -1,
+            duration: 1.8,
+            ease: 'sine.inOut'
+          });
+          gsap.to(creatorIcon, {
+            rotation: 15,
+            yoyo: true,
+            repeat: -1,
+            duration: 1.2,
+            ease: 'sine.inOut'
+          });
+          gsap.to(creatorIcon, {
+            opacity: 0.5,
+            yoyo: true,
+            repeat: -1,
+            duration: 2.5,
+            ease: 'sine.inOut'
+          });
+        }
+      });
+    }
+  }
+
+  // Cargar footer (this should run on all pages where footer is needed)
   fetch('footer.html')
-    .then(r => r.text())
-    .then(html => { document.getElementById('footer-container').innerHTML = html; });
-  
-  // Al cargar, encaja en la primera sección
-  if (sections.length > 0) {
-    lenis.scrollTo(sections[0], { immediate: true });
-    currentSection = 0;
-  }
-  
-  // Animación del icono The Creator
-  const creatorIcon = document.querySelector('.creator-icon');
-  if (creatorIcon) {
-    gsap.to(creatorIcon, {
-      opacity: 1,
-      duration: 1.5,
-      ease: 'power2.inOut',
-      onComplete: function() {
-        gsap.to(creatorIcon, {
-          x: 40,
-          yoyo: true,
-          repeat: -1,
-          duration: 2,
-          ease: 'sine.inOut'
-        });
-        gsap.to(creatorIcon, {
-          scale: 1.3,
-          yoyo: true,
-          repeat: -1,
-          duration: 1.8,
-          ease: 'sine.inOut'
-        });
-        gsap.to(creatorIcon, {
-          rotation: 15,
-          yoyo: true,
-          repeat: -1,
-          duration: 1.2,
-          ease: 'sine.inOut'
-        });
-        gsap.to(creatorIcon, {
-          opacity: 0.5,
-          yoyo: true,
-          repeat: -1,
-          duration: 2.5,
-          ease: 'sine.inOut'
-        });
+    .then(r => {
+      if (!r.ok) {
+        throw new Error(`HTTP error! status: ${r.status}`);
       }
+      return r.text();
+    })
+    .then(html => {
+      // Validate content before injecting
+      if (html.includes('<html') || html.includes('<head') || html.includes('<body')) {
+        throw new Error('Unexpected full document received instead of footer fragment.');
+      }
+      document.getElementById('footer-container').innerHTML = html;
+    })
+    .catch(error => {
+      console.error('Error loading footer:', error);
     });
-  }
 }
 
 // Configurar event listeners
 function setupEventListeners() {
   // Detecta scroll de rueda
   window.addEventListener('wheel', (e) => {
-    console.log('Wheel event, isScrolling:', isScrolling, 'deltaY:', e.deltaY);
     if (isScrolling) return;
     if (e.deltaY > 0) {
       scrollToSection(currentSection + 1);
@@ -203,4 +216,4 @@ function setupEventListeners() {
 }
 
 // Inicializar cuando el DOM esté listo
-window.addEventListener('DOMContentLoaded', initApp); 
+window.addEventListener('DOMContentLoaded', initApp);

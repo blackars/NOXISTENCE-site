@@ -15,6 +15,8 @@ export default defineConfig({
         lore: resolve(__dirname, 'public/lore.html'),
         viewer: resolve(__dirname, 'public/viewer.html'),
         404: resolve(__dirname, 'public/404.html'),
+        // Add footer.html here
+        footer: resolve(__dirname, 'public/footer.html'), // <-- NEW LINE
       }
     }
   },
