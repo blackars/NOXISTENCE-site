@@ -14,7 +14,7 @@ const port = process.env.PORT || 3100;
 
 // Configuración CORS flexible para producción y desarrollo
 const corsOptions = {
-  origin: '*',
+  origin: 'https://noxistence-site-867269891625.us-central1.run.app', // URL del frontend hardcodeada
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
