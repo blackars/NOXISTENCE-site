@@ -66,6 +66,40 @@ const upload = multer({
 
 // --- RUTAS DE API ---
 
+// Ruta para listar archivos JSON en hojas/
+app.get('/api/hojas-list-collections', (req, res) => {
+  try {
+    const hojasPath = path.join(__dirname, '../dist/hojas'); // Path to the copied 'hojas' directory
+    if (!fs.existsSync(hojasPath)) {
+      return res.json([]); // Return empty array if directory doesn't exist
+    }
+    const files = fs.readdirSync(hojasPath)
+      .filter(file => file.endsWith('.json'))
+      .map(file => file); // Just return the filename
+    res.json(files);
+  } catch (error) {
+    console.error('Error al listar colecciones:', error);
+    res.status(500).json({ error: 'Error al listar colecciones' });
+  }
+});
+
+// Ruta para listar archivos JSON en hojas/lore/
+app.get('/api/hojas-list-lore', (req, res) => {
+  try {
+    const hojasLorePath = path.join(__dirname, '../dist/hojas/lore'); // Path to the copied 'hojas/lore' directory
+    if (!fs.existsSync(hojasLorePath)) {
+      return res.json([]); // Return empty array if directory doesn't exist
+    }
+    const files = fs.readdirSync(hojasLorePath)
+      .filter(file => file.endsWith('.json'))
+      .map(file => file); // Just return the filename
+    res.json(files);
+  } catch (error) {
+    console.error('Error al listar artículos de lore:', error);
+    res.status(500).json({ error: 'Error al listar artículos de lore' });
+  }
+});
+
 // Ruta para subir imágenes de arte directamente a Cloudinary
 app.post('/api/upload-art', upload.single('image'), (req, res) => {
   if (!req.file) {
