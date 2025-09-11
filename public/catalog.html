@@ -439,7 +439,7 @@
       // Llenar el select de colecciones/hojas
       async function loadSheets() {
         try {
-          const res = await fetch('data/catalog.json');
+          const res = await fetch('/api/data/catalog');
           const files = await res.json();
           
           // Add default option

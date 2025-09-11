@@ -1539,36 +1539,49 @@
       const selector = document.getElementById('fontSelector');
       const panelSelector = document.getElementById('textFontFamily');
       try {
-        const res = await fetch('fonts/fonts.json');
-        const fontFiles = await res.json();
+        // Fetch from the new API endpoint
+        const res = await fetch('/api/data/fonts'); 
+        const fontData = await res.json();
         
-        for (const font of fontFiles) {
+        // The server returns an empty array if the file doesn't exist, so this check is fine.
+        if (!Array.isArray(fontData)) {
+            console.warn('Font data is not an array:', fontData);
+            return;
+        }
+
+        for (const font of fontData) {
           try {
-            const fontUrl = `fonts/${font}`;
-            const cleanName = font.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
-            const fontFace = new FontFace(cleanName, `url(${fontUrl})`);
+            // The new structure provides a name and a full URL
+            const fontName = font.name;
+            const fontUrl = font.url;
+
+            // Create and load the FontFace
+            const fontFace = new FontFace(fontName, `url(${fontUrl})`);
             await fontFace.load();
             document.fonts.add(fontFace);
             
-            if (![...selector.options].some(opt => opt.value === cleanName)) {
+            // Add the font to the dropdown selectors if not already present
+            if (![...selector.options].some(opt => opt.value === fontName)) {
               const opt = document.createElement('option');
-              opt.value = cleanName;
-              opt.textContent = cleanName;
+              opt.value = fontName;
+              opt.textContent = fontName;
               selector.appendChild(opt);
             }
             
-            if (![...panelSelector.options].some(opt => opt.value === cleanName)) {
+            if (![...panelSelector.options].some(opt => opt.value === fontName)) {
               const panelOpt = document.createElement('option');
-              panelOpt.value = cleanName;
-              panelOpt.textContent = cleanName;
+              panelOpt.value = fontName;
+              panelOpt.textContent = fontName;
               panelSelector.appendChild(panelOpt);
             }
           } catch (e) {
+            console.error(`Error loading font "${font.name}":`, e);
             continue;
           }
         }
       } catch (e) {
-        // Si no hay fonts.json, usar solo las fuentes estándar
+        console.error('Failed to fetch or process custom fonts:', e);
+        // If fetching fails, just use standard fonts
       }
     }
 

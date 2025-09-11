@@ -296,19 +296,108 @@ app.delete('/api/art/:id', async (req, res) => {
   }
 });
 
-// Ruta para obtener todas las criaturas (lee de creatures.json)
-app.get('/api/creatures', (req, res) => {
+app.post('/api/upload', async (req, res) => {
   try {
-    const jsonPath = path.join(__dirname, '../public/data/creatures.json');
-    if (fs.existsSync(jsonPath)) {
-        const jsonData = fs.readFileSync(jsonPath, 'utf8');
-        res.json(JSON.parse(jsonData));
+    const creatureData = req.body;
+    if (!creatureData || Object.keys(creatureData).length === 0) {
+      return res.status(400).json({ error: 'No se proporcionaron datos de criatura.' });
+    }
+
+    const creaturesPublicId = 'data/creatures.json';
+    let creatures = [];
+
+    try {
+      // Intentar leer el JSON existente de Cloudinary
+      const existingDataUrl = cloudinary.url(creaturesPublicId, { resource_type: 'raw', secure: true });
+      const response = await fetch(existingDataUrl);
+      if (response.ok) {
+        const existingJson = await response.json();
+        if (Array.isArray(existingJson)) {
+          creatures = existingJson;
+        }
+      } else if (response.status !== 404) { // If not found, it's okay, we start with empty array
+        throw new Error(`Error al leer el archivo existente de Cloudinary: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.warn(`No se pudo leer ${creaturesPublicId} de Cloudinary, se creará uno nuevo. Error: ${error.message}`);
+      // Continue with empty array if file not found or error
+    }
+
+    // Add new creature
+    creatures.push(creatureData);
+
+    // Upload updated JSON to Cloudinary
+    const jsonString = JSON.stringify(creatures, null, 2);
+    const buffer = Buffer.from(jsonString, 'utf8');
+
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'data', // Folder in Cloudinary
+          public_id: 'creatures', // Specific public_id for creatures.json
+          resource_type: 'raw', // Upload as raw file
+          format: 'json',       // Ensure it's saved with .json extension
+          overwrite: true       // Overwrite if already exists
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(buffer);
+    });
+
+    res.json({
+      success: true,
+      message: 'Datos de criatura subidos correctamente a Cloudinary',
+      public_id: uploadResult.public_id,
+      url: uploadResult.secure_url
+    });
+
+  } catch (error) {
+    console.error('Error en la ruta /api/upload:', error);
+    res.status(500).json({ error: 'Error interno del servidor al subir datos de criatura.' });
+  }
+});
+
+// Ruta para obtener todas las criaturas (lee de Cloudinary)
+app.get('/api/creatures', async (req, res) => {
+  await readJsonFromCloudinary('data/creatures.json', res);
+});
+
+// Helper function to read JSON from Cloudinary
+async function readJsonFromCloudinary(publicId, res) {
+  try {
+    const dataUrl = cloudinary.url(publicId, { resource_type: 'raw', secure: true });
+    const response = await fetch(dataUrl);
+
+    if (response.ok) {
+      const data = await response.json();
+      res.json(data);
+    } else if (response.status === 404) {
+      res.json([]); // Return empty array if file not found
     } else {
-        res.json([]);
+      throw new Error(`Error al leer ${publicId} de Cloudinary: ${response.statusText}`);
     }
   } catch (error) {
-    res.status(500).json({ error: 'Error al leer el archivo JSON' });
+    console.error(`Error al leer ${publicId} de Cloudinary:`, error);
+    res.status(500).json({ error: `Error al leer ${publicId} de Cloudinary` });
   }
+}
+
+// Ruta para obtener datos de lore (lee de Cloudinary)
+app.get('/api/data/lore', async (req, res) => {
+  await readJsonFromCloudinary('data/lore.json', res);
+});
+
+// Ruta para obtener datos de catálogo (lee de Cloudinary)
+app.get('/api/data/catalog', async (req, res) => {
+  await readJsonFromCloudinary('data/catalog.json', res);
+});
+
+// Ruta para obtener datos de fuentes (lee de Cloudinary)
+app.get('/api/data/fonts', async (req, res) => {
+  await readJsonFromCloudinary('data/fonts.json', res);
 });
 
 
