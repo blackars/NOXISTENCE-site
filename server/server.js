@@ -66,6 +66,139 @@ const upload = multer({
 
 // --- RUTAS DE API ---
 
+// Ruta para listar fuentes desde public/fonts/fonts.json
+app.get('/api/list-fonts', (req, res) => {
+  try {
+    const fontsJsonPath = path.join(__dirname, '../public/fonts/fonts.json');
+    if (fs.existsSync(fontsJsonPath)) {
+      const jsonData = fs.readFileSync(fontsJsonPath, 'utf8');
+      res.json(JSON.parse(jsonData));
+    } else {
+      res.json([]); // Return empty array if file doesn't exist
+    }
+  } catch (error) {
+    console.error('Error al listar fuentes:', error);
+    res.status(500).json({ error: 'Error al listar fuentes' });
+  }
+});
+
+// Ruta para generar la firma de Cloudinary para subidas directas desde el frontend
+app.post('/api/cloudinary-signature', (req, res) => {
+  const { folder, resource_type, public_id } = req.body;
+  const timestamp = Math.round((new Date).getTime() / 1000);
+
+  const params = {
+    timestamp: timestamp,
+    folder: folder,
+    resource_type: resource_type,
+  };
+  if (public_id) {
+    params.public_id = public_id;
+  }
+
+  const signature = cloudinary.utils.api_sign_request(params, process.env.CLOUDINARY_API_SECRET);
+
+  res.json({
+    signature: signature,
+    timestamp: timestamp,
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    folder: folder,
+    resource_type: resource_type,
+    public_id: public_id // Incluir public_id si se proporcionó
+  });
+});
+
+
+// Ruta para listar recursos de Cloudinary por carpeta
+app.get('/api/list-assets', async (req, res) => {
+  try {
+    const folder = req.query.folder || ''; // Obtener la carpeta de los parámetros de consulta
+    const resourceType = req.query.resource_type || 'image'; // 'image', 'video', 'raw', etc.
+
+    const result = await cloudinary.api.resources({
+      type: 'upload',
+      prefix: folder ? `${folder}/` : '', // Añadir '/' al final del prefijo si hay carpeta
+      resource_type: resourceType,
+      max_results: 500 // Puedes ajustar esto o implementar paginación
+    });
+
+    res.json({ success: true, assets: result.resources });
+  } catch (error) {
+    console.error('Error al listar recursos de Cloudinary:', error);
+    res.status(500).json({ error: 'Error al listar recursos de Cloudinary' });
+  }
+});
+
+// Ruta para listar archivos JSON en hojas/
+app.get('/api/hojas-list-collections', (req, res) => {
+  try {
+    const hojasPath = path.join(__dirname, '../dist/hojas'); // Path to the copied 'hojas' directory
+    if (!fs.existsSync(hojasPath)) {
+      return res.json([]); // Return empty array if directory doesn't exist
+    }
+    const files = fs.readdirSync(hojasPath)
+      .filter(file => file.endsWith('.json'))
+      .map(file => file); // Just return the filename
+    res.json(files);
+  } catch (error) {
+    console.error('Error al listar colecciones:', error);
+    res.status(500).json({ error: 'Error al listar colecciones' });
+  }
+});
+
+// Ruta para listar archivos JSON en hojas/lore/
+app.get('/api/hojas-list-lore', (req, res) => {
+  try {
+    const hojasLorePath = path.join(__dirname, '../dist/hojas/lore'); // Path to the copied 'hojas/lore' directory
+    if (!fs.existsSync(hojasLorePath)) {
+      return res.json([]); // Return empty array if directory doesn't exist
+    }
+    const files = fs.readdirSync(hojasLorePath)
+      .filter(file => file.endsWith('.json'))
+      .map(file => file); // Just return the filename
+    res.json(files);
+  } catch (error) {
+    console.error('Error al listar artículos de lore:', error);
+    res.status(500).json({ error: 'Error al listar artículos de lore' });
+  }
+});
+
+// Ruta para subir imágenes de arte directamente a Cloudinary
+app.post('/api/upload-art', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No se subió ningún archivo' });
+  }
+
+  const upload_stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "art_uploads", // Carpeta en Cloudinary
+      resource_type: 'auto'
+    },
+    (error, result) => {
+      if (error) {
+        console.error('Error al subir a Cloudinary:', error);
+        return res.status(500).json({ error: 'Error al subir la imagen a Cloudinary' });
+      }
+      
+      // Responder con la información de Cloudinary
+      res.json({
+        success: true,
+        art: {
+          id: result.public_id, // Usar el public_id de Cloudinary como ID
+          name: result.original_filename,
+          img: result.secure_url, // URL segura de la imagen
+          originalName: req.file.originalname
+        },
+        message: 'Imagen de arte subida correctamente a Cloudinary'
+      });
+    }
+  );
+
+  // Escribir el buffer del archivo en el stream de subida de Cloudinary
+  upload_stream.end(req.file.buffer);
+});
+
 // Ruta para listar archivos JSON en hojas/
 app.get('/api/hojas-list-collections', (req, res) => {
   try {
@@ -158,42 +291,6 @@ app.delete('/api/art/:id', async (req, res) => {
   }
 });
 
-
-// --- ATENCIÓN: Las siguientes rutas todavía escriben en el sistema de archivos local ---
-// --- y deben ser migradas a una base de datos para funcionar en Cloud Run. ---
-
-// Función auxiliar para limpiar tags de criaturas (si aplica)
-// function cleanCreaturesTags(creatures) {
-//   return creatures.map(creature => {
-//     const { tags, ...creatureWithoutTags } = creature;
-//     return creatureWithoutTags;
-//   });
-// }
-
-// Ruta para subir data de criaturas (escribe en creatures.json) - DESHABILITADA PARA CLOUD RUN
-// app.post('/api/upload', (req, res) => {
-//   try {
-//     const creature = req.body;
-//     if (!creature || !creature.name || !creature.img) {
-//       return res.status(400).json({ error: 'Datos de criatura inválidos' });
-//     }
-//     const jsonPath = path.join(__dirname, '../public/data/creatures.json');
-//     const dirPath = path.dirname(jsonPath);
-//     if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
-    
-//     let creatures = [];
-//     if (fs.existsSync(jsonPath)) {
-//       const jsonData = fs.readFileSync(jsonPath, 'utf8');
-//       creatures = JSON.parse(jsonData);
-//     }
-//     creatures.push(creature);
-//     fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
-//     res.json({ success: true, creature });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// });
-
 // Ruta para obtener todas las criaturas (lee de creatures.json)
 app.get('/api/creatures', (req, res) => {
   try {
@@ -209,38 +306,6 @@ app.get('/api/creatures', (req, res) => {
   }
 });
 
-// Ruta para eliminar una criatura (modifica creatures.json y borra archivo local) - DESHABILITADA PARA CLOUD RUN
-// app.delete('/api/creatures/:id', (req, res) => {
-//   try {
-//     const creatureId = req.params.id;
-//     const jsonPath = path.join(__dirname, '../public/data/creatures.json');
-//     let creatures = [];
-//     if (fs.existsSync(jsonPath)) {
-//         const jsonData = fs.readFileSync(jsonPath, 'utf8');
-//         creatures = JSON.parse(jsonData);
-//     }
-
-//     const creatureIndex = creatures.findIndex(c => c.id === creatureId);
-//     if (creatureIndex === -1) {
-//       return res.status(404).json({ error: 'Criatura no encontrada' });
-//     }
-
-//     const creature = creatures[creatureIndex];
-//     // ATENCIÓN: Esta parte asume que creature.img es una ruta local.
-//     // Si la imagen está en Cloudinary, se necesita el public_id para borrarla.
-//     if (creature.img && fs.existsSync(creature.img)) {
-//       fs.unlinkSync(creature.img);
-//     }
-
-//     creatures.splice(creatureIndex, 1);
-//     fs.writeFileSync(jsonPath, JSON.stringify(creatures, null, 2));
-//     res.json({ success: true, message: 'Criatura eliminada correctamente' });
-//   } catch (error) {
-//     res.status(500).json({ error: 'Error interno del servidor' });
-//   }
-// });
-
-// --- Fin de las rutas que escriben en disco ---
 
 // Proteger el acceso a /editor.html
 app.get('/editor.html', basicAuth({
