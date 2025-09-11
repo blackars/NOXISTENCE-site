@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { viteStaticCopy } from 'vite-plugin-static-copy'; // <-- Importa el plugin
 
 export default defineConfig({
   root: 'public',
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
+    // copyPublicDir: true, // <-- Esta línea ya no sería necesaria
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'public/index.html'),
@@ -15,18 +17,25 @@ export default defineConfig({
         lore: resolve(__dirname, 'public/lore.html'),
         viewer: resolve(__dirname, 'public/viewer.html'),
         404: resolve(__dirname, 'public/404.html'),
-        // Add footer.html here
-        footer: resolve(__dirname, 'public/footer.html'), // <-- NEW LINE
+        footer: resolve(__dirname, 'public/footer.html'),
       }
     }
   },
+  plugins: [ // <-- Añade la sección de plugins
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'hojas/**/*', // Ruta de origen relativa a `root` (public/hojas)
+          dest: 'hojas' // Ruta de destino relativa a `outDir` (dist/hojas)
+        }
+      ]
+    })
+  ],
   server: {
     open: '/index.html',
-    port: 3000, // o el puerto que uses para Vite
+    port: 3000,
     proxy: {
-      // Redirige todas las peticiones que empiecen con /cloudinary-signature a tu backend
       '/cloudinary-signature': 'http://localhost:3100',
-      // Proxy para todas las rutas de API a Express
       '/api': 'http://localhost:3100'
     }
   },
