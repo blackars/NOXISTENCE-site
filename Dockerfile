@@ -23,13 +23,13 @@ RUN npm run build
 FROM node:20
 
 # Elimina las instalaciones de Puppeteer/Chromium y sus variables de entorno
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
+RUN apt-get update && apt-get install -y \
+    chromium-browser \
+    libnss3 \
+    libfreetype6 \
+    libharfbuzz0b \
     ca-certificates \
-    ttf-freefont
+    fonts-freefont-ttf
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
