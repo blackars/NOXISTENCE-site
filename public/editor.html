@@ -648,7 +648,7 @@
     // Función para cargar criaturas desde la carpeta de Cloudinary
 async function loadCreatures() {
       try {
-        const response = await fetch('/api/list-assets?folder=noxistence/creature&resource_type=image');
+        const response = await fetch('/api/list-assets?folder=noxistence/creatures&resource_type=image');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -762,7 +762,7 @@ async function loadArtImages() {
       }
 
       try {
-        const response = await fetch('/api/list-assets?folder=noxistence/art&resource_type=image');
+        const response = await fetch('/api/list-assets?folder=noxistence/imageart&resource_type=image');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -1498,14 +1498,18 @@ async function loadArtImages() {
       const panelSelector = document.getElementById('textFontFamily');
       try {
         // Fetch from the new API endpoint
-        const res = await fetch('/api/data/fonts'); 
-        const fontData = await res.json();
+        const res = await fetch('/api/list-assets?folder=noxistence/fonts&resource_type=raw'); 
+        const data = await res.json();
         
-        // The server returns an empty array if the file doesn't exist, so this check is fine.
-        if (!Array.isArray(fontData)) {
-            console.warn('Font data is not an array:', fontData);
+        if (!data.success || !Array.isArray(data.assets)) {
+            console.warn('API call to list font assets was not successful or data format is incorrect:', data);
             return;
         }
+
+        const fontData = data.assets.map(asset => ({
+            name: asset.public_id.split('/').pop().replace(/\.[^/.]+$/, ''), // Get filename without extension
+            url: asset.secure_url // Use secure_url as the font URL
+        }));
 
         for (const font of fontData) {
           try {
