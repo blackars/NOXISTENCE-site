@@ -296,18 +296,22 @@ app.delete('/api/art/:id', async (req, res) => {
   }
 });
 
-app.post('/api/upload', async (req, res) => {
-  try {
-    const creatureData = req.body;
-    if (!creatureData || Object.keys(creatureData).length === 0) {
-      return res.status(400).json({ error: 'No se proporcionaron datos de criatura.' });
-    }
+// --- Concurrency control for creatures.json ---
+let isProcessingCreatures = false;
+const creatureQueue = [];
 
+async function processCreatureQueue() {
+  if (isProcessingCreatures || creatureQueue.length === 0) {
+    return;
+  }
+  isProcessingCreatures = true;
+  const { creatureData, res } = creatureQueue.shift();
+
+  try {
     const creaturesPublicId = 'data/creatures.json';
     let creatures = [];
 
     try {
-      // Intentar leer el JSON existente de Cloudinary
       const existingDataUrl = cloudinary.url(creaturesPublicId, { resource_type: 'raw', secure: true });
       const response = await fetch(existingDataUrl, { cache: 'no-store' });
       if (response.ok) {
@@ -315,26 +319,24 @@ app.post('/api/upload', async (req, res) => {
         if (Array.isArray(existingJson)) {
           creatures = existingJson;
         }
-      } else if (response.status !== 404) { // Si no se encuentra (404), está bien, se creará uno nuevo.
-        throw new Error(`Error al leer el archivo existente de Cloudinary: ${response.statusText}`);
+      } else if (response.status !== 404) {
+        throw new Error(`Error reading existing file from Cloudinary: ${response.statusText}`);
       }
     } catch (error) {
-      // Si hay un error (distinto de 404), se registrará, pero continuaremos para crear un archivo nuevo.
-      console.warn(`No se pudo leer ${creaturesPublicId} de Cloudinary, se creará uno nuevo. Error: ${error.message}`);
+      console.warn(`Could not read ${creaturesPublicId} from Cloudinary, will create a new one. Error: ${error.message}`);
     }
 
-    // Añadir la nueva criatura a la lista
     creatures.push(creatureData);
 
-    // Subir el JSON actualizado a Cloudinary
     const jsonString = JSON.stringify(creatures, null, 2);
     
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          public_id: creaturesPublicId, // Usar la ruta completa como public_id
+          public_id: creaturesPublicId,
           resource_type: 'raw',
-          overwrite: true
+          overwrite: true,
+          invalidate: true // Added to try and bust Cloudinary's cache
         },
         (error, result) => {
           if (error) reject(error);
@@ -346,15 +348,28 @@ app.post('/api/upload', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Datos de criatura subidos correctamente a Cloudinary',
+      message: 'Creature data uploaded successfully to Cloudinary',
       public_id: uploadResult.public_id,
       url: uploadResult.secure_url
     });
 
   } catch (error) {
-    console.error('Error en la ruta /api/upload:', error);
-    res.status(500).json({ error: 'Error interno del servidor al subir datos de criatura.' });
+    console.error('Error in /api/upload route:', error);
+    res.status(500).json({ error: 'Internal server error while uploading creature data.' });
+  } finally {
+    isProcessingCreatures = false;
+    processCreatureQueue();
   }
+}
+
+app.post('/api/upload', (req, res) => {
+  const creatureData = req.body;
+  if (!creatureData || Object.keys(creatureData).length === 0) {
+    return res.status(400).json({ error: 'No creature data provided.' });
+  }
+  
+  creatureQueue.push({ creatureData, res });
+  processCreatureQueue();
 });
 
 // Ruta para obtener todas las criaturas (lee de Cloudinary)
