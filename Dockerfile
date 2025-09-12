@@ -22,51 +22,16 @@ RUN npm run build
 # Empieza desde una imagen Alpine ligera para producción
 FROM node:20
 
+# Elimina las instalaciones de Puppeteer/Chromium y sus variables de entorno
 RUN apt-get update && apt-get install -y \
     chromium \
-    # Dependencias comunes de Puppeteer para Debian
-    gconf-service \
-    libasound2 \
-    libatk1.0-0 \
-    libcairo2 \
-    libcups2 \
-    libfontconfig1 \
-    libgdk-pixbuf2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
     libnss3 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxi6 \
-    libxrandr2 \
-    libxrender1 \
-    libxss1 \
-    libxtst6 \
-    libappindicator1 \
-    libnss3-tools \
-    lsb-release \
-    xdg-utils \
-    wget \
-    fonts-liberation \
-    libgbm-dev \
-    libu2f-udev \
-    libvulkan1 \
-    xauth \
-    xvfb \
-    # Asegúrate de que las fuentes estén instaladas
-    fonts-freefont-ttf \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    libfreetype6 \
+    libharfbuzz0b \
+    ca-certificates \
+    fonts-freefont-ttf
 
-
+    
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
     PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
     NODE_ENV=production

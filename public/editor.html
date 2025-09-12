@@ -1122,6 +1122,8 @@ async function loadArtImages() {
         <button onclick="bringToFront(this)">Traer al frente</button>
         <button onclick="sendToBack(this)">Enviar al fondo</button>
         <button onclick="linkLayerDialog(this)">Enlazar capas</button>
+        <button id="generate-thumbnail-btn" onclick="window.generateThumbnail()">Generar Todas las Miniaturas</button>
+
       `;
       document.body.appendChild(menu);
       menu.textItem = textItem;

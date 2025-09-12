@@ -304,7 +304,7 @@ class EditTools {
     const fontColorPicker = document.getElementById('fontColor');
     item.innerHTML = `
       <div class="item-content">
-        <img src="${imgSrc}" alt="${creature.name}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+        <img src="${imgSrc}" alt="${creature.name}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'%27100\'%20height%3D\'%27100\'%20xmlns%3D\'%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'%2750%25\'%20y%3D\'%2760%25\'%20font-size%3D\'%2714\'%20text-anchor%3D\'%27middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
         <div class="item-title" style="font-family: ${fontSelector.value}; font-size: ${fontSizeSlider.value}px; color: ${fontColorPicker.value};">${creature.name}</div>
       </div>`;
     this.makeInteractive(item);
@@ -326,7 +326,7 @@ class EditTools {
     const imgSrc = art.img;
     item.innerHTML = `
       <div class="item-content">
-        <img src="${imgSrc}" alt="art" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+        <img src="${imgSrc}" alt="art" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'%27100\'%20height%3D\'%27100\'%20xmlns%3D\'%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'%2750%25\'%20y%3D\'%2760%25\'%20font-size%3D\'%2714\'%20text-anchor%3D\'%27middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
       </div>`;
     this.makeInteractive(item);
     this.gridElement.appendChild(item);
@@ -347,7 +347,7 @@ class EditTools {
     const imgSrc = lore.img;
     item.innerHTML = `
       <div class="item-content">
-        <img src="${imgSrc}" alt="lore" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+        <img src="${imgSrc}" alt="lore" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'%27100\'%20height%3D\'%27100\'%20xmlns%3D\'%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'%2750%25\'%20y%3D\'%2760%25\'%20font-size%3D\'%2714\'%20text-anchor%3D\'%27middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
       </div>`;
     this.makeInteractive(item);
     this.gridElement.appendChild(item);
@@ -559,6 +559,8 @@ class EditTools {
   }
 }
 
+
+
 // Función global para enlazar capas
 window.linkLayerDialog = async function(btn) {
   // Obtener el menú contextual y el elemento asociado
@@ -637,3 +639,41 @@ window.linkLayerDialog = async function(btn) {
 
 // Exportar para uso global
 window.EditTools = EditTools;
+
+//Funcion global para generar TODAS las thumbnails
+window.generateThumbnail = function() {
+  // Deshabilitar el botón para evitar múltiples clics
+  const triggerButton = document.getElementById('generate-thumbnail-btn'); // Asumiendo que el botón tiene este ID
+  if(triggerButton) triggerButton.disabled = true;
+  
+  alert('Iniciando la generación de TODAS las miniaturas. Este proceso puede tardar varios minutos. Recibirás un aviso al finalizar.');
+
+  // Llamada al nuevo endpoint de generación masiva
+  fetch('/api/generate-all-thumbnails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+  .then(response => {
+    if (!response.ok) {
+      return response.json().then(err => { throw new Error(err.message || 'Error desconocido en el servidor.') });
+    }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      alert(`¡Éxito! ${data.message}`);
+    } else {
+      throw new Error(data.message || 'La respuesta del servidor no indicó éxito.');
+    }
+  })
+  .catch(error => {
+    console.error('Error en la generación masiva de miniaturas:', error);
+    alert(`Ha ocurrido un error: ${error.message}`);
+  })
+  .finally(() => {
+    // Reactivar el botón
+    if(triggerButton) triggerButton.disabled = false;
+  });
+};

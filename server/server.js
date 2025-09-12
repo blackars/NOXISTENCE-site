@@ -70,6 +70,27 @@ const upload = multer({
 
 // --- RUTAS DE API ---
 
+// Ruta para generar TODAS las miniaturas bajo demanda
+app.post('/api/generate-all-thumbnails', async (req, res) => {
+  console.log('[API] Solicitud para generar TODAS las miniaturas.');
+
+  try {
+    // Estas funciones ya están importadas al inicio de server.js
+    console.log('[API] Iniciando generateAllThumbnailsCollections...');
+    await generateAllThumbnailsCollections();
+    console.log('[API] Finalizado generateAllThumbnailsCollections.');
+
+    console.log('[API] Iniciando generateAllThumbnailsLore...');
+    await generateAllThumbnailsLore();
+    console.log('[API] Finalizado generateAllThumbnailsLore.');
+
+    res.json({ success: true, message: 'Todas las miniaturas han sido generadas y subidas exitosamente.' });
+  } catch (error) {
+    console.error('[API ERROR] Falló la generación masiva de miniaturas:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor al generar las miniaturas.' });
+  }
+});
+
 // Ruta para listar fuentes desde public/fonts/fonts.json
 app.get('/api/list-fonts', (req, res) => {
   try {
