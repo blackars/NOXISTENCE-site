@@ -315,36 +315,33 @@ app.post('/api/upload', async (req, res) => {
         if (Array.isArray(existingJson)) {
           creatures = existingJson;
         }
-      } else if (response.status !== 404) { // If not found, it's okay, we start with empty array
+      } else if (response.status !== 404) { // Si no se encuentra (404), está bien, se creará uno nuevo.
         throw new Error(`Error al leer el archivo existente de Cloudinary: ${response.statusText}`);
       }
     } catch (error) {
+      // Si hay un error (distinto de 404), se registrará, pero continuaremos para crear un archivo nuevo.
       console.warn(`No se pudo leer ${creaturesPublicId} de Cloudinary, se creará uno nuevo. Error: ${error.message}`);
-      // Continue with empty array if file not found or error
     }
 
-    // Add new creature
+    // Añadir la nueva criatura a la lista
     creatures.push(creatureData);
 
-    // Upload updated JSON to Cloudinary
+    // Subir el JSON actualizado a Cloudinary
     const jsonString = JSON.stringify(creatures, null, 2);
-    const buffer = Buffer.from(jsonString, 'utf8');
-
+    
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: 'data', // Folder in Cloudinary
-          public_id: 'creatures', // Specific public_id for creatures.json
-          resource_type: 'raw', // Upload as raw file
-          format: 'json',       // Ensure it's saved with .json extension
-          overwrite: true       // Overwrite if already exists
+          public_id: creaturesPublicId, // Usar la ruta completa como public_id
+          resource_type: 'raw',
+          overwrite: true
         },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
         }
       );
-      uploadStream.end(buffer);
+      uploadStream.end(jsonString);
     });
 
     res.json({
