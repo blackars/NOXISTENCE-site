@@ -24,7 +24,7 @@ FROM node:20
 
 # Elimina las instalaciones de Puppeteer/Chromium y sus variables de entorno
 RUN apt-get update && apt-get install -y \
-    chromium \
+    chromium-browser \
     libnss3 \
     libfreetype6 \
     libharfbuzz0b \
@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     fonts-freefont-ttf
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
     NODE_ENV=production
 
 # Establece el directorio de trabajo
