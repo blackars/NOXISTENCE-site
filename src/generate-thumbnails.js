@@ -44,19 +44,23 @@ async function waitForImages(page) {
 
 async function generateThumbnailForFile(fileRelativePath, cloudinaryFolder) {
   console.log(`[DEBUG] generateThumbnailForFile: Iniciando para ${fileRelativePath} en ${cloudinaryFolder}`);
-  const browser = await puppeteer.launch({ 
-    headless: 'new', 
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--disable-gpu'
-    ],
-    // CRÍTICO para Cloud Run: Especificar la ruta del ejecutable de Chromium
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
-  });
-  console.log(`[DEBUG] generateThumbnailForFile: Puppeteer lanzado para ${fileRelativePath}`);
+let browser;
+  try {
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu'
+      ],
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    });
+  } catch (launchError) {
+    console.error(`[DEBUG ERROR] Puppeteer launch failed for ${fileRelativePath}:`, launchError);
+    throw launchError; // Re-throw to ensure the main catch block is hit
+  }
   
   const page = await browser.newPage();
   console.log(`[DEBUG] generateThumbnailForFile: Nueva página creada para ${fileRelativePath}`);
