@@ -128,6 +128,7 @@ app.get('/api/list-assets', async (req, res) => {
       max_results: 500 // Puedes ajustar esto o implementar paginación
     });
 
+    console.log(`[DEBUG] Cloudinary response for folder "${folder}":`, JSON.stringify(result, null, 2));
     res.setHeader('Cache-Control', 'no-store').json({ success: true, assets: result.resources });
   } catch (error) {
     console.error('Error al listar recursos de Cloudinary:', error);
