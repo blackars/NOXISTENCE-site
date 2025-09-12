@@ -645,24 +645,35 @@
       }
     }
     
-    // Función para cargar criaturas desde el archivo JSON local
+    // Función para cargar criaturas desde la carpeta de Cloudinary
     async function loadCreatures() {
       try {
-        const response = await fetch('/api/creatures');
+        const response = await fetch('/api/list-assets?folder=noxistence/creature&resource_type=image');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const creatures = await response.json();
+        const data = await response.json();
+        if (!data.success) {
+            throw new Error('API call to list assets was not successful.');
+        }
+
+        // Adaptar datos de Cloudinary al formato que espera displayCreatures
+        const creatures = data.assets.map(asset => ({
+          name: asset.public_id.split('/').pop().replace(/\.[^/.]+$/, ''), // Nombre de archivo sin extensión
+          img: asset.secure_url,
+          public_id: asset.public_id
+        }));
+
         displayCreatures(creatures);
         return creatures;
       } catch (error) {
-        console.error('Error loading creatures:', error);
+        console.error('Error loading creatures from Cloudinary folder:', error);
         // Mostrar mensaje de error en la interfaz
         const creaturesList = document.getElementById('creaturesList');
         if (creaturesList) {
           creaturesList.innerHTML = `
             <div class="error-message" style="color: #dc3545; padding: 10px; background: #f8d7da; border-radius: 4px; margin: 10px 0;">
-              Error al cargar las criaturas: ${error.message}
+              Error al cargar las imágenes de criaturas: ${error.message}
             </div>
           `;
         }
@@ -990,7 +1001,7 @@
         }
         
         // Subir a Cloudinary
-        const imageUrl = await uploadToCloudinary(file, 'image', 'creatures', fileName);
+        const imageUrl = await uploadToCloudinary(file, 'image', 'noxistence/creature', fileName);
         
         // Crear el objeto de la criatura
         const creature = {
@@ -1066,8 +1077,8 @@
         }
         
         // Subir a Cloudinary
-        const imageUrl = await uploadToCloudinary(file, 'image', 'imageart', fileName);
-        
+        const imageUrl = await uploadToCloudinary(file, 'image', 'noxistence/imageart', fileName);
+
         // Crear la miniatura en la interfaz
         const art = {
           name: fileName,
@@ -2058,7 +2069,7 @@
           uploadBtn.disabled = true;
           uploadBtn.textContent = 'Subiendo...';
         }
-        const imageUrl = await uploadToCloudinary(file, 'image', 'lore', fileName);
+        const imageUrl = await uploadToCloudinary(file, 'image', 'noxistence/lore', fileName);
         const lore = {
           name: fileName,
           img: imageUrl.secure_url,
