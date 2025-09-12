@@ -309,7 +309,7 @@ app.post('/api/upload', async (req, res) => {
     try {
       // Intentar leer el JSON existente de Cloudinary
       const existingDataUrl = cloudinary.url(creaturesPublicId, { resource_type: 'raw', secure: true });
-      const response = await fetch(existingDataUrl);
+      const response = await fetch(existingDataUrl, { cache: 'no-store' });
       if (response.ok) {
         const existingJson = await response.json();
         if (Array.isArray(existingJson)) {
@@ -366,13 +366,13 @@ app.get('/api/creatures', async (req, res) => {
 async function readJsonFromCloudinary(publicId, res) {
   try {
     const dataUrl = cloudinary.url(publicId, { resource_type: 'raw', secure: true });
-    const response = await fetch(dataUrl);
+    const response = await fetch(dataUrl, { cache: 'no-store' });
 
     if (response.ok) {
       const data = await response.json();
-      res.json(data);
+      res.setHeader('Cache-Control', 'no-store').json(data);
     } else if (response.status === 404) {
-      res.json([]); // Return empty array if file not found
+      res.setHeader('Cache-Control', 'no-store').json([]); // Return empty array if file not found
     } else {
       throw new Error(`Error al leer ${publicId} de Cloudinary: ${response.statusText}`);
     }

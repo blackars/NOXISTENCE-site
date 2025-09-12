@@ -484,7 +484,7 @@
           grid.innerHTML = '<div class="loading">Cargando colección...</div>';
           
           // Cargar la colección seleccionada
-          const res = await fetch(`hojas/${selectedFile}`);
+          const res = await fetch(`hojas/${selectedFile}?t=${new Date().getTime()}`);
           const collectionData = await res.json();
           
           // Extraer nombres de criaturas de la colección
