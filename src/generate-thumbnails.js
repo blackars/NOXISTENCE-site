@@ -2,14 +2,25 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const { uploadBufferToCloudinary } = require('../server/cloudinary');
+const cloudinary = require('cloudinary').v2; // Import cloudinary for config
+
+// Asegurarse de que Cloudinary esté configurado (debería estar en server.js, pero es bueno tenerlo aquí también si se ejecuta de forma independiente)
+if (!cloudinary.config().cloud_name) {
+  require('dotenv').config(); // Cargar .env si no está cargado
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+  });
+}
 
 const HOJAS_DIR = path.join(__dirname, '../public/hojas');
 const LORE_DIR = path.join(__dirname, '../public/hojas/lore');
 
-const VIEWER_URL_BASE = process.env.NODE_ENV === 'production' 
-  ? 'http://localhost:3000/viewer.html?file=' 
-  : 'http://localhost:3000/viewer.html?file='; // Mismo puerto pero ahora manejado por la variable de entorno
-const VIEWPORT_SIZE = 400; // Debe coincidir con el tamaño de miniatura
+// URL base configurable para viewer.html
+// Usa una variable de entorno, por defecto localhost:3000 para desarrollo
+const VIEWER_URL_BASE = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
 
 // Función para esperar a que todas las imágenes se carguen
 async function waitForImages(page) {
@@ -29,7 +40,7 @@ async function waitForImages(page) {
   });
 }
 
-async function generateThumbnailForFile(file, cloudinaryFolder) {
+async function generateThumbnailForFile(fileRelativePath, cloudinaryFolder) {
   const browser = await puppeteer.launch({ 
     headless: 'new', 
     args: [
@@ -60,7 +71,8 @@ async function generateThumbnailForFile(file, cloudinaryFolder) {
       }
     });
     
-    const url = VIEWER_URL_BASE + encodeURIComponent(file);
+    // Construir la URL completa para viewer.html
+    const url = `${VIEWER_URL_BASE}/viewer.html?file=${encodeURIComponent(fileRelativePath)}`;
     console.log(`Navegando a: ${url}`);
     
     await page.goto(url, { 
@@ -88,7 +100,7 @@ async function generateThumbnailForFile(file, cloudinaryFolder) {
     });
 
     // Subir el buffer a Cloudinary
-    const publicId = path.basename(file, '.json');
+    const publicId = path.basename(fileRelativePath, '.json');
     console.log(`Subiendo miniatura a Cloudinary: ${cloudinaryFolder}/${publicId}`);
     
     const result = await uploadBufferToCloudinary(buffer, cloudinaryFolder, publicId);
@@ -113,7 +125,8 @@ async function generateAllThumbnailsCollections() {
   for (const file of files) {
     try {
       console.log('[collections] Procesando miniatura para', file);
-      await generateThumbnailForFile(file, 'ss-collections');
+      // Pasar la ruta relativa desde public/
+      await generateThumbnailForFile(`hojas/${file}`, 'noxistence/thumbnails/collections');
     } catch (e) {
       console.error('Error con', file, e);
     }
@@ -130,7 +143,8 @@ async function generateAllThumbnailsLore() {
   for (const file of files) {
     try {
       console.log('[lore] Procesando miniatura para', file);
-      await generateThumbnailForFile('lore/' + file, 'ss-lore');
+      // Pasar la ruta relativa desde public/
+      await generateThumbnailForFile(`hojas/lore/${file}`, 'noxistence/thumbnails/lore');
     } catch (e) {
       console.error('Error con', file, e);
     }
