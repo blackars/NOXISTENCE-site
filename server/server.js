@@ -1,9 +1,6 @@
 require('dotenv').config(); // Al inicio del archivo
-console.log('[SERVER START] server.js is starting up.');
 process.env.FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
 
-// Generar catalog.json automáticamente al iniciar el servidor
-// require('../src/generate-catalog');
 
 const express = require('express');
 const multer = require('multer');
@@ -38,9 +35,8 @@ app.use(express.static(path.join(__dirname, '../dist')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// const fontsRoutes = require('../src/fonts');
 console.log('[SERVER START] Attempting to require generate-thumbnails.js...');
-const { generateAllThumbnailsCollections, generateAllThumbnailsLore } = require('../src/generate-thumbnails');
+const { generateAllThumbnails } = require('../src/generate-thumbnails'); // <-- MODIFICADO
 console.log('[SERVER START] generate-thumbnails.js required successfully.');
 const cloudinary = require('cloudinary').v2;
 
@@ -75,21 +71,30 @@ app.post('/api/generate-all-thumbnails', async (req, res) => {
   console.log('[API] Solicitud para generar TODAS las miniaturas.');
 
   try {
-    // Estas funciones ya están importadas al inicio de server.js
-    console.log('[API] Iniciando generateAllThumbnailsCollections...');
-    await generateAllThumbnailsCollections();
-    console.log('[API] Finalizado generateAllThumbnailsCollections.');
-
-    console.log('[API] Iniciando generateAllThumbnailsLore...');
-    await generateAllThumbnailsLore();
-    console.log('[API] Finalizado generateAllThumbnailsLore.');
-
-    res.json({ success: true, message: 'Todas las miniaturas han sido generadas y subidas exitosamente.' });
+    // Llama a la nueva función unificada
+    await generateAllThumbnails();
+    res.json({ success: true, message: 'Proceso de generación de miniaturas completado.' });
   } catch (error) {
     console.error('[API ERROR] Falló la generación masiva de miniaturas:', error);
     res.status(500).json({ success: false, message: 'Error interno del servidor al generar las miniaturas.' });
   }
 });
+const cloudinary = require('cloudinary').v2;
+
+// Configuración de Cloudinary
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.error('ERROR: Faltan credenciales de Cloudinary en las variables de entorno');
+}
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true
+});
+
+
+
+// --- RUTAS DE API ---
 
 // Ruta para listar fuentes desde public/fonts/fonts.json
 app.get('/api/list-fonts', (req, res) => {
@@ -161,10 +166,10 @@ app.get('/api/list-assets', async (req, res) => {
   }
 });
 
-// Ruta para listar archivos JSON en hojas/
+// Ruta para listar archivos JSON en hojas/collections/ 
 app.get('/api/hojas-list-collections', (req, res) => {
   try {
-    const hojasPath = path.join(__dirname, '../dist/hojas'); // Path to the copied 'hojas' directory
+    const hojasPath = path.join(__dirname, '../dist/hojas/collections'); // Path to the copied 'hojas/collections' directory
     if (!fs.existsSync(hojasPath)) {
       return res.json([]); // Return empty array if directory doesn't exist
     }
@@ -230,39 +235,6 @@ app.post('/api/upload-art', upload.single('image'), (req, res) => {
   upload_stream.end(req.file.buffer);
 });
 
-// Ruta para listar archivos JSON en hojas/
-app.get('/api/hojas-list-collections', (req, res) => {
-  try {
-    const hojasPath = path.join(__dirname, '../dist/hojas'); // Path to the copied 'hojas' directory
-    if (!fs.existsSync(hojasPath)) {
-      return res.json([]); // Return empty array if directory doesn't exist
-    }
-    const files = fs.readdirSync(hojasPath)
-      .filter(file => file.endsWith('.json'))
-      .map(file => file); // Just return the filename
-    res.json(files);
-  } catch (error) {
-    console.error('Error al listar colecciones:', error);
-    res.status(500).json({ error: 'Error al listar colecciones' });
-  }
-});
-
-// Ruta para listar archivos JSON en hojas/lore/
-app.get('/api/hojas-list-lore', (req, res) => {
-  try {
-    const hojasLorePath = path.join(__dirname, '../dist/hojas/lore'); // Path to the copied 'hojas/lore' directory
-    if (!fs.existsSync(hojasLorePath)) {
-      return res.json([]); // Return empty array if directory doesn't exist
-    }
-    const files = fs.readdirSync(hojasLorePath)
-      .filter(file => file.endsWith('.json'))
-      .map(file => file); // Just return the filename
-    res.json(files);
-  } catch (error) {
-    console.error('Error al listar artículos de lore:', error);
-    res.status(500).json({ error: 'Error al listar artículos de lore' });
-  }
-});
 
 // Ruta para subir imágenes de arte directamente a Cloudinary
 app.post('/api/upload-art', upload.single('image'), (req, res) => {
@@ -448,12 +420,12 @@ app.get('/editor.html', basicAuth({
   res.sendFile(path.join(__dirname, '../dist/editor.html'));
 });
 
-// app.use('/', fontsRoutes);
 
 // Generate thumbnails on server start
-// generateAllThumbnailsCollections()
-//   .then(() => generateAllThumbnailsLore())
-//   .catch(err => console.error('Error generating thumbnails:', err));
+console.log('[SERVER START] Calling generateAllThumbnailsCollections()...');
+generateAllThumbnailsCollections()
+  .then(() => generateAllThumbnailsLore())
+  .catch(err => console.error('Error generating thumbnails:', err));
 
 // Fallback para SPA: servir index.html para cualquier otra ruta no encontrada
 app.get('*', (req, res) => {

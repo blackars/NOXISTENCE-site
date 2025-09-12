@@ -4,11 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
 const { uploadBufferToCloudinary } = require('../server/cloudinary');
-const cloudinary = require('cloudinary').v2; // Import cloudinary for config
+const cloudinary = require('cloudinary').v2;
 
-// Asegurarse de que Cloudinary esté configurado (debería estar en server.js, pero es bueno tenerlo aquí también si se ejecuta de forma independiente)
+// Configuración de Cloudinary (si no está ya configurado)
 if (!cloudinary.config().cloud_name) {
-  require('dotenv').config(); // Cargar .env si no está cargado
+  require('dotenv').config();
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -17,173 +17,113 @@ if (!cloudinary.config().cloud_name) {
   });
 }
 
-const HOJAS_DIR = path.join(__dirname, '../public/hojas');
-const LORE_DIR = path.join(__dirname, '../public/hojas/lore');
+// --- RUTA CORRECTA ---
+// Apuntar a la carpeta 'dist' que es la que usa el servidor en producción.
+const HOJAS_DIR = path.join(__dirname, '../dist/hojas');
 
-// URL base configurable para viewer.html
-// Usa una variable de entorno, por defecto localhost:3000 para desarrollo
 const VIEWER_URL_BASE = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
 
-// Función para esperar a que todas las imágenes se carguen
-async function waitForImages(page) {
-  return page.evaluate(async () => {
-    const selectors = Array.from(document.querySelectorAll('img'));
-    
-    await Promise.all(selectors.map(img => {
-      if (img.complete) return;
-      return new Promise((resolve, reject) => {
-        img.addEventListener('load', resolve);
-        img.addEventListener('error', () => {
-          console.error(`Error loading image: ${img.src}`);
-          resolve(); // Continuar aunque falle alguna imagen
-        });
-      });
-    }));
+// Función recursiva para encontrar todos los archivos .json en un directorio
+function findJsonFiles(dir) {
+  let results = [];
+  if (!fs.existsSync(dir)) {
+    console.warn(`[WARN] El directorio no existe, se omite: ${dir}`);
+    return [];
+  }
+  const list = fs.readdirSync(dir);
+  list.forEach(file => {
+    const filePath = path.join(dir, file);
+    const stat = fs.statSync(filePath);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(findJsonFiles(filePath));
+    } else if (file.endsWith('.json')) {
+      results.push(filePath);
+    }
   });
+  return results;
 }
 
-async function generateThumbnailForFile(fileRelativePath, cloudinaryFolder) {
-  console.log(`[DEBUG] generateThumbnailForFile: Iniciando para ${fileRelativePath} en ${cloudinaryFolder}`);
-let browser;
+async function generateThumbnailForFile(absoluteFilePath) {
+  // Convertir el path absoluto a un path relativo desde la carpeta 'dist' para la URL
+  const distDir = path.join(__dirname, '../dist');
+  const fileRelativePath = path.relative(distDir, absoluteFilePath).replace(/\\/g, '/');
+
+  // Determinar la carpeta de Cloudinary
+  const cloudinaryFolder = fileRelativePath.includes('hojas/lore/')
+    ? 'noxistence/thumbnails/lore'
+    : 'noxistence/thumbnails/collections';
+
+  console.log(`[+] Iniciando miniatura para: ${fileRelativePath}`);
+  let browser;
   try {
     browser = await puppeteer.launch({
       headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu'
-      ],
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
     });
-  } catch (launchError) {
-    console.error(`[DEBUG ERROR] Puppeteer launch failed for ${fileRelativePath}:`, launchError);
-    throw launchError; // Re-throw to ensure the main catch block is hit
+  } catch (e) {
+    console.error(`[ERROR] Fallo al iniciar Puppeteer para ${fileRelativePath}:`, e);
+    throw e;
   }
-  
+
   const page = await browser.newPage();
-  console.log(`[DEBUG] generateThumbnailForFile: Nueva página creada para ${fileRelativePath}`);
-  
   try {
-    await page.setViewport({ 
-      width: 1600, 
-      height: 900,
-      deviceScaleFactor: 1
-    });
-    console.log(`[DEBUG] generateThumbnailForFile: Viewport configurado para ${fileRelativePath}`);
-    
-    await page.setRequestInterception(true);
-    page.on('request', (request) => {
-      const resourceType = request.resourceType();
-      if (['font', 'media', 'websocket'].includes(resourceType)) {
-        request.abort();
-      } else {
-        request.continue();
-      }
-    });
-    console.log(`[DEBUG] generateThumbnailForFile: Intercepción de peticiones configurada para ${fileRelativePath}`);
-    
-    // Construir la URL completa para viewer.html
+    await page.setViewport({ width: 1600, height: 900, deviceScaleFactor: 1 });
+
     const url = `${VIEWER_URL_BASE}/viewer.html?file=${encodeURIComponent(fileRelativePath)}`;
-    console.log(`[DEBUG] generateThumbnailForFile: Navegando a: ${url}`);
-    
-    await page.goto(url, { 
-      waitUntil: ['domcontentloaded', 'networkidle0'],
-      timeout: 120000
-    });
-    console.log(`[DEBUG] generateThumbnailForFile: page.goto completado para ${fileRelativePath}`);
-    
-    console.log(`[DEBUG] generateThumbnailForFile: Esperando a que el grid esté visible para ${fileRelativePath}...`);
-    await page.waitForSelector('#grid', { 
-      visible: true, 
-      timeout: 30000 
-    });
-    console.log(`[DEBUG] generateThumbnailForFile: Grid visible para ${fileRelativePath}.`);
-    
-    console.log(`[DEBUG] generateThumbnailForFile: Esperando a que las imágenes se carguen para ${fileRelativePath}...`);
-    await waitForImages(page);
-    console.log(`[DEBUG] generateThumbnailForFile: Imágenes cargadas para ${fileRelativePath}.`);
-    
-    console.log(`[DEBUG] generateThumbnailForFile: Esperando renderizado adicional para ${fileRelativePath}...`);
-    await new Promise(r => setTimeout(r, 3000));
-    console.log(`[DEBUG] generateThumbnailForFile: Renderizado adicional completado para ${fileRelativePath}.`);
+    console.log(` -> Navegando a: ${url}`);
 
-    // Tomar screenshot en un buffer
-    console.log(`[DEBUG] generateThumbnailForFile: Tomando screenshot para ${fileRelativePath}...`);
-    const buffer = await page.screenshot({ 
-      type: 'png',
-      omitBackground: true,
-      fullPage: true
-    });
-    console.log(`[DEBUG] generateThumbnailForFile: Screenshot tomado para ${fileRelativePath}. Tamaño del buffer: ${buffer.length} bytes.`);
+    await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 120000 });
+    await page.waitForSelector('#grid', { visible: true, timeout: 30000 });
+    await new Promise(r => setTimeout(r, 3000)); // Espera extra para renderizado
 
-    // Subir el buffer a Cloudinary
+    const buffer = await page.screenshot({ type: 'png', omitBackground: true, fullPage: true });
+    console.log(` -> Screenshot tomada (tamaño: ${buffer.length} bytes)`);
+
     const publicId = path.basename(fileRelativePath, '.json');
-    console.log(`[DEBUG] generateThumbnailForFile: Subiendo miniatura a Cloudinary: ${cloudinaryFolder}/${publicId}`);
-    
     const result = await uploadBufferToCloudinary(buffer, cloudinaryFolder, publicId);
-    
-    console.log(`[DEBUG] generateThumbnailForFile: Miniatura subida exitosamente a Cloudinary para ${fileRelativePath}:`, result.secure_url);
+    console.log(`[SUCCESS] Miniatura subida a Cloudinary: ${result.secure_url}`);
     return result.secure_url;
-    
+
   } catch (error) {
-    console.error(`[DEBUG ERROR] Error al generar y subir la miniatura para ${fileRelativePath}:`, error);
-    throw error;
+    console.error(`[ERROR] Fallo al procesar ${fileRelativePath}:`, error.message);
+    // No relanzar el error para no detener el proceso masivo
   } finally {
-    console.log(`[DEBUG] generateThumbnailForFile: Cerrando navegador para ${fileRelativePath}.`);
     await browser.close();
   }
 }
 
-async function generateAllThumbnailsCollections() {
-  console.log('[DEBUG] generateAllThumbnailsCollections: Iniciando proceso de colecciones.');
-  if (!fs.existsSync(HOJAS_DIR)) {
-      console.log('No existe la carpeta /public/hojas, no se generan miniaturas de colecciones.');
-      return;
-  }
-  const files = fs.readdirSync(HOJAS_DIR).filter(f => f.endsWith('.json'));
-  console.log(`[DEBUG] generateAllThumbnailsCollections: ${files.length} archivos JSON encontrados en ${HOJAS_DIR}.`);
-  for (const file of files) {
-    try {
-      console.log('[DEBUG] [collections] Procesando miniatura para', file);
-      // Pasar la ruta relativa desde public/
-      await generateThumbnailForFile(`hojas/${file}`, 'noxistence/thumbnails/collections');
-    } catch (e) {
-      console.error('[DEBUG ERROR] Error con la miniatura de colección', file, e);
-    }
-  }
-  console.log('[DEBUG] Proceso de miniaturas de colecciones completado.');
-}
+// --- FUNCIÓN UNIFICADA ---
+// Genera todas las miniaturas de forma recursiva
+async function generateAllThumbnails() {
+  console.log('--- [START] Proceso de Generación de Todas las Miniaturas ---');
+  const fullHojasDir = path.resolve(HOJAS_DIR);
+  console.log(`[INFO] Directorio raíz a escanear: ${fullHojasDir}`);
 
-async function generateAllThumbnailsLore() {
-  console.log('[DEBUG] generateAllThumbnailsLore: Iniciando proceso de lore.');
-  if (!fs.existsSync(LORE_DIR)) {
-    console.log('No existe la carpeta /public/hojas/lore, no se generan miniaturas de lore.');
+  const allJsonFiles = findJsonFiles(fullHojasDir);
+
+  if (allJsonFiles.length === 0) {
+    console.warn('[WARN] No se encontraron archivos .json. Proceso finalizado.');
     return;
   }
-  const files = fs.readdirSync(LORE_DIR).filter(f => f.endsWith('.json'));
-  console.log(`[DEBUG] generateAllThumbnailsLore: ${files.length} archivos JSON encontrados en ${LORE_DIR}.`);
-  for (const file of files) {
+
+  console.log(`[INFO] ${allJsonFiles.length} archivos .json encontrados. Iniciando procesamiento...`);
+  
+  for (const filePath of allJsonFiles) {
     try {
-      console.log('[DEBUG] [lore] Procesando miniatura para', file);
-      // Pasar la ruta relativa desde public/
-      await generateThumbnailForFile(`hojas/lore/${file}`, 'noxistence/thumbnails/lore');
+      await generateThumbnailForFile(filePath);
     } catch (e) {
-      console.error('[DEBUG ERROR] Error con la miniatura de lore', file, e);
+      // El error ya se loguea dentro de generateThumbnailForFile
+      console.error(`[FATAL] Error irrecuperable en el bucle principal para ${filePath}. Saltando al siguiente.`);
     }
   }
-  console.log('[DEBUG] Proceso de miniaturas de lore completado.');
-}
 
-if (require.main === module) {
-  console.log('[DEBUG] generate-thumbnails.js ejecutado directamente. Iniciando generación de todas las miniaturas.');
-  generateAllThumbnailsCollections().then(() => generateAllThumbnailsLore());
+  console.log('--- [END] Proceso de Generación de Todas las Miniaturas Completado ---');
 }
 
 // Exportar para usar desde el backend
 module.exports = {
-  generateAllThumbnailsCollections,
-  generateAllThumbnailsLore,
-  generateThumbnailForFile,
+  generateAllThumbnails,
+  // Mantengo la exportación individual por si se necesita en el futuro
+  generateThumbnailForFile: (relativePath) => generateThumbnailForFile(path.join(__dirname, '../dist', relativePath))
 };
