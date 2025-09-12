@@ -939,7 +939,7 @@
 
       try {
         // Encontrar el elemento en la interfaz
-        const artItem = document.querySelector(`.art-item[data-art-id="${id}"]`);
+        aItem = document.querySelector(`.art-item[data-art-id="${id}"]`);
         if (artItem) {
           // Eliminar de la interfaz inmediatamente para mejor experiencia de usuario
           artItem.remove();
@@ -1001,7 +1001,7 @@
         }
         
         // Subir a Cloudinary
-        const imageUrl = await uploadToCloudinary(file, 'image', 'noxistence/creature', fileName);
+        const imageUrl = await uploadToCloudinary(file, 'image', 'noxistence/creatures', fileName);
         
         // Crear el objeto de la criatura
         const creature = {
