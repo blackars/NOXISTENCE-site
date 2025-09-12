@@ -648,7 +648,7 @@
     // Función para cargar criaturas desde la carpeta de Cloudinary
     async function loadCreatures() {
       try {
-        const response = await fetch('/api/list-assets?folder=noxistence/creature&resource_type=image');
+        const response = await fetch('/api/list-assets?folder=noxistence/creatures&resource_type=image');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -765,7 +765,7 @@
 
       try {
         console.log('Cargando imágenes de arte desde Cloudinary...');
-        const apiUrl = '/api/cloudinary-resources?folder=imageart';
+        const apiUrl = '/api/list-assets?folder=imageart';
         console.log('URL de la API:', apiUrl);
         
         const response = await fetch(apiUrl, {
