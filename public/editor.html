@@ -1924,7 +1924,7 @@ async function loadArtImages() {
         console.log('Subiendo fuente:', file.name);
         try {
           // Usa 'raw' como resource_type para fuentes y mantiene el nombre original
-          const fontUrl = await uploadToCloudinary(file, 'raw', 'fonts', file.name);
+          const fontUrl = await uploadToCloudinary(file, 'raw', 'noxistence/fonts', file.name);
           console.log('URL recibida:', fontUrl);
           window.uploadedFonts = window.uploadedFonts || [];
           window.uploadedFonts.push({ name: file.name, url: fontUrl });
