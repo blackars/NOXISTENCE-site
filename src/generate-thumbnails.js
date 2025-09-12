@@ -1,3 +1,5 @@
+console.log('[GENERATE THUMBNAILS SCRIPT] Script loaded.');
+
 const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer');
@@ -50,7 +52,9 @@ async function generateThumbnailForFile(fileRelativePath, cloudinaryFolder) {
       '--disable-dev-shm-usage',
       '--disable-accelerated-2d-canvas',
       '--disable-gpu'
-    ] 
+    ],
+    // CRÍTICO para Cloud Run: Especificar la ruta del ejecutable de Chromium
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
   });
   console.log(`[DEBUG] generateThumbnailForFile: Puppeteer lanzado para ${fileRelativePath}`);
   

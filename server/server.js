@@ -1,4 +1,6 @@
 require('dotenv').config(); // Al inicio del archivo
+console.log('[SERVER START] server.js is starting up.');
+process.env.FRONTEND_BASE_URL = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
 
 // Generar catalog.json automáticamente al iniciar el servidor
 // require('../src/generate-catalog');
@@ -37,7 +39,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // const fontsRoutes = require('../src/fonts');
-// const { generateAllThumbnailsCollections, generateAllThumbnailsLore } = require('../src/generate-thumbnails');
+console.log('[SERVER START] Attempting to require generate-thumbnails.js...');
+const { generateAllThumbnailsCollections, generateAllThumbnailsLore } = require('../src/generate-thumbnails');
+console.log('[SERVER START] generate-thumbnails.js required successfully.');
 const cloudinary = require('cloudinary').v2;
 
 // Configuración de Cloudinary
