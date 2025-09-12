@@ -27,6 +27,10 @@ export default defineConfig({
         {
           src: 'hojas/**/*', // Ruta de origen relativa a `root` (public/hojas)
           dest: 'hojas' // Ruta de destino relativa a `outDir` (dist/hojas)
+        },
+        { 
+          src: 'js/edit-tools.js', // Ruta de origen relativa a `root` (public/js/edit-tools.js)
+          dest: 'js' // Ruta de destino relativa a `outDir` (dist/js)
         }
       ]
     })
