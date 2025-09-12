@@ -646,15 +646,15 @@
     }
     
     // Función para cargar criaturas desde la carpeta de Cloudinary
-    async function loadCreatures() {
+async function loadCreatures() {
       try {
-        const response = await fetch('/api/list-assets?folder=noxistence/creatures&resource_type=image');
+        const response = await fetch('/api/list-assets?folder=noxistence/creature&resource_type=image');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if (!data.success) {
-            throw new Error('API call to list assets was not successful.');
+        if (!data.success || !Array.isArray(data.assets)) {
+            throw new Error('API call to list assets was not successful or data format is incorrect.');
         }
 
         // Adaptar datos de Cloudinary al formato que espera displayCreatures
@@ -668,7 +668,6 @@
         return creatures;
       } catch (error) {
         console.error('Error loading creatures from Cloudinary folder:', error);
-        // Mostrar mensaje de error en la interfaz
         const creaturesList = document.getElementById('creaturesList');
         if (creaturesList) {
           creaturesList.innerHTML = `
@@ -755,87 +754,35 @@
     }
     
     // Función para cargar imágenes de arte
-    async function loadArtImages() {
+async function loadArtImages() {
       const artList = document.getElementById('artList');
-      
       if (isLocalMode) {
         artList.innerHTML = '<p style="color: #666; font-style: italic;">Art images not available in local mode.</p>';
         return [];
       }
 
       try {
-        console.log('Cargando imágenes de arte desde Cloudinary...');
-        const apiUrl = '/api/list-assets?folder=imageart';
-        console.log('URL de la API:', apiUrl);
-        
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'include', // Incluir credenciales (cookies, autenticación)
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log('Respuesta del servidor:', {
-          status: response.status,
-          statusText: response.statusText,
-          ok: response.ok,
-          headers: Object.fromEntries(response.headers.entries())
-        });
-        
+        const response = await fetch('/api/list-assets?folder=noxistence/art&resource_type=image');
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error en la respuesta del servidor:', errorText);
-          throw new Error(`Error al cargar las imágenes: ${response.status} ${response.statusText}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
-        const data = await response.json().catch(err => {
-          console.error('Error al analizar la respuesta JSON:', err);
-          throw new Error('La respuesta del servidor no es un JSON válido');
-        });
-        
-        console.log('Datos recibidos de Cloudinary:', data);
-        
-        if (!data.resources) {
-          console.error('La respuesta no contiene la propiedad "resources":', data);
-          throw new Error('Formato de respuesta inesperado del servidor');
+        const data = await response.json();
+        if (!data.success || !Array.isArray(data.assets)) {
+          throw new Error('API call to list art assets was not successful or data format is incorrect.');
         }
+
+        const artImages = data.assets.map(asset => ({
+          id: asset.asset_id,
+          name: asset.public_id.split('/').pop(),
+          img: asset.secure_url,
+          public_id: asset.public_id
+        }));
         
-        // Mapear los recursos al formato esperado
-        const artImages = data.resources.map(resource => {
-          if (!resource.secure_url || !resource.public_id) {
-            console.warn('Recurso sin URL o ID público:', resource);
-            return null;
-          }
-          return {
-            id: `art_${resource.asset_id || Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            name: resource.public_id.split('/').pop(),
-            img: resource.secure_url,
-            public_id: resource.public_id
-          };
-        }).filter(Boolean); // Filtrar elementos nulos
-        
-        console.log('Imágenes de arte procesadas:', artImages);
-        
-        if (artImages.length === 0) {
-          console.warn('No se encontraron imágenes en la carpeta imageart');
-          artList.innerHTML = '<p style="color: #ff9800; font-style: italic;">No se encontraron imágenes en la galería.</p>';
-        } else {
-          displayArtImages(artImages);
-        }
-        
+        displayArtImages(artImages);
         return artImages;
       } catch (error) {
-        console.error('Error cargando imágenes de arte:', error);
-        const errorMessage = error.message || 'Error desconocido al cargar las imágenes';
-        artList.innerHTML = `
-          <div style="color: #ff4444; padding: 10px; background: #ffeeee; border-radius: 4px; margin: 10px 0;">
-            <strong>Error:</strong> ${errorMessage}
-            <div style="font-size: 0.9em; margin-top: 5px; color: #666;">
-              Por favor, verifica la consola para más detalles.
-            </div>
-          </div>
-        `;
+        console.error('Error loading art images:', error);
+        artList.innerHTML = `<div style="color: #ff4444; padding: 10px; background: #ffeeee; border-radius: 4px;">Error: ${error.message}</div>`;
         return [];
       }
     }
@@ -1990,39 +1937,34 @@
     });
 
     // --- LÓGICA DE LORE: igual que ART pero para imágenes ---
-    async function loadLoreImages() {
+async function loadLoreImages() {
       const loreList = document.getElementById('loreList');
       if (isLocalMode) {
         loreList.innerHTML = '<p style="color: #666; font-style: italic;">Imágenes de lore no disponibles en modo local.</p>';
         return [];
       }
       try {
-        const apiUrl = '/api/cloudinary-resources?folder=lore';
-        const response = await fetch(apiUrl, {
-          method: 'GET',
-          mode: 'cors',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await fetch('/api/list-assets?folder=noxistence/lore&resource_type=image');
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Error al cargar las imágenes: ${response.status} ${response.statusText}\n${errorText}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if (!data.resources) {
-          loreList.innerHTML = '<p style="color: #ff9800; font-style: italic;">No se encontraron imágenes de lore.</p>';
-          return [];
+        if (!data.success || !Array.isArray(data.assets)) {
+          throw new Error('API call to list lore assets was not successful or data format is incorrect.');
         }
-        const loreImages = data.resources.map(resource => ({
+
+        const loreImages = data.assets.map(resource => ({
           id: `lore_${resource.asset_id || Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: resource.public_id.split('/').pop(),
           img: resource.secure_url,
           public_id: resource.public_id
         }));
+        
         displayLoreImages(loreImages);
         return loreImages;
       } catch (error) {
-        loreList.innerHTML = `<div style=\"color: #ff4444; padding: 10px; background: #ffeeee; border-radius: 4px; margin: 10px 0;\"><strong>Error:</strong> ${error.message}</div>`;
+        console.error('Error loading lore images:', error);
+        loreList.innerHTML = `<div style="color: #ff4444; padding: 10px; background: #ffeeee; border-radius: 4px;"><strong>Error:</strong> ${error.message}</div>`;
         return [];
       }
     }
