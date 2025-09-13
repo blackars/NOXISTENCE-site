@@ -60,7 +60,7 @@ async function generateThumbnailForFile(absoluteFilePath) {
     console.log(` -> Navegador iniciado para ${fileRelativePath}`);
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 1200, height: 630, deviceScaleFactor: 1 });
+    await page.setViewport({ width: 600, height: 600, deviceScaleFactor: 1 });
 
     const url = `${VIEWER_URL_BASE}/viewer.html?file=${encodeURIComponent(fileRelativePath)}`;
     console.log(` -> Navegando a: ${url}`);

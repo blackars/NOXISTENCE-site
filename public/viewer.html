@@ -632,41 +632,41 @@
     const fileName = getFileNameFromURL();
     const creatureName = getCreatureNameFromURL();
     
-    // Cargar fuentes primero
-    loadCustomFonts().then(() => {
-      if (creatureName) {
-        // Mostrar criatura individual desde data/creatures.json
-        loadJSON('data/creatures.json', function(data) {
-          if (data && Array.isArray(data)) {
-            const creature = data.find(c => c.name === creatureName);
-            if (creature) {
-              renderCreature(creature);
-            } else {
-              showError('Criatura no encontrada');
-            }
+    // La carga de fuentes ahora se maneja a través de Cloudinary y no de fonts.json
+    // Por lo tanto, la llamada a loadCustomFonts() se ha eliminado.
+    // Se procede directamente a cargar los datos del JSON.
+    if (creatureName) {
+      // Mostrar criatura individual desde data/creatures.json
+      loadJSON('data/creatures.json', function(data) {
+        if (data && Array.isArray(data)) {
+          const creature = data.find(c => c.name === creatureName);
+          if (creature) {
+            renderCreature(creature);
           } else {
-            showError('Error al cargar los datos de las criaturas');
+            showError('Criatura no encontrada');
           }
-        }, function(error) {
-          console.error('Error al cargar criaturas:', error);
-          redirectTo404();
-        });
-      } else if (fileName) {
-        // Cargar el diseño guardado
-        loadJSON(fileName, function(data) {
-          if (data) {
-            renderLayout(data);
-          } else {
-            showError('El archivo está vacío o es inválido');
-          }
-        }, function(error) {
-          console.error('Error al cargar el archivo:', error);
-          redirectTo404();
-        });
-      } else {
-        showError('No se especificó archivo ni criatura');
-      }
-    });
+        } else {
+          showError('Error al cargar los datos de las criaturas');
+        }
+      }, function(error) {
+        console.error('Error al cargar criaturas:', error);
+        redirectTo404();
+      });
+    } else if (fileName) {
+      // Cargar el diseño guardado
+      loadJSON(fileName, function(data) {
+        if (data) {
+          renderLayout(data);
+        } else {
+          showError('El archivo está vacío o es inválido');
+        }
+      }, function(error) {
+        console.error('Error al cargar el archivo:', error);
+        redirectTo404();
+      });
+    } else {
+      showError('No se especificó archivo ni criatura');
+    }
 
     // Función para redirigir a la página 404 personalizada
     function redirectTo404() {
