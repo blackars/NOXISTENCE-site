@@ -44,7 +44,7 @@ async function generateAndUpload() {
     await fs.writeFile(OUTPUT_CATALOG_FILE, JSON.stringify(jsonFiles, null, 2), 'utf8');
     console.log(`catalog.json generado con ${jsonFiles.length} archivos.`);
     // Upload
-    await uploadToCloudinary(OUTPUT_CATALOG_FILE, 'data/catalog.json');
+    await uploadToCloudinary(OUTPUT_CATALOG_FILE, 'noxistence/data/catalog.json');
   } catch (err) {
     console.error('Error procesando catalog.json:', err);
   }
@@ -56,14 +56,14 @@ async function generateAndUpload() {
     await fs.writeFile(OUTPUT_LORE_FILE, JSON.stringify(jsonFiles, null, 2), 'utf8');
     console.log(`lore.json generado con ${jsonFiles.length} archivos.`);
     // Upload
-    await uploadToCloudinary(OUTPUT_LORE_FILE, 'data/lore.json');
+    await uploadToCloudinary(OUTPUT_LORE_FILE, 'noxistence/data/lore.json');
   } catch (err) {
     if (err.code === 'ENOENT') {
       try {
         await fs.writeFile(OUTPUT_LORE_FILE, JSON.stringify([], null, 2), 'utf8');
         console.log('lore.json generado vacío (no existe carpeta hojas/lore).');
         // Upload empty file
-        await uploadToCloudinary(OUTPUT_LORE_FILE, 'data/lore.json');
+        await uploadToCloudinary(OUTPUT_LORE_FILE, 'noxistence/data/lore.json');
       } catch (writeErr) {
         console.error('Error escribiendo lore.json vacío:', writeErr);
       }

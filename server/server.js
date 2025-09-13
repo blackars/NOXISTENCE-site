@@ -226,7 +226,7 @@ async function processCreatureQueue() {
   isProcessingCreatures = true;
   const { creatureData, res } = creatureQueue.shift();
   try {
-    const creaturesPublicId = 'data/creatures.json';
+    const creaturesPublicId = 'noxistence/data/creatures.json';
     let creatures = [];
     try {
       const existingDataUrl = cloudinary.url(creaturesPublicId, { resource_type: 'raw', secure: true });
@@ -271,10 +271,10 @@ const readJsonFromCloudinary = async (publicId, res) => {
     res.status(500).json({ error: `Error al leer ${publicId}` });
   }
 };
-app.get('/api/creatures', (req, res) => readJsonFromCloudinary('data/creatures.json', res));
-app.get('/api/data/lore', (req, res) => readJsonFromCloudinary('data/lore.json', res));
-app.get('/api/data/catalog', (req, res) => readJsonFromCloudinary('data/catalog.json', res));
-app.get('/api/data/fonts', (req, res) => readJsonFromCloudinary('data/fonts.json', res));
+app.get('/api/creatures', (req, res) => readJsonFromCloudinary('noxistence/data/creatures.json', res));
+app.get('/api/data/lore', (req, res) => readJsonFromCloudinary('noxistence/data/lore.json', res));
+app.get('/api/data/catalog', (req, res) => readJsonFromCloudinary('noxistence/data/catalog.json', res));
+app.get('/api/data/fonts', (req, res) => readJsonFromCloudinary('noxistence/data/fonts.json', res));
 
 // Proteger el acceso a /editor.html
 app.get('/editor.html', basicAuth({
