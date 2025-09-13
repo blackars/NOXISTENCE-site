@@ -223,26 +223,26 @@
     }
     requestAnimationFrame(raf);
 
-    // Cargar fuentes personalizadas
+    // Cargar fuentes personalizadas desde Cloudinary
     async function loadCustomFonts() {
       try {
-        const res = await fetch('/api/data/fonts');
+        const res = await fetch('/fonts-cloudinary.json');
         const fontFiles = await res.json();
         
         for (const font of fontFiles) {
           try {
-            const fontUrl = `fonts/${font}`;
-            const cleanName = font.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
-            const fontFace = new FontFace(cleanName, `url(${fontUrl})`);
+            // El 'name' ya viene limpio desde el JSON
+            const fontFace = new FontFace(font.name, `url(${font.url})`);
             await fontFace.load();
             document.fonts.add(fontFace);
+            console.log(`Fuente cargada: ${font.name}`);
           } catch (e) {
-            console.warn(`No se pudo cargar la fuente: ${font}`, e);
+            console.warn(`No se pudo cargar la fuente: ${font.name}`, e);
             continue;
           }
         }
       } catch (e) {
-        console.log('No se encontró fonts.json, usando solo fuentes estándar');
+        console.error('No se pudo cargar fonts-cloudinary.json:', e);
       }
     }
 

@@ -1,0 +1,55 @@
+{
+  "texts": [],
+  "backgroundColor": "#d26060",
+  "fontSettings": {
+    "family": "batesshower",
+    "size": "14",
+    "color": "#923535"
+  },
+  "exportDate": "2025-09-13T20:50:43.145Z",
+  "showTitles": true,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757655108/noxistence/creatures/hhaaas.png",
+      "left": "341px",
+      "top": "38.9px",
+      "scale": "2.100000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "linkTo": "lore/kk.json",
+      "name": "hhaaas",
+      "fontFamily": "batesshower",
+      "fontSize": "14px",
+      "color": "rgb(146, 53, 53)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757651219/noxistence/imageart/apesun.png",
+      "left": "523.4px",
+      "top": "377.4px",
+      "scale": "1",
+      "rotate": "0",
+      "flipped": false,
+      "name": "art",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757651272/noxistence/lore/chatgptimage5jul202504_13_50a.m..png",
+      "left": "75.6px",
+      "top": "337.6px",
+      "scale": "1",
+      "rotate": "0",
+      "flipped": false,
+      "name": "art",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
