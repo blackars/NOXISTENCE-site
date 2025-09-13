@@ -439,7 +439,7 @@
       // Llenar el select de colecciones/hojas
       async function loadSheets() {
         try {
-          const res = await fetch('/api/data/catalog');
+          const res = await fetch('/api/hojas-list-collections');
           const files = await res.json();
           
           // Add default option
@@ -484,7 +484,7 @@
           grid.innerHTML = '<div class="loading">Cargando colección...</div>';
           
           // Cargar la colección seleccionada
-          const res = await fetch(`hojas/${selectedFile}?t=${new Date().getTime()}`);
+          const res = await fetch(`hojas/collections/${selectedFile}?t=${new Date().getTime()}`);
           const collectionData = await res.json();
           
           // Extraer nombres de criaturas de la colección
