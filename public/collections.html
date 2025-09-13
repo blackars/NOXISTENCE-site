@@ -319,7 +319,7 @@
           try {
             const card = document.createElement('a');
             card.className = 'collection-card';
-            card.href = `viewer.html?file=${encodeURIComponent(file)}`;
+            card.href = `viewer.html?file=collections/${encodeURIComponent(file)}`;
             card.title = file;
             
             // Miniatura

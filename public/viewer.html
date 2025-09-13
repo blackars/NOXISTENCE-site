@@ -226,7 +226,7 @@
     // Cargar fuentes personalizadas
     async function loadCustomFonts() {
       try {
-        const res = await fetch('fonts/fonts.json');
+        const res = await fetch('/api/data/fonts');
         const fontFiles = await res.json();
         
         for (const font of fontFiles) {

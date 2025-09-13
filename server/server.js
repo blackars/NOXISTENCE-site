@@ -127,20 +127,47 @@ app.get('/api/list-assets', async (req, res) => {
   }
 });
 
-// Endpoint para listar todas las hojas recursivamente
+// Endpoint para listar solo colecciones
+app.get('/api/hojas-list-collections', (req, res) => {
+  try {
+    const collectionsPath = path.join(__dirname, '../dist/hojas/collections');
+    if (!fs.existsSync(collectionsPath)) {
+      return res.json([]);
+    }
+    const files = fs.readdirSync(collectionsPath).filter(file => file.endsWith('.json'));
+    res.json(files);
+  } catch (error) {
+    console.error('Error al listar colecciones:', error);
+    res.status(500).json({ error: 'Error al listar colecciones' });
+  }
+});
+
+// Endpoint para listar solo lore
+app.get('/api/hojas-list-lore', (req, res) => {
+  try {
+    const lorePath = path.join(__dirname, '../dist/hojas/lore');
+    if (!fs.existsSync(lorePath)) {
+      return res.json([]);
+    }
+    const files = fs.readdirSync(lorePath).filter(file => file.endsWith('.json'));
+    res.json(files);
+  } catch (error) {
+    console.error('Error al listar lore:', error);
+    res.status(500).json({ error: 'Error al listar lore' });
+  }
+});
+
+// Endpoint para listar TODAS las hojas (recursivo) para "enlazar capas"
 app.get('/api/hojas-list', (req, res) => {
   const hojasDir = path.join(__dirname, '../dist/hojas');
-
+  
   function findJsonFilesRecursive(dir) {
     let results = [];
-    if (!fs.existsSync(dir)) {
-      return [];
-    }
+    if (!fs.existsSync(dir)) return [];
     const list = fs.readdirSync(dir);
     list.forEach(file => {
       const filePath = path.join(dir, file);
-      const stat = fs.statSync(filePath);
-      if (stat && stat.isDirectory()) {
+      if (fs.statSync(filePath).isDirectory()) {
         results = results.concat(findJsonFilesRecursive(filePath));
       } else if (file.endsWith('.json')) {
         results.push(filePath);
@@ -151,7 +178,6 @@ app.get('/api/hojas-list', (req, res) => {
 
   try {
     const allFiles = findJsonFilesRecursive(hojasDir);
-    // Necesitamos que las rutas sean relativas a la carpeta 'hojas' para que los enlaces funcionen
     const relativeFiles = allFiles.map(file => path.relative(hojasDir, file).replace(/\\/g, '/'));
     res.json({ hojas: relativeFiles });
   } catch (error) {
@@ -160,32 +186,6 @@ app.get('/api/hojas-list', (req, res) => {
   }
 });
 
-// Endpoint para listar colecciones (puede ser obsoleto ahora)
-app.get('/api/hojas-list-collections', (req, res) => {
-  try {
-    const hojasPath = path.join(__dirname, '../dist/hojas/collections');
-    if (!fs.existsSync(hojasPath)) return res.json([]);
-    const files = fs.readdirSync(hojasPath).filter(file => file.endsWith('.json'));
-    res.json(files);
-  } catch (error) {
-    console.error('Error al listar colecciones:', error);
-    res.status(500).json({ error: 'Error al listar colecciones' });
-  }
-});
-
-// Endpoint para listar lore
-
-app.get('/api/hojas-list-lore', (req, res) => {
-  try {
-    const hojasLorePath = path.join(__dirname, '../dist/hojas/lore');
-    if (!fs.existsSync(hojasLorePath)) return res.json([]);
-    const files = fs.readdirSync(hojasLorePath).filter(file => file.endsWith('.json'));
-    res.json(files);
-  } catch (error) {
-    console.error('Error al listar artículos de lore:', error);
-    res.status(500).json({ error: 'Error al listar artículos de lore' });
-  }
-});
 
 // Endpoint para subir arte
 app.post('/api/upload-art', upload.single('image'), (req, res) => {
