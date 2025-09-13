@@ -67,6 +67,7 @@ const upload = multer({
 // --- RUTAS DE API ---
 
 // Ruta para generar TODAS las miniaturas bajo demanda
+// Ruta para generar TODAS las miniaturas bajo demanda
 app.post('/api/generate-all-thumbnails', async (req, res) => {
   console.log('[API] Solicitud para generar TODAS las miniaturas.');
 
@@ -421,11 +422,8 @@ app.get('/editor.html', basicAuth({
 });
 
 
-// Generate thumbnails on server start
-console.log('[SERVER START] Calling generateAllThumbnailsCollections()...');
-generateAllThumbnailsCollections()
-  .then(() => generateAllThumbnailsLore())
-  .catch(err => console.error('Error generating thumbnails:', err));
+// Thumbnail generation on startup is disabled to prevent deployment timeouts.
+// Thumbnails are now generated on-demand via the API endpoint.
 
 // Fallback para SPA: servir index.html para cualquier otra ruta no encontrada
 app.get('*', (req, res) => {
