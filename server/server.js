@@ -63,17 +63,25 @@ const upload = multer({
 // --- RUTAS DE API ---
 
 // Endpoint para generar miniaturas bajo demanda
-app.post('/api/generate-all-thumbnails', async (req, res) => {
+// Ruta para generar TODAS las miniaturas bajo demanda (de forma asíncrona)
+app.post('/api/generate-all-thumbnails', (req, res) => {
   console.log('[API] Solicitud para generar TODAS las miniaturas.');
-  try {
-    // **CARGA DIFERIDA**: El require se hace aquí para no retrasar el arranque del servidor.
-    const { generateAllThumbnails } = require('../src/generate-thumbnails');
-    await generateAllThumbnails();
-    res.json({ success: true, message: 'Proceso de generación de miniaturas completado.' });
-  } catch (error) {
-    console.error('[API ERROR] Falló la generación masiva de miniaturas:', error);
-    res.status(500).json({ success: false, message: 'Error interno del servidor al generar las miniaturas.' });
-  }
+
+  // **CARGA DIFERIDA**: El require se hace aquí para no retrasar el arranque del servidor.
+  const { generateAllThumbnails } = require('../src/generate-thumbnails');
+
+  // Llama a la función pero NO la espera con await.
+  // Esto libera el request de inmediato.
+  generateAllThumbnails().catch(err => {
+    // Loguear cualquier error no capturado del proceso en segundo plano
+    console.error('[BACKGROUND ERROR] Falló la generación masiva de miniaturas:', err);
+  });
+
+  // Responder inmediatamente al cliente para no causar un timeout.
+  res.status(202).json({ 
+    success: true, 
+    message: 'El proceso de generación de miniaturas ha comenzado en segundo plano. Revisa los logs del servidor para ver el progreso.' 
+  });
 });
 
 // Endpoint para listar fuentes
