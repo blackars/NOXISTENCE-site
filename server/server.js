@@ -272,10 +272,10 @@ const readJsonFromCloudinary = async (publicId, res) => {
     res.status(500).json({ error: `Error al leer ${publicId}` });
   }
 };
-app.get('/api/creatures', (req, res) => readJsonFromCloudinary('creatures.json', 'noxistence/data', res));
-app.get('/api/data/lore', (req, res) => readJsonFromCloudinary('lore.json', 'noxistence/data', res));
-app.get('/api/data/catalog', (req, res) => readJsonFromCloudinary('catalog.json', 'noxistence/data', res));
-app.get('/api/data/fonts', (req, res) => readJsonFromCloudinary('fonts.json', 'noxistence/data', res));
+app.get('/api/creatures', (req, res) => readJsonFromCloudinary('noxistence/data/creatures.json', res));
+app.get('/api/data/lore', (req, res) => readJsonFromCloudinary('noxistence/data/lore.json', res));
+app.get('/api/data/catalog', (req, res) => readJsonFromCloudinary('noxistence/data/catalog.json', res));
+app.get('/api/data/fonts', (req, res) => readJsonFromCloudinary('noxistence/data/fonts.json', res));
 
 // Proteger el acceso a /editor.html
 app.get('/editor.html', basicAuth({
