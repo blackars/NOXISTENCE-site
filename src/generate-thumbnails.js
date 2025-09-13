@@ -55,7 +55,7 @@ async function generateThumbnailForFile(absoluteFilePath) {
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
       ignoreHTTPSErrors: true,
-      timeout: 90000, // Aumentar el timeout a 90 segundos
+      timeout: 60000, // Aumentar el timeout a 60 segundos
     });
     console.log(` -> Navegador iniciado para ${fileRelativePath}`);
 

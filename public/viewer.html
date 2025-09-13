@@ -653,7 +653,7 @@
         });
       } else if (fileName) {
         // Cargar el diseño guardado
-        loadJSON(`hojas/${fileName}`, function(data) {
+        loadJSON(fileName, function(data) {
           if (data) {
             renderLayout(data);
           } else {
