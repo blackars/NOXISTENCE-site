@@ -1,12 +1,13 @@
-console.log('[GENERATE THUMBNAILS SCRIPT] Script loaded.');
-
 const fs = require('fs');
 const path = require('path');
-const puppeteer = require('puppeteer');
+const chromium = require('@sparticuz/chromium');
+const puppeteer = require('puppeteer-core');
 const { uploadBufferToCloudinary } = require('../server/cloudinary');
 const cloudinary = require('cloudinary').v2;
 
-// Configuración de Cloudinary (si no está ya configurado)
+console.log('[GENERATE THUMBNAILS SCRIPT] Script loaded using @sparticuz/chromium.');
+
+// Configuración de Cloudinary
 if (!cloudinary.config().cloud_name) {
   require('dotenv').config();
   cloudinary.config({
@@ -17,17 +18,13 @@ if (!cloudinary.config().cloud_name) {
   });
 }
 
-// --- RUTA CORRECTA ---
-// Apuntar a la carpeta 'dist' que es la que usa el servidor en producción.
 const HOJAS_DIR = path.join(__dirname, '../dist/hojas');
-
 const VIEWER_URL_BASE = process.env.FRONTEND_BASE_URL || 'http://localhost:3000';
 
-// Función recursiva para encontrar todos los archivos .json en un directorio
 function findJsonFiles(dir) {
   let results = [];
   if (!fs.existsSync(dir)) {
-    console.warn(`[WARN] El directorio no existe, se omite: ${dir}`);
+    console.warn(`[WARN] Directory not found, skipping: ${dir}`);
     return [];
   }
   const list = fs.readdirSync(dir);
@@ -44,57 +41,50 @@ function findJsonFiles(dir) {
 }
 
 async function generateThumbnailForFile(absoluteFilePath) {
-  // Convertir el path absoluto a un path relativo desde la carpeta 'dist' para la URL
   const distDir = path.join(__dirname, '../dist');
   const fileRelativePath = path.relative(distDir, absoluteFilePath).replace(/\\/g, '/');
-
-  // Determinar la carpeta de Cloudinary
-  const cloudinaryFolder = fileRelativePath.includes('hojas/lore/')
-    ? 'noxistence/thumbnails/lore'
-    : 'noxistence/thumbnails/collections';
+  const cloudinaryFolder = fileRelativePath.includes('hojas/lore/') ? 'noxistence/thumbnails/lore' : 'noxistence/thumbnails/collections';
 
   console.log(`[+] Iniciando miniatura para: ${fileRelativePath}`);
-  let browser;
+  let browser = null;
+
   try {
     browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true,
     });
-  } catch (e) {
-    console.error(`[ERROR] Fallo al iniciar Puppeteer para ${fileRelativePath}:`, e);
-    throw e;
-  }
+    console.log(` -> Navegador iniciado para ${fileRelativePath}`);
 
-  const page = await browser.newPage();
-  try {
-    await page.setViewport({ width: 1600, height: 900, deviceScaleFactor: 1 });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 630, deviceScaleFactor: 1 });
 
     const url = `${VIEWER_URL_BASE}/viewer.html?file=${encodeURIComponent(fileRelativePath)}`;
     console.log(` -> Navegando a: ${url}`);
 
-    await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'], timeout: 120000 });
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
     await page.waitForSelector('#grid', { visible: true, timeout: 30000 });
-    await new Promise(r => setTimeout(r, 3000)); // Espera extra para renderizado
+    await new Promise(r => setTimeout(r, 2000));
 
-    const buffer = await page.screenshot({ type: 'png', omitBackground: true, fullPage: true });
+    const buffer = await page.screenshot({ type: 'png', omitBackground: true });
     console.log(` -> Screenshot tomada (tamaño: ${buffer.length} bytes)`);
 
     const publicId = path.basename(fileRelativePath, '.json');
     const result = await uploadBufferToCloudinary(buffer, cloudinaryFolder, publicId);
-    console.log(`[SUCCESS] Miniatura subida a Cloudinary: ${result.secure_url}`);
+    console.log(`[SUCCESS] Miniatura subida: ${result.secure_url}`);
     return result.secure_url;
 
   } catch (error) {
     console.error(`[ERROR] Fallo al procesar ${fileRelativePath}:`, error.message);
-    // No relanzar el error para no detener el proceso masivo
   } finally {
-    await browser.close();
+    if (browser !== null) {
+      await browser.close();
+    }
   }
 }
 
-// --- FUNCIÓN UNIFICADA ---
-// Genera todas las miniaturas de forma recursiva
 async function generateAllThumbnails() {
   console.log('--- [START] Proceso de Generación de Todas las Miniaturas ---');
   const fullHojasDir = path.resolve(HOJAS_DIR);
@@ -109,21 +99,12 @@ async function generateAllThumbnails() {
 
   console.log(`[INFO] ${allJsonFiles.length} archivos .json encontrados. Iniciando procesamiento...`);
   
+  // Procesar en serie para no sobrecargar el contenedor
   for (const filePath of allJsonFiles) {
-    try {
-      await generateThumbnailForFile(filePath);
-    } catch (e) {
-      // El error ya se loguea dentro de generateThumbnailForFile
-      console.error(`[FATAL] Error irrecuperable en el bucle principal para ${filePath}. Saltando al siguiente.`);
-    }
+    await generateThumbnailForFile(filePath);
   }
 
   console.log('--- [END] Proceso de Generación de Todas las Miniaturas Completado ---');
 }
 
-// Exportar para usar desde el backend
-module.exports = {
-  generateAllThumbnails,
-  // Mantengo la exportación individual por si se necesita en el futuro
-  generateThumbnailForFile: (relativePath) => generateThumbnailForFile(path.join(__dirname, '../dist', relativePath))
-};
+module.exports = { generateAllThumbnails };
