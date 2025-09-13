@@ -1917,29 +1917,11 @@ async function loadArtImages() {
     }
 
     // --- Event listener para subir fuentes ---
-    document.getElementById('fontUploadInput').addEventListener('change', async function(e) {
-      if (isLocalMode) {
-        alert('Font upload not available in local mode.');
-        e.target.value = '';
-        return;
-      }
-      const files = Array.from(e.target.files);
-      if (!files.length) return;
-
-      for (const file of files) {
-        console.log('Subiendo fuente:', file.name);
-        try {
-          // Usa 'raw' como resource_type para fuentes y mantiene el nombre original
-          const fontUrl = await uploadToCloudinary(file, 'raw', 'noxistence/fonts', file.name);
-          console.log('URL recibida:', fontUrl);
-          window.uploadedFonts = window.uploadedFonts || [];
-          window.uploadedFonts.push({ name: file.name, url: fontUrl });
-          alert(`Fuente subida: ${file.name}`);
-        } catch (err) {
-          alert('Error subiendo fuente: ' + file.name);
-        }
-      }
-      e.target.value = '';
+    // Importar la función de subida de fuentes desde upload-fonts.js usando módulos ES6
+    // (Asegúrate de que tu HTML use type="module" en el script principal)
+    import { uploadFontsFromInput } from './js/upload-fonts.js';
+    document.getElementById('fontUploadInput').addEventListener('change', function(e) {
+      uploadFontsFromInput(e.target, window.isLocalMode);
     });
 
     // --- LÓGICA DE LORE: igual que ART pero para imágenes ---
