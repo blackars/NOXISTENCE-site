@@ -25,8 +25,8 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: 'hojas/**/*', // Ruta de origen relativa a `root` (public/hojas)
-          dest: 'hojas' // Ruta de destino relativa a `outDir` (dist/hojas)
+          src: 'hojas', // Origen: la carpeta 'hojas' completa
+          dest: ''   // Destino: la raíz de 'dist', manteniendo la estructura interna
         },
         { 
           src: 'js/edit-tools.js', // Ruta de origen relativa a `root` (public/js/edit-tools.js)

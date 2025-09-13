@@ -55,21 +55,39 @@ async function generateThumbnailForFile(absoluteFilePath) {
       executablePath: await chromium.executablePath(),
       headless: chromium.headless,
       ignoreHTTPSErrors: true,
-      timeout: 60000, // Aumentar el timeout a 60 segundos
+      timeout: 90000, // 90 segundos de timeout para el arranque
     });
     console.log(` -> Navegador iniciado para ${fileRelativePath}`);
 
     const page = await browser.newPage();
-    await page.setViewport({ width: 600, height: 600, deviceScaleFactor: 1 });
+    await page.setViewport({ width: 1920, height: 1080 }); // Viewport grande para no limitar el contenido
 
-    const url = `${VIEWER_URL_BASE}/viewer.html?file=${encodeURIComponent(fileRelativePath)}`;
+    // viewer.html espera una ruta sin el prefijo 'hojas/', ya que lo añade internamente.
+    const pathForViewer = fileRelativePath.startsWith('hojas/') ? fileRelativePath.substring(6) : fileRelativePath;
+    const url = `${VIEWER_URL_BASE}/viewer.html?file=${encodeURIComponent(pathForViewer)}`;
     console.log(` -> Navegando a: ${url}`);
 
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });
     await page.waitForSelector('#grid', { visible: true, timeout: 30000 });
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(r => setTimeout(r, 2000)); // Espera extra para renderizado
 
-    const buffer = await page.screenshot({ type: 'png', omitBackground: true });
+    // Medir el contenido y recortar la captura a su tamaño exacto
+    const clip = await page.evaluate(() => {
+        const grid = document.getElementById('grid');
+        if (!grid || !grid.firstElementChild) return null;
+        const contentBox = grid.firstElementChild.getBoundingClientRect();
+        return { x: contentBox.x, y: contentBox.y, width: contentBox.width, height: contentBox.height };
+    });
+
+    let buffer;
+    if (!clip || clip.width === 0 || clip.height === 0) {
+        console.warn(` -> No se pudo medir el contenido, se usará el viewport completo.`);
+        buffer = await page.screenshot({ type: 'png', omitBackground: true });
+    } else {
+        console.log(` -> Recortando a las dimensiones del contenido: ${Math.round(clip.width)}x${Math.round(clip.height)}`);
+        buffer = await page.screenshot({ type: 'png', omitBackground: true, clip });
+    }
+    
     console.log(` -> Screenshot tomada (tamaño: ${buffer.length} bytes)`);
 
     const publicId = path.basename(fileRelativePath, '.json');

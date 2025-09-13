@@ -311,15 +311,16 @@
             thumbImg.style.height = '100%';
             thumbImg.style.objectFit = 'cover';
 
-            // Intentar cargar el thumbnail específico
-            const imgLoader = new Image();
-            imgLoader.onload = function() {
-              thumbImg.src = `${API_BASE_URL}/thumbnails/ss-lore/${file.replace('.json','.png')}`;
+            // CONSTRUIR URL DE CLOUDINARY
+            const cloudName = 'dhpz3b0n0'; 
+            const publicId = file.replace('.json', '');
+            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/noxistence/thumbnails/lore/${publicId}.png`;
+            
+            // Fallback a placeholder si la imagen de Cloudinary no carga
+            thumbImg.onerror = function() {
+              this.onerror=null;
+              this.src='thumbnails/placeholder.png';
             };
-            imgLoader.onerror = function() {
-              // No thumbnail found, keep placeholder
-            };
-            imgLoader.src = `${API_BASE_URL}/thumbnails/ss-lore/${file.replace('.json','.png')}`;
 
             mini.appendChild(thumbImg);
             card.appendChild(mini);
