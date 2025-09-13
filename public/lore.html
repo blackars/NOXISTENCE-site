@@ -303,25 +303,20 @@
             const mini = document.createElement('div');
             mini.className = 'mini-viewer';
 
-            // Imagen de miniatura
+            // Imagen de miniatura desde Cloudinary
             const thumbImg = document.createElement('img');
-            thumbImg.src = 'thumbnails/placeholder.png';
+            const cloudName = 'dhpz3b0n0';
+            const publicId = file.replace('.json', '');
+            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/noxistence/thumbnails/lore/${publicId}.png`;
             thumbImg.alt = file;
             thumbImg.style.width = '100%';
             thumbImg.style.height = '100%';
             thumbImg.style.objectFit = 'cover';
-
-            // CONSTRUIR URL DE CLOUDINARY
-            const cloudName = 'dhpz3b0n0'; 
-            const publicId = file.replace('.json', '');
-            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/noxistence/thumbnails/lore/${publicId}.png`;
-            
-            // Fallback a placeholder si la imagen de Cloudinary no carga
+            // Fallback a placeholder de Cloudinary si la imagen no carga
             thumbImg.onerror = function() {
-              this.onerror=null;
-              this.src='thumbnails/placeholder.png';
+              this.onerror = null;
+              this.src = `https://res.cloudinary.com/${cloudName}/image/upload/noxistence/thumbnails/placeholder_c59bti.png`;
             };
-
             mini.appendChild(thumbImg);
             card.appendChild(mini);
 
