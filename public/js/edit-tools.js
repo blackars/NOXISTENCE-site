@@ -93,13 +93,22 @@ async function generateAndUploadFontsJson(triggerBtn) {
 
     // Si no obtuvimos nada, usar /api/list-assets como respaldo
     if (!Array.isArray(fonts) || fonts.length === 0) {
-      const resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=raw');
-      const dataAssets = await resAssets.json();
-      const assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
+      let resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=raw');
+      if (!resAssets.ok) throw new Error('Error al listar assets raw');
+      let dataAssets = await resAssets.json();
+      let assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
+      if (assets.length === 0) {
+        // Probar como resource_type=image por si fueron subidas como imagen
+        console.warn('No assets raw, intentando con resource_type=image');
+        resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=image');
+        dataAssets = await resAssets.json();
+        assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
+      }
+      console.log('Assets encontrados en fonts/:', assets.length);
       fonts = assets.map(a => ({
-          name: a.public_id.split('/').pop(),
-          url: a.secure_url
-        }));
+        name: a.public_id.split('/').pop(),
+        url: a.secure_url
+      }));
     }
 
     if (!fonts.length) throw new Error('No se encontraron fuentes en Cloudinary.');
