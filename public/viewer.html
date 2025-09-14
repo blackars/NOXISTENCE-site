@@ -521,6 +521,9 @@
           textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
           // Aplicar fuente con fallback
           const fontFamily = textData.fontFamily || 'sans-serif';
+          if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+            ensureFontLoaded(fontFamily);
+          }
           textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
           textItem.style.fontSize = textData.fontSize || '14px';
           textItem.style.color = textData.color || '#000';
@@ -635,17 +638,29 @@
     }
 
     async function ensureFontLoaded(fontFamily, fontUrl) {
+      console.log('Intentando cargar fuente:', fontFamily);
       // Si ya está cargada, nada que hacer
-      if (document.fonts.check(`12px "${fontFamily}"`)) return;
+      if (document.fonts.check(`12px "${fontFamily}"`)) {
+        console.log('Fuente ya cargada:', fontFamily);
+        return;
+      }
       // Si no viene url, intenta buscar en el mapa
       if (!fontUrl && customFontMap.size) {
         fontUrl = customFontMap.get(fontFamily) || customFontMap.get(fontFamily.replace(/\.[^/.]+$/, ''));
+        console.log('URL de fuente encontrada:', fontUrl);
       }
-      if (!fontUrl) return;
-      if (!document.fonts.check(`12px "${fontFamily}"`)) {
+      if (!fontUrl) {
+        console.warn('No se encontró URL para la fuente:', fontFamily);
+        return;
+      }
+      try {
         const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
+        console.log('Cargando fuente:', fontFamily, 'desde:', fontUrl);
         await fontFace.load();
         document.fonts.add(fontFace);
+        console.log('Fuente cargada exitosamente:', fontFamily);
+      } catch (e) {
+        console.error('Error al cargar la fuente:', fontFamily, e);
       }
     }
 
