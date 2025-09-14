@@ -885,10 +885,6 @@ async function loadArtImages() {
     
     // Subir nueva criatura
     async function uploadCreature() {
-      if (isLocalMode) {
-        alert('La subida de criaturas no está disponible en modo local.\n\nPara subir criaturas, ejecuta el servidor Node.js con:\n\nnpm start');
-        return;
-      }
       
       const fileInput = document.getElementById('singleImageLoader');
       const nameInput = document.getElementById('creatureName');
@@ -968,10 +964,7 @@ async function loadArtImages() {
     
     // Subir nueva imagen de arte
     async function uploadArtImage() {
-      if (isLocalMode) {
-        alert('Art images upload not available in local mode.\n\nTo upload images, run Node.js server with:\n\nnpm start');
-        return;
-      }
+
       
       const fileInput = document.getElementById('artImageLoader');
 
@@ -1890,11 +1883,7 @@ async function loadArtImages() {
 
     // --- Event listener para subir fuentes ---
     document.getElementById('fontUploadInput').addEventListener('change', async function(e) {
-      if (isLocalMode) {
-        alert('Font upload not available in local mode.');
-        e.target.value = '';
-        return;
-      }
+
       const files = Array.from(e.target.files);
       if (!files.length) return;
 
@@ -1917,10 +1906,7 @@ async function loadArtImages() {
     // --- LÓGICA DE LORE: igual que ART pero para imágenes ---
 async function loadLoreImages() {
       const loreList = document.getElementById('loreList');
-      if (isLocalMode) {
-        loreList.innerHTML = '<p style="color: #666; font-style: italic;">Imágenes de lore no disponibles en modo local.</p>';
-        return [];
-      }
+
       try {
         const response = await fetch('/api/list-assets?folder=noxistence/lore&resource_type=image');
         if (!response.ok) {
@@ -1970,10 +1956,7 @@ async function loadLoreImages() {
       });
     }
     async function uploadLoreImage() {
-      if (isLocalMode) {
-        alert('La subida de imágenes de lore no está disponible en modo local.');
-        return;
-      }
+
       const fileInput = document.getElementById('loreImageLoader');
       if (!fileInput.files[0]) {
         alert('Selecciona una imagen');
@@ -2037,10 +2020,6 @@ async function loadLoreImages() {
       if (emptyMessage) emptyMessage.remove();
     }
     async function deleteLoreImage(public_id) {
-      if (isLocalMode) {
-        alert('Eliminar imágenes de lore no está disponible en modo local.');
-        return;
-      }
       if (!confirm('¿Seguro que quieres eliminar esta imagen de lore?')) return;
       try {
         // Petición real al backend para borrar la imagen de Cloudinary
