@@ -88,15 +88,33 @@ app.post('/api/generate-all-thumbnails', (req, res) => {
 app.get('/api/list-fonts', (req, res) => {
   try {
     const fontsJsonPath = path.join(__dirname, '../public/fonts/fonts.json');
-    if (fs.existsSync(fontsJsonPath)) {
-      const jsonData = fs.readFileSync(fontsJsonPath, 'utf8');
-      res.json(JSON.parse(jsonData));
+    let debug = {
+      ruta: fontsJsonPath,
+      existe: fs.existsSync(fontsJsonPath),
+      contenido: null,
+      error: null
+    };
+    if (debug.existe) {
+      try {
+        const jsonData = fs.readFileSync(fontsJsonPath, 'utf8');
+        debug.contenido = jsonData;
+        let parsed = [];
+        try {
+          parsed = JSON.parse(jsonData);
+        } catch (e) {
+          debug.error = 'JSON.parse error: ' + e.message;
+        }
+        res.json({ fonts: parsed, debug });
+      } catch (e) {
+        debug.error = 'readFileSync error: ' + e.message;
+        res.json({ fonts: [], debug });
+      }
     } else {
-      res.json([]);
+      res.json({ fonts: [], debug });
     }
   } catch (error) {
     console.error('Error al listar fuentes:', error);
-    res.status(500).json({ error: 'Error al listar fuentes' });
+    res.status(500).json({ error: 'Error al listar fuentes', debug: { error: error.message } });
   }
 });
 

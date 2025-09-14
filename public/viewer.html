@@ -275,24 +275,56 @@
               if (errorCallback) errorCallback(e);
               else redirectTo404();
             }
-          } else {
-            console.error('Error al cargar el archivo:', xhr.status, xhr.statusText);
-            if (errorCallback) errorCallback(new Error(`Error ${xhr.status}: ${xhr.statusText}`));
-            else redirectTo404();
+          try {
+            const response = await fetch('/api/list-fonts');
+            const data = await response.json();
+            console.log('Respuesta /api/list-fonts:', data);
+            let fonts = Array.isArray(data) ? data : (data.fonts || []);
+            // Mostrar debug info en pantalla si no hay fuentes
+            if (!Array.isArray(fonts) || fonts.length === 0) {
+              let debugInfo = data && data.debug ? JSON.stringify(data.debug, null, 2) : 'Sin debug info';
+              const msg = `No se encontraron fuentes personalizadas.\nDebug backend:\n${debugInfo}`;
+              console.warn(msg);
+              // Mostrar en pantalla
+              let debugDiv = document.getElementById('font-debug');
+              if (!debugDiv) {
+                debugDiv = document.createElement('pre');
+                debugDiv.id = 'font-debug';
+                debugDiv.style.color = 'red';
+                debugDiv.style.background = '#fff0f0';
+                debugDiv.style.padding = '1em';
+                debugDiv.style.fontSize = '1em';
+                debugDiv.style.maxWidth = '100%';
+                debugDiv.style.overflowX = 'auto';
+                document.body.insertBefore(debugDiv, document.body.firstChild);
+              }
+              debugDiv.textContent = msg;
+              return;
+            }
+            for (const font of fonts) {
+              if (font.url && font.name) {
+                const fontFace = new FontFace(font.name, `url(${font.url})`);
+                await fontFace.load();
+                document.fonts.add(fontFace);
+              }
+            }
+            window.customFontsLoaded = true;
+          } catch (e) {
+            console.error('Error loading custom fonts:', e);
+            let debugDiv = document.getElementById('font-debug');
+            if (!debugDiv) {
+              debugDiv = document.createElement('pre');
+              debugDiv.id = 'font-debug';
+              debugDiv.style.color = 'red';
+              debugDiv.style.background = '#fff0f0';
+              debugDiv.style.padding = '1em';
+              debugDiv.style.fontSize = '1em';
+              debugDiv.style.maxWidth = '100%';
+              debugDiv.style.overflowX = 'auto';
+              document.body.insertBefore(debugDiv, document.body.firstChild);
+            }
+            debugDiv.textContent = 'Error cargando fuentes: ' + e.message;
           }
-        }
-      };
-      xhr.onerror = function() {
-        console.error('Error de red al cargar:', file);
-        if (errorCallback) errorCallback(new Error('Error de red'));
-        else redirectTo404();
-      };
-      xhr.send(null);
-    }
-
-    function renderLayout(data) {
-      console.log('JSON cargado', data);
-      const grid = document.getElementById('grid');
       
       // Aplicar color de fondo si existe
       if (data.backgroundColor) {
