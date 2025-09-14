@@ -93,13 +93,11 @@ async function generateAndUploadFontsJson(triggerBtn) {
 
     // Si no obtuvimos nada, usar /api/list-assets como respaldo
     if (!Array.isArray(fonts) || fonts.length === 0) {
-      const resAssets = await fetch('/api/list-assets?folder=noxistence/fonts&resource_type=raw');
+      const resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=raw');
       const dataAssets = await resAssets.json();
       const assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
-      fonts = assets
-        .filter(a => /\.(ttf|otf|woff2?|fnt)$/i.test(a.secure_url || ''))
-        .map(a => ({
-          name: a.public_id.split('/').pop().replace(/^[^/]*\//, ''),
+      fonts = assets.map(a => ({
+          name: a.public_id.split('/').pop(),
           url: a.secure_url
         }));
     }
