@@ -79,6 +79,10 @@ if (fontSelector) {
 // Genera un customfonts.json con { name, url } directamente desde los assets de Cloudinary
 // y lo sube (sobrescribe) a la ruta noxistence/data/customfonts.json.
 // Se invoca desde el botón "Actualizar fuentes" (id="update-fonts-btn") del editor.
+/**
+ * [FONT_SYNC] Genera customfonts.json y lo sube.
+ * Muestra trazas abundantes en consola y un alert con la lista encontrada.
+ */
 async function generateAndUploadFontsJson(triggerBtn) {
   if (triggerBtn) triggerBtn.disabled = true;
   try {
@@ -93,25 +97,30 @@ async function generateAndUploadFontsJson(triggerBtn) {
 
     // Si no obtuvimos nada, usar /api/list-assets como respaldo
     if (!Array.isArray(fonts) || fonts.length === 0) {
+      console.log('%c[FONT_SYNC] --- Paso 1: solicitando lista RAW de fonts/','color:cyan;font-weight:bold');
       let resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=raw');
       if (!resAssets.ok) throw new Error('Error al listar assets raw');
       let dataAssets = await resAssets.json();
       let assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
       if (assets.length === 0) {
         // Probar como resource_type=image por si fueron subidas como imagen
-        console.warn('No assets raw, intentando con resource_type=image');
+        console.warn('[FONT_SYNC] No assets RAW. Intentando como IMAGE…');
         resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=image');
         dataAssets = await resAssets.json();
         assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
       }
-      console.log('Assets encontrados en fonts/:', assets.length);
+      console.log('%c[FONT_SYNC] Assets encontrados en fonts/: '+assets.length,'color:cyan');
       fonts = assets.map(a => ({
         name: a.public_id.split('/').pop(),
         url: a.secure_url
       }));
     }
 
-    if (!fonts.length) throw new Error('No se encontraron fuentes en Cloudinary.');
+    if (!fonts.length) throw new Error('[FONT_SYNC] No se encontraron fuentes en Cloudinary.');
+
+    // Mostrar listado al usuario para depuración
+    console.table(fonts);
+    alert('[FONT_SYNC] Fuentes detectadas:\n'+fonts.map(f=>f.name).join('\n'));
 
     const jsonString = JSON.stringify(fonts, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
@@ -151,7 +160,7 @@ async function generateAndUploadFontsJson(triggerBtn) {
       await fillFontSelectorUnified();
     }
   } catch (err) {
-    console.error('Error actualizando fuentes:', err);
+    console.error('%c[FONT_SYNC] ERROR','color:red;font-weight:bold', err);
     alert(`Error actualizando fuentes: ${err.message}`);
   } finally {
     if (triggerBtn) triggerBtn.disabled = false;
@@ -160,8 +169,36 @@ async function generateAndUploadFontsJson(triggerBtn) {
 // Registrar en window para que el botón pueda llamarlo
 window.generateAndUploadFontsJson = generateAndUploadFontsJson;
 
+/**
+ * [DEBUG] Lista las fuentes encontradas en Cloudinary y las muestra en consola/alert.
+ */
+window.debugFontsList = async function() {
+  try {
+    const res = await fetch('/api/list-assets?folder=fonts&resource_type=raw');
+    const data = await res.json();
+    if (!data || !Array.isArray(data.assets)) {
+      alert('[DEBUG] Respuesta inválida list-assets');
+      console.error('[DEBUG] Respuesta inválida', data);
+      return;
+    }
+    const fonts = data.assets.map(a=>({name:a.public_id.split('/').pop(), url:a.secure_url}));
+    console.table(fonts);
+    alert('[DEBUG] Fuentes RAW:'+fonts.map(f=>f.name).join('\n'));
+  } catch(e){
+    console.error('[DEBUG] error',e);
+    alert('[DEBUG] error '+e.message);
+  }
+};
+
 // Asignar automáticamente si existe el botón
 document.addEventListener('DOMContentLoaded', () => {
+  // Delegación para botones dinámicos
+  document.body.addEventListener('click', (e) => {
+    const btn = e.target.closest('#update-fonts-btn');
+    if (btn) {
+      generateAndUploadFontsJson(btn);
+    }
+  });
   const updateBtn = document.getElementById('update-fonts-btn');
   if (updateBtn) {
     updateBtn.addEventListener('click', () => generateAndUploadFontsJson(updateBtn));
