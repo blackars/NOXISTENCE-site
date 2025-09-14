@@ -95,25 +95,34 @@ async function generateAndUploadFontsJson(triggerBtn) {
       }
     } catch (_) { /* Ignorar */ }
 
-    // Si no obtuvimos nada, usar /api/list-assets como respaldo
+    // Si no obtuvimos nada, usar /api/list-assets probando varios prefijos
     if (!Array.isArray(fonts) || fonts.length === 0) {
-      console.log('%c[FONT_SYNC] --- Paso 1: solicitando lista RAW de fonts/','color:cyan;font-weight:bold');
-      let resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=raw');
-      if (!resAssets.ok) throw new Error('Error al listar assets raw');
-      let dataAssets = await resAssets.json();
-      let assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
-      if (assets.length === 0) {
-        // Probar como resource_type=image por si fueron subidas como imagen
-        console.warn('[FONT_SYNC] No assets RAW. Intentando como IMAGE…');
-        resAssets = await fetch('/api/list-assets?folder=fonts&resource_type=image');
-        dataAssets = await resAssets.json();
-        assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
+      const prefixes = ['fonts', 'noxistence/fonts'];
+      let assets = [];
+      for (const pref of prefixes) {
+        console.log(`%c[FONT_SYNC] --- solicitando lista RAW de ${pref}/`,'color:cyan;font-weight:bold');
+        let resAssets = await fetch(`/api/list-assets?folder=${pref}&resource_type=raw`);
+        const dataAssets = await resAssets.json();
+        if (Array.isArray(dataAssets.assets) && dataAssets.assets.length) {
+          assets = dataAssets.assets;
+          console.log(`[FONT_SYNC] Encontrados ${assets.length} assets en ${pref}/`);
+          break;
+        }
       }
-      console.log('%c[FONT_SYNC] Assets encontrados en fonts/: '+assets.length,'color:cyan');
-      fonts = assets.map(a => ({
-        name: a.public_id.split('/').pop(),
-        url: a.secure_url
-      }));
+      // Si sigue vacío, intentar como image usando mismos prefijos
+      if (assets.length === 0) {
+        console.warn('[FONT_SYNC] No assets RAW en ninguno de los prefijos. Probando IMAGE…');
+        for (const pref of prefixes) {
+          let resImg = await fetch(`/api/list-assets?folder=${pref}&resource_type=image`);
+          const dataImg = await resImg.json();
+          if (Array.isArray(dataImg.assets) && dataImg.assets.length) {
+            assets = dataImg.assets;
+            console.log(`[FONT_SYNC] Encontrados ${assets.length} assets IMAGE en ${pref}/`);
+            break;
+          }
+        }
+      }
+      fonts = assets.map(a=>({name:a.public_id.split('/').pop(), url:a.secure_url}));
     }
 
     if (!fonts.length) throw new Error('[FONT_SYNC] No se encontraron fuentes en Cloudinary.');
