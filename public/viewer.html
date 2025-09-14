@@ -216,6 +216,9 @@
       infinite: false
     });
 
+    // Mapa global para relacionar nombre de fuente → URL (se llena en loadCustomFonts)
+    const customFontMap = new Map();
+
     // Función de animación de Lenis
     function raf(time) {
       lenis.raf(time);
@@ -226,15 +229,25 @@
     // Cargar fuentes personalizadas desde Cloudinary
     async function loadCustomFonts() {
       try {
-        const res = await fetch('/fonts-cloudinary.json');
+        // URL permanente al listado de fuentes en tu nube de Cloudinary
+        const CUSTOM_FONTS_URL = 'https://res.cloudinary.com/dgff8o52c/raw/upload/noxistence/data/customfonts.json';
+        // Intentar descargar el listado remoto; si falla, usar la copia local como respaldo
+        const res = await fetch(CUSTOM_FONTS_URL).catch(() => fetch('/fonts-cloudinary.json'));
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const fontFiles = await res.json();
         
+        // Rellenamos el mapa pero NO cargamos todavía las fuentes; se cargan on-demand con ensureFontLoaded
         for (const font of fontFiles) {
           try {
             // El 'name' ya viene limpio desde el JSON
+            // Normalizamos el nombre: con y sin extensión
+            const baseName = font.name.replace(/\.[^/.]+$/, '');
+            customFontMap.set(font.name, font.url);
+            customFontMap.set(baseName, font.url);
+            /*  No cargamos aquí directamente para evitar tener que descargar todas las fuentes de golpe
             const fontFace = new FontFace(font.name, `url(${font.url})`);
             await fontFace.load();
-            document.fonts.add(fontFace);
+            document.fonts.add(fontFace); */
             console.log(`Fuente cargada: ${font.name}`);
           } catch (e) {
             console.warn(`No se pudo cargar la fuente: ${font.name}`, e);
@@ -347,6 +360,7 @@
           }
           const titleElement = item.querySelector('div:last-child');
           if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
+            if (itemData.fontFamily) ensureFontLoaded(itemData.fontFamily);
             titleElement.style.fontFamily = `"${itemData.fontFamily || 'sans-serif'}", Arial, sans-serif`;
             titleElement.style.fontSize = itemData.fontSize || '14px';
             titleElement.style.color = itemData.color || '#111111';
@@ -621,6 +635,12 @@
     }
 
     async function ensureFontLoaded(fontFamily, fontUrl) {
+      // Si ya está cargada, nada que hacer
+      if (document.fonts.check(`12px "${fontFamily}"`)) return;
+      // Si no viene url, intenta buscar en el mapa
+      if (!fontUrl && customFontMap.size) {
+        fontUrl = customFontMap.get(fontFamily) || customFontMap.get(fontFamily.replace(/\.[^/.]+$/, ''));
+      }
       if (!fontUrl) return;
       if (!document.fonts.check(`12px "${fontFamily}"`)) {
         const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
