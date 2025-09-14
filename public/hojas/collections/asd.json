@@ -1,61 +1,59 @@
 {
+  "texts": [
+    {
+      "content": "proof 1",
+      "left": "100px",
+      "top": "100px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "kitisakkullian",
+      "fontSize": "25px",
+      "color": "rgb(205, 193, 193)"
+    },
+    {
+      "content": "proof 2",
+      "left": "426px",
+      "top": "40px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "serif",
+      "fontSize": "25px",
+      "color": "rgb(205, 193, 193)"
+    },
+    {
+      "content": "proof3",
+      "left": "337px",
+      "top": "293px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "25px",
+      "color": "rgb(205, 193, 193)"
+    }
+  ],
+  "backgroundColor": "#7e60d2",
+  "fontSettings": {
+    "family": "batesshower",
+    "size": "25",
+    "color": "#cdc1c1"
+  },
+  "exportDate": "2025-09-14T02:49:06.964Z",
+  "showTitles": true,
   "images": [
     {
-      "name": "Dorado Golem",
-      "img": "img/1751856742317.png",
-      "left": "1345px",
-      "top": "153px",
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757800303/noxistence/creatures/apesun.png",
+      "left": "563px",
+      "top": "167px",
       "scale": "1",
       "rotate": "0",
-      "fontFamily": "Simpsonfont",
-      "fontSize": "32px",
-      "color": "rgb(247, 247, 247)",
       "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "Dorado Golem",
-      "img": "img/1751856742317.png",
-      "left": "973px",
-      "top": "42.88px",
-      "scale": "0.6000000000000001",
-      "rotate": "0",
-      "fontFamily": "Simpsonfont",
-      "fontSize": "32px",
-      "color": "rgb(3, 2, 2)",
-      "flipped": false,
-      "showTitles": true
-    },
-    {
-      "name": "sdasdasas",
-      "img": "img/1751857759468.png",
-      "left": "279px",
-      "top": "46px",
-      "scale": "1",
-      "rotate": "0",
-      "fontFamily": "Simpsonfont",
-      "fontSize": "32px",
-      "color": "rgb(3, 2, 2)",
-      "flipped": false,
+      "name": "apesun",
+      "fontFamily": "kitisakkullian",
+      "fontSize": "25px",
+      "color": "rgb(47, 39, 39)",
       "showTitles": true
     }
   ],
-  "artimages": [
-    {
-      "img": "imgart/1751856795624.png",
-      "left": "406px",
-      "top": "402px",
-      "scale": "1",
-      "rotate": "0"
-    }
-  ],
-  "texts": [],
-  "backgroundColor": "#c0078f",
-  "fontSettings": {
-    "family": "Simpsonfont",
-    "size": "46",
-    "color": "#030202"
-  },
-  "exportDate": "2025-07-07T05:40:15.630Z",
-  "showTitles": true
+  "artimages": [],
+  "loreimages": []
 }
