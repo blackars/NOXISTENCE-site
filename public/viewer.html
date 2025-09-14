@@ -225,28 +225,24 @@
 
     // Cargar fuentes personalizadas
     async function loadCustomFonts() {
-      // Cargar fuentes desde el endpoint backend dinámico
-      const apiFontsUrl = '/api/list-fonts';
       try {
-        const res = await fetch(apiFontsUrl);
-        if (!res.ok) throw new Error('No se pudo cargar la lista de fuentes del backend');
-        const fontList = await res.json();
-        if (!Array.isArray(fontList)) throw new Error('Respuesta de /api/list-fonts inválida');
-        console.log('Intentando cargar fuentes:', fontList);
-        for (const font of fontList) {
-          if (!font.name || !font.url) continue;
+        const res = await fetch('fonts/fonts.json');
+        const fontFiles = await res.json();
+        
+        for (const font of fontFiles) {
           try {
-            const fontFace = new FontFace(font.name, `url(${font.url})`);
+            const fontUrl = `fonts/${font}`;
+            const cleanName = font.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
+            const fontFace = new FontFace(cleanName, `url(${fontUrl})`);
             await fontFace.load();
             document.fonts.add(fontFace);
-            console.log(`Fuente cargada: ${font.name}`);
           } catch (e) {
-            console.warn(`No se pudo cargar la fuente: ${font.name} (${font.url})`, e);
+            console.warn(`No se pudo cargar la fuente: ${font}`, e);
             continue;
           }
         }
       } catch (e) {
-        console.log('No se pudo cargar la lista de fuentes del backend, usando solo fuentes estándar', e);
+        console.log('No se encontró fonts.json, usando solo fuentes estándar');
       }
     }
 
@@ -275,10 +271,25 @@
               if (errorCallback) errorCallback(e);
               else redirectTo404();
             }
+          } else {
+            console.error('Error al cargar el archivo:', xhr.status, xhr.statusText);
+            if (errorCallback) errorCallback(new Error(`Error ${xhr.status}: ${xhr.statusText}`));
+            else redirectTo404();
           }
-        };
-        xhr.send(null);
-      }
+        }
+      };
+      xhr.onerror = function() {
+        console.error('Error de red al cargar:', file);
+        if (errorCallback) errorCallback(new Error('Error de red'));
+        else redirectTo404();
+      };
+      xhr.send(null);
+    }
+
+    function renderLayout(data) {
+      console.log('JSON cargado', data);
+      const grid = document.getElementById('grid');
+      
       // Aplicar color de fondo si existe
       if (data.backgroundColor) {
         grid.style.backgroundColor = data.backgroundColor;
@@ -312,15 +323,19 @@
             titleDiv = `<div>${itemData.name}</div>`;
           }
           if (itemData.linkTo) {
-            // Si es un enlace externo, abrir en nueva pestaña, si no, usar viewer
-            const isExternal = /^https?:\/\//i.test(itemData.linkTo);
-            const viewerUrl = isExternal ? itemData.linkTo : `viewer.html?file=hojas/${encodeURIComponent(itemData.linkTo)}`;
-            if (isExternal) {
-              item.innerHTML = `<a href="${viewerUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;color:inherit;"><div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div></a>`;
-              // No interceptar el click, dejar que el navegador abra el enlace externo
-            } else {
-              item.innerHTML = `<a href="${viewerUrl}" style="text-decoration:underline;color:inherit;"><div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div></a>`;
-              // Interceptar el click para navegación interna
+            const isExternalLink = itemData.linkTo.startsWith('http://') || itemData.linkTo.startsWith('https://');
+            const viewerUrl = isExternalLink ? itemData.linkTo : `viewer.html?file=hojas/${encodeURIComponent(itemData.linkTo)}`;
+            const targetAttr = isExternalLink ? ' target="_blank" rel="noopener noreferrer"' : '';
+
+            item.innerHTML = `
+              <a href="${viewerUrl}" style="text-decoration:underline;color:inherit;"${targetAttr}>
+                <div class="item-content">
+                  <img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+                  ${titleDiv}
+                </div>
+              </a>`;
+            // Interceptar el click para navegación interna solo si NO es un enlace externo
+            if (!isExternalLink) {
               const link = item.querySelector('a');
               link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -328,7 +343,11 @@
               });
             }
           } else {
-            item.innerHTML = `<div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div>`;
+            item.innerHTML = `
+              <div class="item-content">
+                <img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+                ${titleDiv}
+              </div>`;
           }
           const titleElement = item.querySelector('div:last-child');
           if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
@@ -384,23 +403,28 @@
           // Crear el contenido de la imagen
           const imgHtml = `
             <div class="item-content">
-              <img src="${artData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+              <img src="${artData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
             </div>`;
           
           // Si tiene linkTo, hacerlo clickeable
           if (artData.linkTo) {
-            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(artData.linkTo)}`;
+            const isExternalLink = artData.linkTo.startsWith('http://') || artData.linkTo.startsWith('https://');
+            const viewerUrl = isExternalLink ? artData.linkTo : `/public/viewer.html?file=${encodeURIComponent(artData.linkTo)}`;
+            const targetAttr = isExternalLink ? ' target="_blank" rel="noopener noreferrer"' : '';
+
             item.innerHTML = `
-              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;"${targetAttr}>
                 ${imgHtml}
               </a>`;
             
-            // Interceptar el click para navegación interna
-            const link = item.querySelector('a');
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.location.href = viewerUrl;
-            });
+            // Interceptar el click para navegación interna solo si NO es un enlace externo
+            if (!isExternalLink) {
+              const link = item.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = viewerUrl;
+              });
+            }
             
             // Agregar clase para efecto hover
             item.classList.add('clickable');
@@ -444,23 +468,28 @@
           // Crear el contenido de la imagen
           const imgHtml = `
             <div class="item-content">
-              <img src="${loreData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+              <img src="${loreData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
             </div>`;
           
           // Si tiene linkTo, envolver en un enlace
           if (loreData.linkTo) {
-            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(loreData.linkTo)}`;
+            const isExternalLink = loreData.linkTo.startsWith('http://') || loreData.linkTo.startsWith('https://');
+            const viewerUrl = isExternalLink ? loreData.linkTo : `/public/viewer.html?file=${encodeURIComponent(loreData.linkTo)}`;
+            const targetAttr = isExternalLink ? ' target="_blank" rel="noopener noreferrer"' : '';
+            
             item.innerHTML = `
-              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;"${targetAttr}>
                 ${imgHtml}
               </a>`;
             
-            // Interceptar el click para navegación interna
-            const link = item.querySelector('a');
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.location.href = viewerUrl;
-            });
+            // Interceptar el click para navegación interna solo si NO es un enlace externo
+            if (!isExternalLink) {
+              const link = item.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = viewerUrl;
+              });
+            }
           } else {
             item.innerHTML = imgHtml;
           }
@@ -490,9 +519,9 @@
           textItem.style.left = textData.left;
           textItem.style.top = textData.top;
           textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
-          // Aplicar fuente con fallback (igual que editor, sin comillas extra)
+          // Aplicar fuente con fallback
           const fontFamily = textData.fontFamily || 'sans-serif';
-          textItem.style.fontFamily = `${fontFamily}, Arial, sans-serif`;
+          textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
           textItem.style.fontSize = textData.fontSize || '14px';
           textItem.style.color = textData.color || '#000';
           textItem.style.pointerEvents = textData.linkTo ? 'auto' : 'none';
@@ -502,21 +531,25 @@
           
           // Si tiene linkTo, hacerlo clickeable
           if (textData.linkTo) {
-            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(textData.linkTo)}`;
+            const isExternalLink = textData.linkTo.startsWith('http://') || textData.linkTo.startsWith('https://');
+            const viewerUrl = isExternalLink ? textData.linkTo : `/public/viewer.html?file=${encodeURIComponent(textData.linkTo)}`;
+            const targetAttr = isExternalLink ? ' target="_blank" rel="noopener noreferrer"' : '';
             // Agregar clase clickable al contenedor
             textItem.classList.add('clickable');
             // Crear el contenido con un span para el efecto de subrayado
             textItem.innerHTML = `
-              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:inline-block;position:relative;padding-bottom:2px;">
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:inline-block;position:relative;padding-bottom:2px;"${targetAttr}>
                 <span>${textData.content}</span>
               </a>`;
             
-            // Interceptar el click para navegación interna
-            const link = textItem.querySelector('a');
-            link.addEventListener('click', function(e) {
-              e.preventDefault();
-              window.location.href = viewerUrl;
-            });
+            // Interceptar el click para navegación interna solo si NO es un enlace externo
+            if (!isExternalLink) {
+              const link = textItem.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = viewerUrl;
+              });
+            }
           } else {
             textItem.textContent = textData.content;
           }
@@ -536,7 +569,15 @@
           minX = Math.min(minX, left);
           minY = Math.min(minY, top);
           
-          // No comprobamos disponibilidad, igual que editor: si la fuente no está, el navegador usará el fallback.
+          // Verificar si la fuente se cargó correctamente
+          if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+            document.fonts.ready.then(() => {
+              if (!document.fonts.check(`12px "${fontFamily}"`)) {
+                console.warn(`Fuente "${fontFamily}" no disponible, usando fallback`);
+                textItem.style.fontFamily = 'Arial, sans-serif';
+              }
+            });
+          }
         });
       }
       
@@ -800,4 +841,3 @@
   </script>
 </body>
 </html>
-
