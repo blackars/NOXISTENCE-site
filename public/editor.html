@@ -456,7 +456,7 @@
       background: rgb(20, 20, 20);
       padding: 40px;
       border-radius: 0px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(145, 144, 144, 0.3);
       max-width: 400px;
       width: 90%;
       text-align: center;
@@ -486,9 +486,10 @@
     .auth-form input {
       padding: 12px 16px;
       border: 2px solid #ddd;
-      border-radius: 8px;
+      border-radius: 0px;
       font-size: 16px;
       transition: border-color 0.3s ease;
+      font-family: 'Gobold', monospace, courier;
     }
 
     .auth-form input:focus {
@@ -510,7 +511,7 @@
     }
 
     .auth-form button:hover {
-      background: #8213f9;
+      background: #a251f9;
     }
 
     .auth-form button:disabled {
@@ -540,8 +541,8 @@
       <h2>🔐Editor Access</h2>
       <p>Enter your credentials to access the Creator's Playground</p>
       <form class="auth-form" id="authForm">
-        <input type="text" id="username" placeholder="Usuario" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
         <button type="submit" id="authButton">Login</button>
         <div class="auth-error" id="authError">Invalid credentials</div>
         <div class="auth-loading" id="authLoading">Checking credentials...</div>
