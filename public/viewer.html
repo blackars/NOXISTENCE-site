@@ -223,26 +223,40 @@
     }
     requestAnimationFrame(raf);
 
-    // Cargar fuentes personalizadas
+    // Cargar fuentes personalizadas desde Cloudinary
     async function loadCustomFonts() {
       try {
-        const res = await fetch('fonts/fonts.json');
-        const fontFiles = await res.json();
+        const res = await fetch('/api/list-assets?folder=noxistence/fonts&resource_type=raw');
+        const data = await res.json();
         
-        for (const font of fontFiles) {
+        if (!data.success || !Array.isArray(data.assets)) {
+          console.warn('API call to list font assets was not successful or data format is incorrect:', data);
+          return;
+        }
+
+        const fontData = data.assets.map(asset => ({
+          name: asset.public_id.split('/').pop().replace(/\.[^/.]+$/, ''), // Get filename without extension
+          url: asset.secure_url // Use secure_url as the font URL
+        }));
+
+        for (const font of fontData) {
           try {
-            const fontUrl = `fonts/${font}`;
-            const cleanName = font.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '');
-            const fontFace = new FontFace(cleanName, `url(${fontUrl})`);
+            const fontName = font.name;
+            const fontUrl = font.url;
+
+            // Create and load the FontFace
+            const fontFace = new FontFace(fontName, `url(${fontUrl})`);
             await fontFace.load();
             document.fonts.add(fontFace);
+            console.log(`Fuente cargada: ${fontName}`);
           } catch (e) {
-            console.warn(`No se pudo cargar la fuente: ${font}`, e);
+            console.error(`Error loading font "${font.name}":`, e);
             continue;
           }
         }
       } catch (e) {
-        console.log('No se encontró fonts.json, usando solo fuentes estándar');
+        console.error('Failed to fetch or process custom fonts from Cloudinary:', e);
+        // If fetching fails, just use standard fonts
       }
     }
 
@@ -605,8 +619,21 @@
           minX = Math.min(minX, left);
           minY = Math.min(minY, top);
           
-          // Verificar si la fuente se cargó correctamente
-          if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+          // Cargar fuente personalizada si tiene fontUrl
+          if (textData.fontUrl && fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+            ensureFontLoaded(fontFamily, textData.fontUrl).then(() => {
+              // Verificar si la fuente se cargó correctamente después de intentar cargarla
+              document.fonts.ready.then(() => {
+                if (!document.fonts.check(`12px "${fontFamily}"`)) {
+                  console.warn(`Fuente "${fontFamily}" no disponible después de cargar, usando fallback`);
+                  textItem.style.fontFamily = 'Arial, sans-serif';
+                } else {
+                  console.log(`Fuente "${fontFamily}" aplicada correctamente`);
+                }
+              });
+            });
+          } else if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+            // Verificar si la fuente ya está cargada (desde la carga inicial)
             document.fonts.ready.then(() => {
               if (!document.fonts.check(`12px "${fontFamily}"`)) {
                 console.warn(`Fuente "${fontFamily}" no disponible, usando fallback`);
@@ -677,9 +704,14 @@
     async function ensureFontLoaded(fontFamily, fontUrl) {
       if (!fontUrl) return;
       if (!document.fonts.check(`12px "${fontFamily}"`)) {
-        const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
-        await fontFace.load();
-        document.fonts.add(fontFace);
+        try {
+          const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
+          await fontFace.load();
+          document.fonts.add(fontFace);
+          console.log(`Fuente cargada dinámicamente: ${fontFamily}`);
+        } catch (e) {
+          console.error(`Error loading font "${fontFamily}":`, e);
+        }
       }
     }
 
