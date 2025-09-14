@@ -339,7 +339,15 @@
               const link = item.querySelector('a');
               link.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 window.location.href = viewerUrl;
+              });
+            } else {
+              // Para enlaces externos, asegurar que se abran en nueva pestaña
+              const link = item.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // No preventDefault para enlaces externos - permitir comportamiento normal
               });
             }
           } else {
@@ -355,15 +363,19 @@
             titleElement.style.fontSize = itemData.fontSize || '14px';
             titleElement.style.color = itemData.color || '#111111';
           }
-          item.addEventListener('click', function() {
-            openCreaturePage(itemData.name);
-          });
-          item.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
+          
+          // Solo agregar event listeners si NO tiene linkTo (para evitar conflictos)
+          if (!itemData.linkTo) {
+            item.addEventListener('click', function() {
               openCreaturePage(itemData.name);
-            }
-          });
+            });
+            item.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openCreaturePage(itemData.name);
+              }
+            });
+          }
           contentContainer.appendChild(item);
           // Calcular dimensiones del contenido
           const left = parseFloat(itemData.left) || 0;
@@ -422,7 +434,15 @@
               const link = item.querySelector('a');
               link.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 window.location.href = viewerUrl;
+              });
+            } else {
+              // Para enlaces externos, asegurar que se abran en nueva pestaña
+              const link = item.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // No preventDefault para enlaces externos - permitir comportamiento normal
               });
             }
             
@@ -487,7 +507,15 @@
               const link = item.querySelector('a');
               link.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 window.location.href = viewerUrl;
+              });
+            } else {
+              // Para enlaces externos, asegurar que se abran en nueva pestaña
+              const link = item.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // No preventDefault para enlaces externos - permitir comportamiento normal
               });
             }
           } else {
@@ -547,7 +575,15 @@
               const link = textItem.querySelector('a');
               link.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 window.location.href = viewerUrl;
+              });
+            } else {
+              // Para enlaces externos, asegurar que se abran en nueva pestaña
+              const link = textItem.querySelector('a');
+              link.addEventListener('click', function(e) {
+                e.stopPropagation();
+                // No preventDefault para enlaces externos - permitir comportamiento normal
               });
             }
           } else {
