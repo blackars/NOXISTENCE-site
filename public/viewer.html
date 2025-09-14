@@ -327,13 +327,14 @@
             titleDiv = `<div>${itemData.name}</div>`;
           }
           if (itemData.linkTo) {
-            // Si es un enlace externo, abrir en nueva pestaña
+            // Si es un enlace externo, abrir en nueva pestaña, si no, usar viewer
             const isExternal = /^https?:\/\//i.test(itemData.linkTo);
             const viewerUrl = isExternal ? itemData.linkTo : `viewer.html?file=hojas/${encodeURIComponent(itemData.linkTo)}`;
-            item.innerHTML = isExternal
-              ? `<a href="${viewerUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;color:inherit;"><div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div></a>`
-              : `<a href="${viewerUrl}" style="text-decoration:underline;color:inherit;"><div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div></a>`;
-            if (!isExternal) {
+            if (isExternal) {
+              item.innerHTML = `<a href="${viewerUrl}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;color:inherit;"><div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div></a>`;
+              // No interceptar el click, dejar que el navegador abra el enlace externo
+            } else {
+              item.innerHTML = `<a href="${viewerUrl}" style="text-decoration:underline;color:inherit;"><div class="item-content"><img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\\'100\\'%20height%3D\\'100\\'%20xmlns%3D\\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\\'%3E%3Ctext%20x%3D\\'50%\\'%20y%3D\\'60%\\'%20font-size%3D\\'14\\'%20text-anchor%3D\\'middle\\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />${titleDiv}</div></a>`;
               // Interceptar el click para navegación interna
               const link = item.querySelector('a');
               link.addEventListener('click', function(e) {
@@ -504,9 +505,9 @@
           textItem.style.left = textData.left;
           textItem.style.top = textData.top;
           textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
-          // Aplicar fuente con fallback
+          // Aplicar fuente con fallback (igual que editor, sin comillas extra)
           const fontFamily = textData.fontFamily || 'sans-serif';
-          textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
+          textItem.style.fontFamily = `${fontFamily}, Arial, sans-serif`;
           textItem.style.fontSize = textData.fontSize || '14px';
           textItem.style.color = textData.color || '#000';
           textItem.style.pointerEvents = textData.linkTo ? 'auto' : 'none';
@@ -550,15 +551,7 @@
           minX = Math.min(minX, left);
           minY = Math.min(minY, top);
           
-          // Verificar si la fuente se cargó correctamente
-          if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
-            document.fonts.ready.then(() => {
-              if (!document.fonts.check(`12px "${fontFamily}"`)) {
-                console.warn(`Fuente "${fontFamily}" no disponible, usando fallback`);
-                textItem.style.fontFamily = 'Arial, sans-serif';
-              }
-            });
-          }
+          // No comprobamos disponibilidad, igual que editor: si la fuente no está, el navegador usará el fallback.
         });
       }
       
