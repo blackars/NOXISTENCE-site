@@ -68,7 +68,7 @@ app.post('/api/generate-all-thumbnails', (req, res) => {
   console.log('[API] Solicitud para generar TODAS las miniaturas.');
 
   // **CARGA DIFERIDA**: El require se hace aquí para no retrasar el arranque del servidor.
-  const { generateAllThumbnails } = require('../src/generate-thumbnails');
+  const { generateAllThumbnails } = require('../js/generate-thumbnails');
 
   // Llama a la función pero NO la espera con await.
   // Esto libera el request de inmediato.
@@ -276,6 +276,52 @@ app.get('/api/creatures', (req, res) => readJsonFromCloudinary('noxistence/data/
 app.get('/api/data/lore', (req, res) => readJsonFromCloudinary('noxistence/data/lore.json', res));
 app.get('/api/data/catalog', (req, res) => readJsonFromCloudinary('noxistence/data/catalog.json', res));
 app.get('/api/data/fonts', (req, res) => readJsonFromCloudinary('noxistence/data/fonts.json', res));
+
+// --- NUEVO: generar customfonts.json con listado de fuentes y subirlo ---
+app.post('/api/update-fonts-json', async (req, res) => {
+  try {
+    const prefixes = ['noxistence/fonts', 'fonts'];
+    let fontAssets = [];
+    for (const prefix of prefixes) {
+      const result = await cloudinary.api.resources({
+        type: 'upload',
+        prefix: prefix + '/',
+        resource_type: 'raw',
+        max_results: 500
+      });
+      if (Array.isArray(result.resources)) {
+        fontAssets = fontAssets.concat(result.resources);
+      }
+    }
+    if (!fontAssets.length) {
+      return res.status(404).json({ success: false, message: 'No font assets found' });
+    }
+
+    const fontsArr = fontAssets.map(a => ({
+      name: a.public_id.split('/').pop(),
+      url: a.secure_url
+    }));
+
+    const jsonString = JSON.stringify(fontsArr, null, 2);
+
+    await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream({
+        folder: 'noxistence/data',
+        public_id: 'customfonts',
+        resource_type: 'raw',
+        format: 'json',
+        overwrite: true,
+        invalidate: true
+      }, (error, result) => error ? reject(error) : resolve(result));
+      uploadStream.end(jsonString);
+    });
+
+    res.json({ success: true, count: fontsArr.length, fonts: fontsArr });
+  } catch (error) {
+    console.error('Error generating customfonts.json:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Proteger el acceso a /editor.html
 app.get('/editor.html', basicAuth({

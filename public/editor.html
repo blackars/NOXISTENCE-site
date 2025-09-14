@@ -612,7 +612,6 @@
 
   <script>
     const gridElement = document.getElementById('grid');
-    let isLocalMode = false;
     let currentFont = localStorage.getItem('currentFont') || 'sans-serif';
     let currentBackgroundColor = localStorage.getItem('backgroundColor') || '#ffffff';
     let currentFontSize = localStorage.getItem('fontSize') || '14';
@@ -625,25 +624,6 @@
     let isDraggingText = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
-    
-    // Detectar si estamos en modo local o con servidor
-    function detectMode() {
-      const protocol = window.location.protocol;
-      const hostname = window.location.hostname;
-      const port = window.location.port;
-      
-      isLocalMode = protocol === 'file:' || 
-                    (hostname === 'localhost' && !port) || 
-                    (hostname === '127.0.0.1' && !port);
-      
-      console.log('Modo detectado:', isLocalMode ? 'Local' : 'Servidor');
-      
-      if (isLocalMode) {
-        document.querySelector('.upload-form').style.display = 'none';
-        document.querySelector('.creatures-list').style.display = 'none';
-        document.querySelector('.art-section').style.display = 'none';
-      }
-    }
     
     // Función para cargar criaturas desde la carpeta de Cloudinary
 async function loadCreatures() {
@@ -756,10 +736,6 @@ async function loadCreatures() {
     // Función para cargar imágenes de arte
 async function loadArtImages() {
       const artList = document.getElementById('artList');
-      if (isLocalMode) {
-        artList.innerHTML = '<p style="color: #666; font-style: italic;">Art images not available in local mode.</p>';
-        return [];
-      }
 
       try {
         const response = await fetch('/api/list-assets?folder=noxistence/imageart&resource_type=image');
@@ -875,10 +851,6 @@ async function loadArtImages() {
     
     // Eliminar imagen de arte
     async function deleteArtImage(id) {
-      if (isLocalMode) {
-        alert('Delete art images not available in local mode.\n\nTo delete art images, run Node.js server with:\n\nnpm start');
-        return;
-      }
       
       if (!confirm('Are you sure you want to delete this art image?')) {
         return;
@@ -1552,7 +1524,6 @@ async function loadArtImages() {
 
     // Inicializar al cargar la página
     window.addEventListener('DOMContentLoaded', async () => {
-      detectMode();
       
       // Inicializar herramientas de edición
       editTools = new EditTools(gridElement);

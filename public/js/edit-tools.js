@@ -76,12 +76,22 @@ if (fontSelector) {
 // ===== END CLOUD FONTS ======
 
 /* === ACTUALIZAR LISTA DE FUENTES EN LA NUBE === */
-// Genera un customfonts.json con { name, url } directamente desde los assets de Cloudinary
-// y lo sube (sobrescribe) a la ruta noxistence/data/customfonts.json.
-// Se invoca desde el botón "Actualizar fuentes" (id="update-fonts-btn") del editor.
-/**
- * [FONT_SYNC] Genera customfonts.json y lo sube.
- * Muestra trazas abundantes en consola y un alert con la lista encontrada.
+// Ahora el backend hace todo: POST /api/update-fonts-json retorna {success,count,fonts}
+async function generateAndUploadFontsJson(triggerBtn){
+  if(triggerBtn) triggerBtn.disabled=true;
+  try{
+    console.log('%c[FONT_SYNC] Solicitando generación en backend...','color:cyan;font-weight:bold');
+    const res=await fetch('/api/update-fonts-json',{method:'POST'});
+    const data=await res.json();
+    if(!res.ok||!data.success) throw new Error(data.error||'Backend error');
+    console.table(data.fonts);
+    alert(`[FONT_SYNC] customfonts.json actualizado. Total fuentes: ${data.count}`);
+    // refrescar selector
+    if(typeof fillFontSelectorUnified==='function') await fillFontSelectorUnified();
+  }catch(e){
+    console.error('[FONT_SYNC] ERROR',e);
+    alert('Error actualizando fuentes: '+e.message);
+  }finally{if(triggerBtn) triggerBtn.disabled=false;}
  */
 async function generateAndUploadFontsJson(triggerBtn) {
   if (triggerBtn) triggerBtn.disabled = true;
