@@ -75,6 +75,92 @@ if (fontSelector) {
 }
 // ===== END CLOUD FONTS ======
 
+/* === ACTUALIZAR LISTA DE FUENTES EN LA NUBE === */
+// Genera un customfonts.json con { name, url } directamente desde los assets de Cloudinary
+// y lo sube (sobrescribe) a la ruta noxistence/data/customfonts.json.
+// Se invoca desde el botón "Actualizar fuentes" (id="update-fonts-btn") del editor.
+async function generateAndUploadFontsJson(triggerBtn) {
+  if (triggerBtn) triggerBtn.disabled = true;
+  try {
+    // 1. Obtener lista de fuentes – intenta primero /api/list-fonts como pidió el usuario
+    let fonts = [];
+    try {
+      const resListFonts = await fetch('/api/list-fonts');
+      if (resListFonts.ok) {
+        fonts = await resListFonts.json();
+      }
+    } catch (_) { /* Ignorar */ }
+
+    // Si no obtuvimos nada, usar /api/list-assets como respaldo
+    if (!Array.isArray(fonts) || fonts.length === 0) {
+      const resAssets = await fetch('/api/list-assets?folder=noxistence/fonts&resource_type=raw');
+      const dataAssets = await resAssets.json();
+      const assets = Array.isArray(dataAssets.assets) ? dataAssets.assets : [];
+      fonts = assets
+        .filter(a => /\.(ttf|otf|woff2?|fnt)$/i.test(a.secure_url || ''))
+        .map(a => ({
+          name: a.public_id.split('/').pop().replace(/^[^/]*\//, ''),
+          url: a.secure_url
+        }));
+    }
+
+    if (!fonts.length) throw new Error('No se encontraron fuentes en Cloudinary.');
+
+    const jsonString = JSON.stringify(fonts, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // 2. Pedir firma al backend
+    const sigRes = await fetch('/api/cloudinary-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        folder: 'noxistence/data',
+        resource_type: 'raw',
+        public_id: 'customfonts'
+      })
+    });
+    if (!sigRes.ok) throw new Error('No se pudo obtener firma de Cloudinary');
+    const sig = await sigRes.json();
+
+    // 3. Subir a Cloudinary
+    const formData = new FormData();
+    formData.append('file', blob, 'customfonts.json');
+    formData.append('api_key', sig.apiKey);
+    formData.append('timestamp', sig.timestamp);
+    formData.append('folder', sig.folder);
+    formData.append('public_id', sig.public_id);
+    formData.append('signature', sig.signature);
+    // overwrite = true para reemplazar cada vez
+    formData.append('overwrite', 'true');
+
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${sig.cloudName}/raw/upload`;
+    const upRes = await fetch(uploadUrl, { method: 'POST', body: formData });
+    if (!upRes.ok) throw new Error('Error subiendo customfonts.json');
+    await upRes.json();
+
+    alert('customfonts.json actualizado correctamente.');
+    // Refrescar selector de fuentes
+    if (typeof fillFontSelectorUnified === 'function') {
+      await fillFontSelectorUnified();
+    }
+  } catch (err) {
+    console.error('Error actualizando fuentes:', err);
+    alert(`Error actualizando fuentes: ${err.message}`);
+  } finally {
+    if (triggerBtn) triggerBtn.disabled = false;
+  }
+}
+// Registrar en window para que el botón pueda llamarlo
+window.generateAndUploadFontsJson = generateAndUploadFontsJson;
+
+// Asignar automáticamente si existe el botón
+document.addEventListener('DOMContentLoaded', () => {
+  const updateBtn = document.getElementById('update-fonts-btn');
+  if (updateBtn) {
+    updateBtn.addEventListener('click', () => generateAndUploadFontsJson(updateBtn));
+  }
+});
+
 class EditTools {
   constructor(gridElement) {
     this.gridElement = gridElement;
