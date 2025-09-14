@@ -445,7 +445,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.9);
       z-index: 10000;
       display: flex;
       align-items: center;
@@ -453,9 +453,9 @@
     }
 
     .auth-modal {
-      background: white;
+      background: rgb(20, 20, 20);
       padding: 40px;
-      border-radius: 12px;
+      border-radius: 0px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       max-width: 400px;
       width: 90%;
@@ -464,14 +464,17 @@
 
     .auth-modal h2 {
       margin: 0 0 20px 0;
-      color: #333;
+      color: #ffffff;
       font-size: 24px;
+      font-family: 'Gobold', monospace, courier;
+
     }
 
     .auth-modal p {
       margin: 0 0 30px 0;
-      color: #666;
+      color: #eeebeb;
       font-size: 14px;
+      font-family: 'Gobold', monospace, courier;
     }
 
     .auth-form {
@@ -495,17 +498,19 @@
 
     .auth-form button {
       padding: 12px 24px;
-      background: #007bff;
+      background: #7b00ff;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 0px;
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      font-family: 'Gobold', monospace, courier;
+      
     }
 
     .auth-form button:hover {
-      background: #0056b3;
+      background: #8213f9;
     }
 
     .auth-form button:disabled {
@@ -532,14 +537,14 @@
   <!-- Modal de autenticación -->
   <div id="authOverlay" class="auth-overlay">
     <div class="auth-modal">
-      <h2>🔐 Acceso al Editor</h2>
-      <p>Ingresa tus credenciales para acceder al Creator's Playground</p>
+      <h2>🔐Editor Access</h2>
+      <p>Enter your credentials to access the Creator's Playground</p>
       <form class="auth-form" id="authForm">
         <input type="text" id="username" placeholder="Usuario" required>
         <input type="password" id="password" placeholder="Contraseña" required>
-        <button type="submit" id="authButton">Iniciar Sesión</button>
-        <div class="auth-error" id="authError">Credenciales incorrectas</div>
-        <div class="auth-loading" id="authLoading">Verificando credenciales...</div>
+        <button type="submit" id="authButton">Login</button>
+        <div class="auth-error" id="authError">Invalid credentials</div>
+        <div class="auth-loading" id="authLoading">Checking credentials...</div>
       </form>
     </div>
   </div>
