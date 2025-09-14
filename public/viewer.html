@@ -360,10 +360,22 @@
           }
           const titleElement = item.querySelector('div:last-child');
           if (titleElement && (itemData.fontFamily || itemData.fontSize || itemData.color)) {
-            if (itemData.fontFamily) ensureFontLoaded(itemData.fontFamily);
-            titleElement.style.fontFamily = `"${itemData.fontFamily || 'sans-serif'}", Arial, sans-serif`;
+            const fontFamily = itemData.fontFamily || 'sans-serif';
+            if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
+              ensureFontLoaded(fontFamily).then(success => {
+                if (success) {
+                  titleElement.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
+                } else {
+                  console.warn(`No se pudo cargar la fuente: ${fontFamily}, usando fallback`);
+                  titleElement.style.fontFamily = 'Arial, sans-serif';
+                }
+              });
+            } else {
+              titleElement.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
+            }
             titleElement.style.fontSize = itemData.fontSize || '14px';
             titleElement.style.color = itemData.color || '#111111';
+            titleElement.style.whiteSpace = 'nowrap';
           }
           item.addEventListener('click', function() {
             openCreaturePage(itemData.name);
@@ -418,7 +430,7 @@
           
           // Si tiene linkTo, hacerlo clickeable
           if (artData.linkTo) {
-            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(artData.linkTo)}`;
+            const viewerUrl = `/dist/viewer.html?file=${encodeURIComponent(artData.linkTo)}`;
             item.innerHTML = `
               <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
                 ${imgHtml}
@@ -478,7 +490,7 @@
           
           // Si tiene linkTo, envolver en un enlace
           if (loreData.linkTo) {
-            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(loreData.linkTo)}`;
+            const viewerUrl = `/dist/viewer.html?file=${encodeURIComponent(loreData.linkTo)}`;
             item.innerHTML = `
               <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;">
                 ${imgHtml}
@@ -522,9 +534,20 @@
           // Aplicar fuente con fallback
           const fontFamily = textData.fontFamily || 'sans-serif';
           if (fontFamily !== 'sans-serif' && fontFamily !== 'Arial') {
-            ensureFontLoaded(fontFamily);
+            // Usar una fuente temporal mientras se carga la fuente personalizada
+            textItem.style.fontFamily = 'Arial, sans-serif';
+            ensureFontLoaded(fontFamily).then(success => {
+              if (success) {
+                textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
+                // Forzar repintado para asegurar que se aplique la nueva fuente
+                textItem.style.letterSpacing = 'normal';
+              } else {
+                console.warn(`No se pudo cargar la fuente: ${fontFamily}, usando fallback`);
+              }
+            });
+          } else {
+            textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
           }
-          textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
           textItem.style.fontSize = textData.fontSize || '14px';
           textItem.style.color = textData.color || '#000';
           textItem.style.pointerEvents = textData.linkTo ? 'auto' : 'none';
@@ -534,7 +557,7 @@
           
           // Si tiene linkTo, hacerlo clickeable
           if (textData.linkTo) {
-            const viewerUrl = `/public/viewer.html?file=${encodeURIComponent(textData.linkTo)}`;
+            const viewerUrl = `/dist/viewer.html?file=${encodeURIComponent(textData.linkTo)}`;
             // Agregar clase clickable al contenedor
             textItem.classList.add('clickable');
             // Crear el contenido con un span para el efecto de subrayado
@@ -637,31 +660,84 @@
       window.location.href = url;
     }
 
+    // Mapa para rastrear fuentes que ya intentaron cargar
+    const loadingFonts = new Map();
+
     async function ensureFontLoaded(fontFamily, fontUrl) {
+      // Limpiar comillas extras si las hay
+      fontFamily = fontFamily.replace(/^['"]|['"]$/g, '');
+      
       console.log('Intentando cargar fuente:', fontFamily);
-      // Si ya está cargada, nada que hacer
+      
+      // Verificar si ya está cargada o en proceso
       if (document.fonts.check(`12px "${fontFamily}"`)) {
         console.log('Fuente ya cargada:', fontFamily);
-        return;
+        return true;
       }
-      // Si no viene url, intenta buscar en el mapa
+      
+      // Evitar múltiples intentos simultáneos para la misma fuente
+      if (loadingFonts.has(fontFamily)) {
+        console.log('Fuente ya en proceso de carga:', fontFamily);
+        return loadingFonts.get(fontFamily);
+      }
+
+      // Intentar encontrar la URL si no se proporciona
       if (!fontUrl && customFontMap.size) {
-        fontUrl = customFontMap.get(fontFamily) || customFontMap.get(fontFamily.replace(/\.[^/.]+$/, ''));
+        // Buscar coincidencia exacta primero
+        fontUrl = customFontMap.get(fontFamily);
+        
+        // Si no se encuentra, intentar sin extensión
+        if (!fontUrl) {
+          const baseName = fontFamily.replace(/\.[^/.]+$/, '');
+          fontUrl = customFontMap.get(baseName);
+          console.log('Buscando fuente sin extensión:', baseName, '=>', fontUrl);
+        }
+        
         console.log('URL de fuente encontrada:', fontUrl);
       }
+
       if (!fontUrl) {
         console.warn('No se encontró URL para la fuente:', fontFamily);
-        return;
+        // Verificar si es una fuente del sistema
+        const systemFonts = ['Arial', 'Helvetica', 'Times New Roman', 'Courier New', 'Georgia', 'Verdana', 'sans-serif', 'serif', 'monospace'];
+        if (systemFonts.includes(fontFamily)) {
+          return true; // Es una fuente del sistema, no necesita carga
+        }
+        return false;
       }
-      try {
-        const fontFace = new FontFace(fontFamily, `url(${fontUrl})`);
-        console.log('Cargando fuente:', fontFamily, 'desde:', fontUrl);
-        await fontFace.load();
-        document.fonts.add(fontFace);
-        console.log('Fuente cargada exitosamente:', fontFamily);
-      } catch (e) {
-        console.error('Error al cargar la fuente:', fontFamily, e);
-      }
+
+      // Marcar como cargando
+      const loadPromise = (async () => {
+        try {
+          console.log('Cargando fuente:', fontFamily, 'desde:', fontUrl);
+          const fontFace = new FontFace(fontFamily, `url("${fontUrl}")`);
+          
+          // Configuración adicional para mejorar la carga
+          fontFace.display = 'swap';
+          fontFace.weight = 'normal';
+          fontFace.style = 'normal';
+          
+          // Cargar la fuente
+          const loadedFace = await fontFace.load();
+          document.fonts.add(loadedFace);
+          
+          // Forzar actualización del renderizado
+          document.body.style.fontFamily = `"${fontFamily}", ${document.body.style.fontFamily}`;
+          
+          console.log('Fuente cargada exitosamente:', fontFamily);
+          return true;
+        } catch (e) {
+          console.error('Error al cargar la fuente:', fontFamily, e);
+          return false;
+        } finally {
+          // Limpiar el estado de carga
+          loadingFonts.delete(fontFamily);
+        }
+      })();
+      
+      // Guardar la promesa de carga
+      loadingFonts.set(fontFamily, loadPromise);
+      return loadPromise;
     }
 
     const fileName = getFileNameFromURL();

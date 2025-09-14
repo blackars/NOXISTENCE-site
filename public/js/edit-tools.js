@@ -637,12 +637,12 @@ window.linkLayerDialog = async function(btn) {
   }
 
   // Mostrar prompt con instrucciones
-  const mensaje = 'Ingresa:\n' +
+  let mensaje = 'Ingresa:\n' +
     '- Nombre del archivo (ej: "mi-hoja" o "hojas/mi-hoja.json")\n' +
     '- O URL completa (ej: "https://...")';
   
   if (hojas.length) {
-    mensaje += '\n\nHojas disponibles:\n' + hojas.join('\n');
+    mensaje = mensaje + '\n\nHojas disponibles:\n' + hojas.join('\n');
   }
 
   const userInput = prompt(mensaje);
