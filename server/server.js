@@ -341,6 +341,53 @@ app.post('/api/update-fonts-json', async (req, res) => {
   }
 });
 
+// Endpoint para verificar credenciales de autenticación
+app.post('/api/verify-auth', (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Verificar que se proporcionaron las credenciales
+    if (!username || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Usuario y contraseña son requeridos' 
+      });
+    }
+    
+    // Verificar credenciales contra las variables de entorno
+    const validUser = process.env.EDITOR_USER;
+    const validPass = process.env.EDITOR_PASS;
+    
+    if (!validUser || !validPass) {
+      console.error('ERROR: Variables de entorno EDITOR_USER y EDITOR_PASS no configuradas');
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error de configuración del servidor' 
+      });
+    }
+    
+    // Comparar credenciales
+    if (username === validUser && password === validPass) {
+      res.json({ 
+        success: true, 
+        message: 'Autenticación exitosa',
+        username: username
+      });
+    } else {
+      res.status(401).json({ 
+        success: false, 
+        message: 'Credenciales incorrectas' 
+      });
+    }
+  } catch (error) {
+    console.error('Error en verificación de autenticación:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Error interno del servidor' 
+    });
+  }
+});
+
 // Proteger el acceso a /editor.html
 app.get('/editor.html', basicAuth({
   users: { [process.env.EDITOR_USER]: process.env.EDITOR_PASS },

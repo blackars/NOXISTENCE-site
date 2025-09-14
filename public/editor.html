@@ -437,15 +437,119 @@
     .floating-sidebar {
       overflow-x: hidden;
     }
+
+    /* Estilos para el modal de autenticación */
+    .auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-modal {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .auth-modal h2 {
+      margin: 0 0 20px 0;
+      color: #333;
+      font-size: 24px;
+    }
+
+    .auth-modal p {
+      margin: 0 0 30px 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .auth-form input {
+      padding: 12px 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .auth-form input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .auth-form button {
+      padding: 12px 24px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .auth-form button:hover {
+      background: #0056b3;
+    }
+
+    .auth-form button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .auth-error {
+      color: #dc3545;
+      font-size: 14px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .auth-loading {
+      display: none;
+      color: #666;
+      font-size: 14px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <button id="toggleSidebarBtn" style="position:fixed;top:10px;right:30px;z-index:3500;padding:12px 16px;background:#007bff;color:white;border:none;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.18);font-size:1.5rem;cursor:pointer;display:block;">🛠️</button>
+  <!-- Modal de autenticación -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-modal">
+      <h2>🔐 Acceso al Editor</h2>
+      <p>Ingresa tus credenciales para acceder al Creator's Playground</p>
+      <form class="auth-form" id="authForm">
+        <input type="text" id="username" placeholder="Usuario" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button type="submit" id="authButton">Iniciar Sesión</button>
+        <div class="auth-error" id="authError">Credenciales incorrectas</div>
+        <div class="auth-loading" id="authLoading">Verificando credenciales...</div>
+      </form>
+    </div>
+  </div>
+
+  <button id="toggleSidebarBtn" style="position:fixed;top:10px;right:30px;z-index:3500;padding:12px 16px;background:#007bff;color:white;border:none;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.18);font-size:1.5rem;cursor:pointer;display:none;">🛠️</button>
   <div id="floatingSidebar" class="floating-sidebar" style="display:none;position:fixed;top:50%;right:60px;transform:translateY(-50%);z-index:3600;width:340px;max-width:90vw;max-height:90vh;background:#fff;border-radius:3px;box-shadow:0 8px 32px rgba(0,0,0,0.18);padding:24px 18px 18px 18px;overflow-y:auto;transition:opacity 0.2s;">
     <button id="closeSidebarBtn" style="position:absolute;top:10px;right:10px;background:#dc3545;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:1.2rem;cursor:pointer;z-index:2;">×</button>
     <div id="sidebarContent"></div>
   </div> 
-  <div class="editor-container">
+  <div class="editor-container" id="editorContainer" style="display: none;">
     <!-- Sidebar izquierdo -->
     <div class="sidebar ">
       <!-- Formulario de subida -->
@@ -2071,6 +2175,102 @@ async function loadLoreImages() {
         toggleSidebarBtn.style.display = 'block';
       }
     });
+
+    // === SISTEMA DE AUTENTICACIÓN ===
+    
+    // Verificar si ya está autenticado
+    function checkAuthStatus() {
+      const isAuthenticated = localStorage.getItem('editor_authenticated') === 'true';
+      if (isAuthenticated) {
+        showEditor();
+      } else {
+        showAuthModal();
+      }
+    }
+
+    // Mostrar modal de autenticación
+    function showAuthModal() {
+      document.getElementById('authOverlay').style.display = 'flex';
+      document.getElementById('editorContainer').style.display = 'none';
+      document.getElementById('toggleSidebarBtn').style.display = 'none';
+    }
+
+    // Mostrar editor después de autenticación exitosa
+    function showEditor() {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('editorContainer').style.display = 'flex';
+      document.getElementById('toggleSidebarBtn').style.display = 'block';
+    }
+
+    // Verificar credenciales con el servidor
+    async function verifyCredentials(username, password) {
+      try {
+        const response = await fetch('/api/verify-auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.success === true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Error verificando credenciales:', error);
+        return false;
+      }
+    }
+
+    // Manejar envío del formulario de autenticación
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const authButton = document.getElementById('authButton');
+      const authError = document.getElementById('authError');
+      const authLoading = document.getElementById('authLoading');
+
+      // Mostrar estado de carga
+      authButton.disabled = true;
+      authLoading.style.display = 'block';
+      authError.style.display = 'none';
+
+      try {
+        const isValid = await verifyCredentials(username, password);
+        
+        if (isValid) {
+          // Credenciales válidas
+          localStorage.setItem('editor_authenticated', 'true');
+          localStorage.setItem('editor_username', username);
+          showEditor();
+        } else {
+          // Credenciales inválidas
+          authError.style.display = 'block';
+          authButton.disabled = false;
+          authLoading.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error en autenticación:', error);
+        authError.textContent = 'Error de conexión. Intenta nuevamente.';
+        authError.style.display = 'block';
+        authButton.disabled = false;
+        authLoading.style.display = 'none';
+      }
+    });
+
+    // Cerrar sesión (función auxiliar)
+    function logout() {
+      localStorage.removeItem('editor_authenticated');
+      localStorage.removeItem('editor_username');
+      showAuthModal();
+    }
+
+    // Inicializar autenticación al cargar la página
+    checkAuthStatus();
   </script>
 </body>
 </html>
