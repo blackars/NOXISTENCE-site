@@ -225,13 +225,13 @@
 
     // Cargar fuentes personalizadas
     async function loadCustomFonts() {
-      // URL remota de customfonts.json en Cloudinary
-      const cloudFontsUrl = 'https://res.cloudinary.com/dgff8o52c/raw/upload/noxistence/data/customfonts.json';
+      // Cargar fuentes desde el endpoint backend dinámico
+      const apiFontsUrl = '/api/list-fonts';
       try {
-        const res = await fetch(cloudFontsUrl);
-        if (!res.ok) throw new Error('No se pudo cargar customfonts.json de Cloudinary');
+        const res = await fetch(apiFontsUrl);
+        if (!res.ok) throw new Error('No se pudo cargar la lista de fuentes del backend');
         const fontList = await res.json();
-        if (!Array.isArray(fontList)) throw new Error('customfonts.json inválido');
+        if (!Array.isArray(fontList)) throw new Error('Respuesta de /api/list-fonts inválida');
         for (const font of fontList) {
           if (!font.name || !font.url) continue;
           try {
@@ -244,7 +244,7 @@
           }
         }
       } catch (e) {
-        console.log('No se encontró customfonts.json en la nube, usando solo fuentes estándar', e);
+        console.log('No se pudo cargar la lista de fuentes del backend, usando solo fuentes estándar', e);
       }
     }
 
