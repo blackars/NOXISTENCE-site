@@ -626,31 +626,50 @@ window.linkLayerDialog = async function(btn) {
   const textItem = menu && menu.textItem;
   if (!textItem) return alert('No hay elemento seleccionado.');
 
-  // Pedir lista de hojas al backend
+  // Pedir lista de hojas al backend para autocompletado
   let hojas = [];
   try {
     const resp = await fetch('/api/hojas-list');
     const data = await resp.json();
     hojas = data.hojas || [];
   } catch (err) {
-    alert('No se pudieron obtener las hojas: ' + err.message);
-    return;
+    console.warn('No se pudieron obtener las hojas locales:', err.message);
   }
 
-  if (!hojas.length) {
-    alert('No hay hojas disponibles para enlazar.');
-    return;
+  // Mostrar prompt con instrucciones
+  const mensaje = 'Ingresa:\n' +
+    '- Nombre del archivo (ej: "mi-hoja" o "hojas/mi-hoja.json")\n' +
+    '- O URL completa (ej: "https://...")';
+  
+  if (hojas.length) {
+    mensaje += '\n\nHojas disponibles:\n' + hojas.join('\n');
   }
 
-  // Mostrar selector simple (prompt o select)
-  const hoja = prompt('Selecciona hoja destino (escribe el nombre exacto):\n' + hojas.join('\n'));
-  if (!hoja || !hojas.includes(hoja)) return;
+  const userInput = prompt(mensaje);
+  if (!userInput) return;
+
+  // Determinar si es URL externa o archivo local
+  let target, isExternal;
+  if (userInput.startsWith('http://') || userInput.startsWith('https://')) {
+    target = userInput;
+    isExternal = true;
+  } else {
+    // Manejo de archivos locales
+    target = userInput;
+    if (!target.endsWith('.json')) {
+      target += '.json';
+    }
+    if (!target.startsWith('hojas/') && !target.startsWith('/hojas/')) {
+      target = 'hojas/' + target;
+    }
+    isExternal = false;
+  }
 
   // Buscar el contenedor principal (.item, .text-item)
   let container = textItem.closest('.item, .text-item');
   if (!container) container = textItem;
 
-  // --- CORRECCIÓN: Para textos, no envolver el textarea, solo el div de texto visible ---
+  // --- Manejo de contenido editable ---
   let content;
   if (container.classList.contains('text-item')) {
     // Si hay un textarea visible (modo edición), no permitir enlazar
@@ -659,35 +678,44 @@ window.linkLayerDialog = async function(btn) {
       alert('Termina de editar el texto antes de enlazar.');
       return;
     }
-    // Buscar el div que contiene el texto (no textarea)
-    // Si hay un <a>, usarlo, si no, usar el contenedor directamente
     content = container;
   } else {
     content = container.querySelector('.item-content') || container;
   }
 
-  let alreadyLinked = content.querySelector && content.querySelector('a[data-link-layer]');
+  // Manejar enlace existente o crear uno nuevo
+  let existingLink = content.querySelector('a[data-link-layer]');
 
-  if (alreadyLinked) {
-    alreadyLinked.href = `hojas/${hoja}`;
-    alreadyLinked.setAttribute('target', '_blank');
+  if (existingLink) {
+    // Actualizar enlace existente
+    existingLink.href = target;
+    existingLink.target = '_blank';
+    if (isExternal) {
+      existingLink.rel = 'noopener noreferrer';
+    } else {
+      existingLink.removeAttribute('rel');
+    }
   } else {
-    // Crear el <a> y envolver el contenido real
+    // Crear nuevo enlace
     const a = document.createElement('a');
-    a.href = `hojas/${hoja}`;
+    a.href = target;
     a.target = '_blank';
     a.style.color = 'inherit';
     a.style.textDecoration = 'underline';
     a.setAttribute('data-link-layer', '1');
+    if (isExternal) {
+      a.rel = 'noopener noreferrer';
+    }
+    
     // Mover todos los hijos actuales dentro del <a>
     while (content.firstChild) a.appendChild(content.firstChild);
     content.appendChild(a);
   }
 
-  // Asignar el atributo de enlace al contenedor principal
-  container.dataset.linkedHoja = hoja;
-  // Marcar visualmente
+  // Actualizar atributos del contenedor
+  container.dataset.linkedHoja = target;
   container.style.background = '#e0f7fa';
+
   // Guardar estado
   if (window.editTools && typeof window.editTools.saveState === 'function') {
     window.editTools.saveState();
