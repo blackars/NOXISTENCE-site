@@ -42,6 +42,11 @@
         overflow: auto;
       }
     }
+    /* Neutralizar cualquier overlay/residuo visual de Lenis cuando está detenido */
+    .lenis.lenis-stopped {
+      background: transparent !important;
+      pointer-events: none !important;
+    }
     
     /* Estilos para la barra de desplazamiento */
     #grid::-webkit-scrollbar {
@@ -226,8 +231,12 @@
     // Detectar entorno táctil para usar paneo nativo
     const useNativePan = window.matchMedia('(pointer: coarse)').matches;
     if (useNativePan) {
-      // Desactivar Lenis y permitir overflow nativo en móvil
-      try { lenis.stop(); } catch (_) {}
+      // Destruir Lenis y limpiar clases para evitar artefactos visuales
+      try { lenis.destroy(); } catch (_) {}
+      try {
+        document.documentElement.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped');
+        document.body.classList.remove('lenis', 'lenis-smooth', 'lenis-stopped');
+      } catch (_) {}
       grid.style.overflow = 'auto';
       grid.style.webkitOverflowScrolling = 'touch';
     }
