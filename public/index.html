@@ -262,7 +262,7 @@
     para probar diferentes tamaños sin afectar el responsive design.
     */
     :root {
-      --grid-scale: 0.7; /* Tamaño base - se sobrescribe en cada breakpoint */
+      --grid-scale: 1.0; /* Tamaño base - se sobrescribe en cada breakpoint */
     }
     
     /* Fade animation (aplica al grid completo) */
@@ -322,28 +322,28 @@
     /* Mobile pequeño */
     @media (max-width: 480px) {
       :root {
-        --grid-scale: 0.5; /* Más pequeño en móviles pequeños */
+        --grid-scale: 0.8; /* Más pequeño en móviles pequeños */
       }
     }
     
     /* Mobile normal */
     @media (min-width: 481px) and (max-width: 767px) {
       :root {
-        --grid-scale: 0.6; /* Tamaño medio en móviles */
+        --grid-scale: 0.8; /* Tamaño medio en móviles */
       }
     }
     
     /* Tablet */
     @media (min-width: 768px) and (max-width: 1023px) {
       :root {
-        --grid-scale: 0.65; /* Ligeramente más grande en tablets */
+        --grid-scale: 0.8; /* Ligeramente más grande en tablets */
       }
     }
     
     /* Desktop */
     @media (min-width: 1024px) {
       :root {
-        --grid-scale: 0.7; /* Tamaño principal en desktop */
+        --grid-scale: 1.0; /* Tamaño principal en desktop */
       }
     }
     
