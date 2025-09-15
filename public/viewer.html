@@ -40,7 +40,13 @@
     @media (pointer: coarse) {
       #grid {
         overflow: auto;
+        /* Ocultar barras de scroll visibles en móvil para evitar artefactos */
+        scrollbar-width: none; /* Firefox */
       }
+      #grid::-webkit-scrollbar { width: 0; height: 0; }
+      #grid::-webkit-scrollbar-thumb { background: transparent; }
+      #grid::-webkit-scrollbar-track { background: transparent; }
+      #grid::-webkit-scrollbar-corner { background: transparent; }
     }
     /* Neutralizar cualquier overlay/residuo visual de Lenis cuando está detenido */
     .lenis.lenis-stopped {
@@ -60,6 +66,9 @@
     
     #grid::-webkit-scrollbar-track {
       background:transparent;
+    }
+    #grid::-webkit-scrollbar-corner {
+      background: transparent;
     }
     .item {
       position: absolute;
