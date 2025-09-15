@@ -35,6 +35,13 @@
       -webkit-overflow-scrolling: touch; /* Mejor scroll en iOS */
       overscroll-behavior: none; /* Previene el bounce effect en iOS */
     }
+
+    /* En dispositivos táctiles (coarse), permitir scroll nativo del contenedor */
+    @media (pointer: coarse) {
+      #grid {
+        overflow: auto;
+      }
+    }
     
     /* Estilos para la barra de desplazamiento */
     #grid::-webkit-scrollbar {
@@ -215,6 +222,15 @@
       touchMultiplier: 2,
       infinite: false
     });
+
+    // Detectar entorno táctil para usar paneo nativo
+    const useNativePan = window.matchMedia('(pointer: coarse)').matches;
+    if (useNativePan) {
+      // Desactivar Lenis y permitir overflow nativo en móvil
+      try { lenis.stop(); } catch (_) {}
+      grid.style.overflow = 'auto';
+      grid.style.webkitOverflowScrolling = 'touch';
+    }
 
     // Función de animación de Lenis
     function raf(time) {
@@ -820,6 +836,10 @@
 
     // --- Scroll y arrastre mejorado ---
     (function enablePanAndScroll() {
+      // En móvil táctil usamos paneo nativo, no agregamos handlers personalizados
+      if (useNativePan) {
+        return;
+      }
       // grid ya está definido arriba
       let isDragging = false;
       let startX, startY, scrollLeft, scrollTop;
