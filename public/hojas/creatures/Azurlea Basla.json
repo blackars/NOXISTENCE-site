@@ -1,0 +1,119 @@
+{
+  "texts": [
+    {
+      "content": "The Azurleaf Bulb is notable for its large bluish leaf with prominent venation, ",
+      "left": "716px",
+      "top": "237.3px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "Its root system is short and fibrous, allowing it to anchor itself in unstable or viscous soils.",
+      "left": "705.3px",
+      "top": "333.1px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "Within Maxkodia’s forests, this plant functions as a bioindicator of iron-rich grounds,\n\n",
+      "left": "725.8px",
+      "top": "380px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "concentrating metallic traces in its foliar tissues.",
+      "left": "773px",
+      "top": "430.1px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "supported by a fleshy orange basal bulb.",
+      "left": "784.5px",
+      "top": "281.5px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "At night, its leaves reflect the binary starlight with a faint glow,",
+      "left": "752px",
+      "top": "474.6px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "serving as a landmark for small luminescent insects.",
+      "left": "773.5px",
+      "top": "525.3px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "c",
+      "left": "502.041px",
+      "top": "104.875px",
+      "scale": "4.400000000000001",
+      "rotate": "20",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    },
+    {
+      "content": "Azurlea Basla",
+      "left": "829.6px",
+      "top": "103.8px",
+      "scale": "8.199999999999989",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)"
+    }
+  ],
+  "backgroundColor": "#badec3",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "15",
+    "color": "#030303"
+  },
+  "exportDate": "2025-09-16T04:42:01.193Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757995241/noxistence/creatures/azurlea-basla.png",
+      "left": "265.4px",
+      "top": "237.185px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "flipped": false,
+      "name": "azurlea-basla",
+      "fontFamily": "melonfruit",
+      "fontSize": "15px",
+      "color": "rgb(3, 3, 3)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
