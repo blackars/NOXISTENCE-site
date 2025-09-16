@@ -406,7 +406,8 @@
       function renderCreatures() {
         const filterName = searchInput.value.trim().toLowerCase();
         const filterWorld = worldSelect.value;
-        let creaturesToRender = allCreatures;
+        // Invertir el orden del array para mostrar primero los más recientes
+        let creaturesToRender = [...allCreatures].reverse();
         
         // Aplicar filtros
         const filtered = creaturesToRender.filter(c => {
