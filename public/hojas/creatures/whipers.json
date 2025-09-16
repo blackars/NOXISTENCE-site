@@ -1,0 +1,99 @@
+{
+  "texts": [
+    {
+      "content": "The Sunspire develops a yellow basal bulb from which rigid red and yellow leaves emerge, arranged in a vertical tuft. ",
+      "left": "557px",
+      "top": "265px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Its morphology indicates adaptation to open areas with high exposure to Maxkodia’s twin suns.",
+      "left": "663px",
+      "top": "310px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Field analyses reveal it accumulates carotenoid pigments in unusual amounts, likely to dissipate excess radiation.",
+      "left": "613px",
+      "top": "358px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "It partially folds its leaves during intense blue-light phases, reopening them under the red cycle.",
+      "left": "660px",
+      "top": "403px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Whipers",
+      "left": "970.2px",
+      "top": "127.2px",
+      "scale": "5.199999999999998",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "e",
+      "left": "643px",
+      "top": "115.5px",
+      "scale": "2.500000000000001",
+      "rotate": "0",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "They can be lethal, using their stems as whips with microscopic stingers that inject venom on contact.",
+      "left": "646px",
+      "top": "449px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#d9ddbb",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "26",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-16T05:15:11.010Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757995085/noxistence/creatures/whipers.png",
+      "left": "361px",
+      "top": "204.07px",
+      "scale": "2.6000000000000014",
+      "rotate": "0",
+      "flipped": false,
+      "name": "whipers",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

@@ -1,0 +1,89 @@
+{
+  "texts": [
+    {
+      "content": "The Sunbloom Chalice grows an inflated green stalk topped with a bright yellow floral crown arranged like an open chalice",
+      "left": "499px",
+      "top": "312px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Its morphology maximizes solar radiation capture, boosting photosynthesis.",
+      "left": "694px",
+      "top": "358px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "During the suns’ conjunction, the chalice glows intensely due to reflective pigments.",
+      "left": "657px",
+      "top": "403px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "This radiance attracts winged pollinators, which rely on its nectar as a dense carbohydrate source.",
+      "left": "599px",
+      "top": "446px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Deepsun Chalice",
+      "left": "896.2px",
+      "top": "174.2px",
+      "scale": "3.8000000000000025",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "c",
+      "left": "543.213px",
+      "top": "81.2421px",
+      "scale": "3.0000000000000018",
+      "rotate": "50",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "26px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#d9ddbb",
+  "fontSettings": {
+    "family": "goaroundthebooksarrows",
+    "size": "26",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-16T05:08:07.890Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1757995038/noxistence/creatures/deepsun-chalice.png",
+      "left": "297.1px",
+      "top": "204.452px",
+      "scale": "2.100000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "deepsun-chalice",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
