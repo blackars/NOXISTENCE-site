@@ -1,92 +1,138 @@
-# NOXISTENCE Site - Editor de Criaturas
+<div align="center">
+  <h1>🚀 NOXISTENCE</h1>
+  <p>Creature and Content Management Platform</p>
+  
+  [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+  [![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
+  [![Vite](https://img.shields.io/badge/Vite-4.x-646CFF.svg)](https://vitejs.dev/)
+</div>
 
-Sistema para gestionar criaturas y crear layouts visuales.
+> ⚠️ **Important Notice**: This website and its content are protected under the [CC BY-NC-ND 4.0](LICENSE) license. Any commercial use, modification, or redistribution is strictly prohibited without express written permission from the author.
 
-## Instalación
+## 🌟 Key Features
 
-1. **Instalar Node.js** (si no lo tienes ya)
-   - Descarga desde: https://nodejs.org/
+- **🎨 Modern UI** - Smooth animations and responsive minimalistic design
+- **🦄 Creature Management** - Full CRUD operations for creatures
+- **📚 Content System** - Organize lore and collections
+- **🖼️ 3D Visualization** - Powered by Three.js
+- **☁️ Cloud Integration** - Cloudinary for asset management
+- **🛡️ Authentication** - Secure access control
+- **🔍 Search & Filter** - Find content easily
+- **📱 Responsive** - Works on all devices
 
-2. **Instalar dependencias**
+## 🛠️ Tech Stack
+
+### Frontend
+- **Vite** - Next-gen frontend tooling
+- **Three.js** - 3D graphics rendering
+- **GSAP** - Professional-grade animations
+- **Lenis** - Buttery smooth scrolling
+
+### Backend
+- **Node.js** - JavaScript runtime
+- **Express** - Web framework
+- **Cloudinary** - Media management
+
+### DevOps
+- **Docker** - Containerization
+- **GitHub Actions** - CI/CD
+- **Google Cloud Run** - Deployment
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18.x or later
+- npm 9.x or later
+- Cloudinary account (for media)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/blackars/NOXISTENCE-site.git
+   cd NOXISTENCE-site
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Iniciar el servidor**
+3. **Setup environment**
+   Create a `.env` file in the root directory:
+   ```env
+   # Server
+   PORT=3100
+   NODE_ENV=development
+   
+   # Cloudinary
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+
+4. **Start development server**
    ```bash
+   # Frontend + Backend
+   npm run dev
+   
+   # Backend only
    npm start
    ```
 
-4. **Abrir en el navegador**
-   - Editor: http://localhost:3000/editor.html
-   - Catálogo: http://localhost:3000/catalog.html
+5. **Access the application**
+   - Frontend: http://localhost:3000
+   - API: http://localhost:3100
 
-## Estructura del Proyecto
+## 🐳 Docker Deployment
 
-```
-/
-├── server.js              # Servidor Node.js
-├── package.json           # Dependencias
-├── editor.html            # Editor de criaturas
-├── catalog.html           # Catálogo de layouts
-├── data/
-│   └── creatures.json     # Metadatos de criaturas
-├── img/                   # Imágenes de criaturas
-└── fonts/                 # Fuentes personalizadas
-    └── fonts.json         # Lista de fuentes
-```
+1. **Build the image**
+   ```bash
+   docker-compose build
+   ```
 
-## Funcionalidades
+2. **Start containers**
+   ```bash
+   docker-compose up -d
+   ```
 
-### Editor (editor.html)
-- **Subir criaturas**: Selecciona imagen, nombre, mundo y tags
-- **Gestionar criaturas**: Ver lista y eliminar criaturas existentes
-- **Crear layouts**: Arrastra, escala y rota criaturas
-- **Exportar layouts**: Guarda la disposición actual como JSON
+3. **View logs**
+   ```bash
+   docker-compose logs -f
+   ```
 
-### Catálogo (catalog.html)
-- **Ver layouts**: Lista todos los archivos JSON de layouts
-- **Abrir layouts**: Hace clic para abrir en el visualizador
+## 🔧 API Reference
 
-### Servidor
-- **Subir imágenes**: Guarda en `/img/` y actualiza `creatures.json`
-- **API REST**: Endpoints para gestionar criaturas
-- **Archivos estáticos**: Sirve HTML, CSS, JS e imágenes
+### Creatures
+- `GET /api/creatures` - List all creatures
+- `POST /api/upload` - Upload new creature
+- `GET /api/creature/:id` - Get creature details
 
-## API Endpoints
+### Content
+- `GET /api/data/lore` - Get lore content
+- `GET /api/data/catalog` - Get catalog
+- `GET /api/data/fonts` - List available fonts
 
-- `POST /upload` - Subir nueva criatura
-- `GET /creatures` - Obtener todas las criaturas
-- `DELETE /creatures/:id` - Eliminar criatura
+### Utilities
+- `POST /api/generate-all-thumbnails` - Generate thumbnails
+- `GET /api/list-fonts` - List installed fonts
 
-## Uso
+## 📄 License
 
-1. **Agregar criaturas**:
-   - Abre el editor
-   - Completa el formulario de subida
-   - La imagen se guarda en `/img/` y se actualiza `creatures.json`
+This project is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International** (CC BY-NC-ND 4.0) license.
 
-2. **Crear layouts**:
-   - Las criaturas aparecen automáticamente en el grid
-   - Arrastra, escala (Shift + rueda) y rota (Alt + rueda)
-   - Exporta el layout con "Guardar Hoja"
+### You are free to:
+- **Share** — redistribute the final product in any medium or format
 
-3. **Gestionar contenido**:
-   - Ve la lista de criaturas en el panel derecho
-   - Elimina criaturas con el botón ×
-   - Los cambios se reflejan inmediatamente
+### Under the following terms:
+- **Attribution** — You must give appropriate credit
+- **NonCommercial** — No commercial use without permission
+- **NoDerivatives** — No modifications allowed
 
-## Desarrollo
+For full details, see the [LICENSE](LICENSE) file.
 
-Para desarrollo con recarga automática:
-```bash
-npm run dev
-```
+---
 
-## Notas
-
-- Las imágenes se guardan con nombres únicos basados en timestamp
-- El JSON se actualiza automáticamente al subir/eliminar criaturas
-- Los layouts se guardan en localStorage del navegador
-- El sistema es compatible con tu estructura JSON existente 
-- datos extra
+<div align="center">
+  <sub>Built with ❤️ by <a href="https://blackars.com">Blackars</a></sub>
+</div>
