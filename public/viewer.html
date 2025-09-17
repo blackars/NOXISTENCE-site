@@ -596,9 +596,6 @@
           textItem.style.top = textData.top;
           textItem.style.transform = `scale(${textData.scale}) rotate(${textData.rotate}deg)`;
           textItem.style.textAlign = 'center';
-          textItem.style.width = '100%';
-          textItem.style.maxWidth = '600px'; // Ancho máximo para mejor legibilidad
-          textItem.style.margin = '0 auto'; // Centrar el bloque de texto
           // Aplicar fuente con fallback
           const fontFamily = textData.fontFamily || 'sans-serif';
           textItem.style.fontFamily = `"${fontFamily}", Arial, sans-serif`;
@@ -618,8 +615,8 @@
             textItem.classList.add('clickable');
             // Crear el contenido con un span para el efecto de subrayado
             textItem.innerHTML = `
-              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;width:100%;text-align:center;"${targetAttr}>
-                <span style="display:inline-block;text-align:center;max-width:600px;margin:0 auto;">${textData.content.replace(/\\n/g, '<br>')}</span>
+              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;"${targetAttr}>
+                <span>${textData.content.replace(/\\n/g, '<br>')}</span>
               </a>`;
             
             // Interceptar el click para navegación interna solo si NO es un enlace externo
