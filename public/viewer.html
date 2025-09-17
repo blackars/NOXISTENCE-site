@@ -238,7 +238,7 @@
       wrapper: grid, // Usamos el grid como contenedor
       content: grid, // El contenido que se desplazará
       duration: 1.2,
-      smoothTouch: true,
+      smoothTouch: false,
       smoothWheel: true,
       autoRaf: true,
       wheelMultiplier: 1.2,
@@ -261,8 +261,9 @@
 
     // Función de animación de Lenis
     function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+      if (!useNativePan) { // Solo usar Lenis si no es un dispositivo táctil
+        lenis.raf(time);
+      }
     }
     requestAnimationFrame(raf);
 
