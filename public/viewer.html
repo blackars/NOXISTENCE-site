@@ -30,10 +30,19 @@
       right: 0;
       bottom: 0;
       background: white;
-      overflow: hidden; /* Cambiado de auto a hidden para que Lenis maneje el scroll */
+      overflow: hidden; /* Necesario para Lenis */
       touch-action: pan-x pan-y;
-      -webkit-overflow-scrolling: touch; /* Mejor scroll en iOS */
-      overscroll-behavior: none; /* Previene el bounce effect en iOS */
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
+    }
+
+    /* Asegurar que el contenedor interno pueda crecer según el contenido */
+    #grid > div {
+      position: relative;
+      min-width: 100%;
+      min-height: 100%;
+      width: fit-content;
+      height: fit-content;
     }
 
     /* En dispositivos táctiles (coarse), permitir scroll nativo del contenedor */
