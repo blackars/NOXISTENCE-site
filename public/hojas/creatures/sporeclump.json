@@ -2,7 +2,7 @@
   "texts": [
     {
       "content": "The Sporeclump manifests as bulbous masses in hues of fuchsia, purple,\nand blue,supported by twisted stalks that raise slimy, spore-filled eyes.",
-      "left": "429px",
+      "left": "450px",
       "top": "191px",
       "scale": "1",
       "rotate": "0",
@@ -12,7 +12,7 @@
     },
     {
       "content": "Each eye locks onto a target and bursts violently in its direction, releasing a\ncloud of dust that coats the victim with compounds irresistible to nearby predators.",
-      "left": "385.388px",
+      "left": "400.388px",
       "top": "263.4px",
       "scale": "1",
       "rotate": "0",
@@ -23,7 +23,7 @@
     {
       "content": "Sporeclump\n\n",
       "left": "664.375px",
-      "top": "57.8125px",
+      "top": "37.8125px",
       "scale": "4.8",
       "rotate": "0",
       "fontFamily": "melonfruit",
@@ -32,7 +32,7 @@
     },
     {
       "content": "Drawn by the scent, these hunters consume the prey, allowing the spores to\ncomplete their reproductive cycle within their highly acidic stomachs.",
-      "left": "416px",
+      "left": "420px",
       "top": "340px",
       "scale": "1",
       "rotate": "0",
@@ -42,7 +42,7 @@
     },
     {
       "content": "Beyond reproduction, the released clouds have hallucinogenic\npropertiesthat alter the behavior of nearby fauna.",
-      "left": "491px",
+      "left": "500px",
       "top": "448px",
       "scale": "1",
       "rotate": "0",
@@ -52,7 +52,7 @@
     },
     {
       "content": "This effect is believed to deter herbivorous threats,\nensuring the Cluster’s survival in hostile ecosystems.",
-      "left": "530px",
+      "left": "540px",
       "top": "529px",
       "scale": "1",
       "rotate": "0",
