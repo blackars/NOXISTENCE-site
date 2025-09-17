@@ -615,7 +615,7 @@
             // Crear el contenido con un span para el efecto de subrayado
             textItem.innerHTML = `
               <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:inline-block;position:relative;padding-bottom:2px;"${targetAttr}>
-                <span>${textData.content}</span>
+                <span>${textData.content.replace(/\\n/g, '<br>')}</span>
               </a>`;
             
             // Interceptar el click para navegación interna solo si NO es un enlace externo
@@ -635,7 +635,7 @@
               });
             }
           } else {
-            textItem.textContent = textData.content;
+            textItem.innerHTML = textData.content.replace(/\n/g, '<br>');
           }
           
           contentContainer.appendChild(textItem);
