@@ -1,0 +1,89 @@
+{
+  "texts": [
+    {
+      "content": "The Beljawhar bears ascending green stems with pendant bell-shaped flowers, whose opaque,",
+      "left": "573px",
+      "top": "307px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "rough surfaces exude heavy aromatic compounds that attract nocturnal pollinators.",
+      "left": "627px",
+      "top": "351px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "It thrives in shaded, damp soils, forming dense colonies that compete for vertical space.",
+      "left": "617px",
+      "top": "395px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Studies indicate its roots release allelopathic substances that inhibit the growth of nearby plants, ensuring local dominance.",
+      "left": "538.4px",
+      "top": "443.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Beljawhar",
+      "left": "909px",
+      "top": "141.9px",
+      "scale": "4.8",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "c",
+      "left": "565.206px",
+      "top": "60.3214px",
+      "scale": "2.200000000000001",
+      "rotate": "60",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#89aa6e",
+  "fontSettings": {
+    "family": "goaroundthebooksarrows",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T05:17:58.709Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758046606/noxistence/creatures/beljhawar.png",
+      "left": "274.975px",
+      "top": "253px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "flipped": false,
+      "name": "beljhawar",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

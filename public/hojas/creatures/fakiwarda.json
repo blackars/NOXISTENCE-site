@@ -1,0 +1,89 @@
+{
+  "texts": [
+    {
+      "content": "The Fakiwarda is characterized not only by its sharp poisonous leaves but also by its flowers,",
+      "left": "184px",
+      "top": "344px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "which resemble reptilian heads with prominent jaws lined with inward-curving spines.",
+      "left": "207px",
+      "top": "381px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "It thrives in swampy regions where small predators are often lured by the scent exhaled from its maw.",
+      "left": "151px",
+      "top": "423px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Although not carnivorous in the strict sense, it takes advantage of this organic matter as a supplementary source of nutrients.",
+      "left": "53.4px",
+      "top": "461.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Fakiwarda",
+      "left": "519px",
+      "top": "183.5px",
+      "scale": "4.8",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "e",
+      "left": "908.7px",
+      "top": "244.3px",
+      "scale": "2.1",
+      "rotate": "-160",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#89aa6e",
+  "fontSettings": {
+    "family": "goaroundthebooksarrows",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T05:29:43.921Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758046685/noxistence/creatures/fakiwarda.png",
+      "left": "1187.4px",
+      "top": "260.4px",
+      "scale": "2.300000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "fakiwarda",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

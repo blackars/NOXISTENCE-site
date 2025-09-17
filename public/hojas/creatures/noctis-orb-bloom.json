@@ -1,0 +1,99 @@
+{
+  "texts": [
+    {
+      "content": "The Noctis Spheres are photosensitive structures made of vegetal chitin enriched with ferric minerals.",
+      "left": "549px",
+      "top": "311px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Their reddish stems circulate luminescent fluids that stabilize the interior,",
+      "left": "675px",
+      "top": "354px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "while at dusk they store starlight, acting as natural archives of celestial landscapes.",
+      "left": "637px",
+      "top": "393px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Ecologically, they function as luminous signals for nocturnal pollinators and",
+      "left": "665px",
+      "top": "435px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "as microhabitats for translucent invertebrates, also indicating soils rich in iron and manganese.",
+      "left": "592px",
+      "top": "478px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Noctis Orb Bloom",
+      "left": "876px",
+      "top": "161.8px",
+      "scale": "4.200000000000002",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "e",
+      "left": "501.604px",
+      "top": "173.467px",
+      "scale": "1.6000000000000005",
+      "rotate": "-20",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#bade9c",
+  "fontSettings": {
+    "family": "goaroundthebooksarrows",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T05:11:39.885Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758046972/noxistence/creatures/noctis-orb-bloom.png",
+      "left": "262px",
+      "top": "264.357px",
+      "scale": "2.300000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "noctis-orb-bloom",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
