@@ -18,25 +18,22 @@
       padding: 0;
       background: #f0f0f0;
       font-family: sans-serif;
-      width: 100%;
-      min-height: 100vh;
-      overflow: auto; /* Permitir scroll en el body */
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden; /* Mantenemos hidden en el body para evitar doble scroll */
     }
     
     #grid {
-      position: relative;
-      min-height: 100vh;
-      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: white;
-      overflow: visible; /* Cambiado a visible */
-    }
-
-    /* Contenedor interno para el contenido */
-    #grid > div {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      overflow: visible;
+      overflow: hidden; /* Necesario para Lenis */
+      touch-action: pan-x pan-y;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: none;
     }
 
     /* Asegurar que el contenedor interno pueda crecer según el contenido */
