@@ -297,13 +297,29 @@
     });
 
     // Detectar cambios en el contenido para recargar Lenis
-    const observer = new MutationObserver(refreshLenis);
+    // Solo observar cambios en elementos directos del grid, no en el subárbol
+    const observer = new MutationObserver((mutations) => {
+      // Verificar si hay cambios importantes que requieran actualizar Lenis
+      const needsRefresh = mutations.some(mutation => {
+        // Solo considerar inserciones/eliminaciones directas de nodos
+        return mutation.type === 'childList' && 
+               (mutation.addedNodes.length > 0 || 
+                mutation.removedNodes.length > 0);
+      });
+      
+      if (needsRefresh) {
+        // Pequeño retraso para asegurar que el DOM esté actualizado
+        setTimeout(refreshLenis, 50);
+      }
+    });
+    
     const grid = document.getElementById('grid');
     if (grid) {
       observer.observe(grid, {
-        childList: true,
-        subtree: true,
-        attributes: true
+        childList: true,    // Observar adición/eliminación de nodos
+        subtree: false,     // No observar cambios en el subárbol
+        attributes: false,  // No observar cambios en atributos
+        characterData: false // No observar cambios en texto
       });
     }
 
