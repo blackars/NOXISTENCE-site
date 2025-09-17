@@ -1,0 +1,116 @@
+{
+  "texts": [
+    {
+      "content": "are spiny, cactus-like protrusions that emit bursts of radiation to deter nearby threats.\nThough they appear as isolated organisms, each is merely the surface node\n of a vast parasitic mycelium network buried underground",
+      "left": "172.075px",
+      "top": "267.8px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Atop each stalk sits a mobile eye capable of slow, deliberate rotation.\n These ocular organs not only detect movement but emit hypnotic bioluminescent\n flashes that can disorient or briefly paralyze nearby fauna.",
+      "left": "620.4px",
+      "top": "694px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Cacteye",
+      "left": "471.2px",
+      "top": "97.0125px",
+      "scale": "6.199999999999995",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Their growth is sparse and deliberately\nspaced,suggesting a territorial strategy\nbased on isolated control zones.",
+      "left": "571px",
+      "top": "472.2px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Sensory data is relayed to the central\n mycelial core,which coordinates\ndefensive responses with precision.",
+      "left": "651.4px",
+      "top": "934.5px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "When agitated, the stalks writhe in rhythmic,\nalmost choreographedmotion-an eerie\ndisplay that resembles a convulsive dance.",
+      "left": "607.8px",
+      "top": "1164.6px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "This movement appears to serve both as a deterrent and a formofintra-network\nsignaling, though its exact function remains poorly understood.",
+      "left": "224.888px",
+      "top": "1380.4px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#a459c0",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T20:36:51.350Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758047239/noxistence/creatures/cacteye.png",
+      "left": "1197.7px",
+      "top": "196.887px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "flipped": false,
+      "name": "cacteye",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758138100/noxistence/imageart/cacteye.png",
+      "left": "202.7px",
+      "top": "815.75px",
+      "scale": "4.8999999999999995",
+      "rotate": "0",
+      "flipped": false
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758138108/noxistence/imageart/chatgptimagejul3202511_34_49pm.png",
+      "left": "1200.2px",
+      "top": "1154.75px",
+      "scale": "4.300000000000002",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
