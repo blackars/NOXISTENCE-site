@@ -232,78 +232,80 @@
   
   <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"></script>
   <script>
-    // Variables globales
+    // Variable global para Lenis
     let lenis;
-    let rafId;
-    
+    let resizeTimeout;
+
     // Función para inicializar Lenis
     function initLenis() {
-      // Destruir instancia anterior si existe
-      if (lenis) {
-        cancelAnimationFrame(rafId);
-        lenis.destroy();
-      }
-      
       const grid = document.getElementById('grid');
       
-      // Solo inicializar Lenis en dispositivos no táctiles
-      const useNativePan = window.matchMedia('(pointer: coarse)').matches;
-      
-      if (!useNativePan) {
-        // Configuración de Lenis
-        lenis = new Lenis({
-          wrapper: window,
-          content: document.documentElement,
-          duration: 1.2,
-          smoothTouch: false,
-          smoothWheel: true,
-          wheelMultiplier: 1.2,
-          touchMultiplier: 2
-        });
-        
-        // Función de animación
-        function raf(time) {
-          lenis.raf(time);
-          rafId = requestAnimationFrame(raf);
-        }
-        rafId = requestAnimationFrame(raf);
-        
-        // Forzar actualización después de que todo esté cargado
-        setTimeout(() => {
-          if (lenis) lenis.resize();
-        }, 100);
-      } else {
-        // Para dispositivos táctiles, usar scroll nativo
-        grid.style.overflow = 'auto';
-        grid.style.webkitOverflowScrolling = 'touch';
+      // Destruir instancia anterior si existe
+      if (lenis) {
+        lenis.destroy();
+      }
+
+      // Inicializar Lenis
+      lenis = new Lenis({
+        wrapper: grid,
+        content: grid,
+        duration: 1.2,
+        smoothTouch: false,
+        smoothWheel: true,
+        autoRaf: true,
+        wheelMultiplier: 1.2,
+        touchMultiplier: 2,
+        infinite: false
+      });
+
+      // Función de animación
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+
+      return lenis;
+    }
+
+    // Función para forzar el recálculo de Lenis
+    function refreshLenis() {
+      if (lenis) {
+        // Forzar recálculo de dimensiones
+        lenis.resize();
+        // Forzar scroll al inicio para asegurar que todo esté en su lugar
+        lenis.scrollTo(0, { immediate: true });
       }
     }
-    
+
     // Inicializar cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', () => {
+      // Inicializar Lenis
       initLenis();
       
-      // Re-inicializar cuando el contenido cambie
-      const observer = new MutationObserver(() => {
-        initLenis();
-      });
+      // Forzar recálculo después de que todo el contenido se cargue
+      window.addEventListener('load', refreshLenis);
       
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-      
-      // Re-inicializar en eventos importantes
-      window.addEventListener('resize', () => {
-        if (lenis) lenis.resize();
-      });
-      
-      window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-          if (lenis) lenis.resize();
-        }, 100);
-      });
+      // También forzar recálculo después de un pequeño retraso
+      setTimeout(refreshLenis, 300);
     });
+
+    // Recargar Lenis cuando cambie el tamaño de la ventana
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(refreshLenis, 100);
+    });
+
+    // Detectar cambios en el contenido para recargar Lenis
+    const observer = new MutationObserver(refreshLenis);
+    const grid = document.getElementById('grid');
+    if (grid) {
+      observer.observe(grid, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+    }
 
     // Cargar fuentes personalizadas desde Cloudinary
     async function loadCustomFonts() {
