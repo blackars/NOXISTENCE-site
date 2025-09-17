@@ -1,0 +1,78 @@
+{
+  "texts": [
+    {
+      "content": "Crown Stalks form clusters of upright, green, segmented structures,\neach topped with a plume of varying color depending on its properties.",
+      "left": "205.2px",
+      "top": "321.8px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Their fibrous roots intertwine underground, creating communal networks\nfor nutrient exchange.",
+      "left": "205.6px",
+      "top": "420.6px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "This colonial habit allows them to overtake entire regions, forming\n“crown forests”across humid plains. When releasing pollen in synchrony,\nthey fill the air with a tinted haze that spreads for kilometers.",
+      "left": "741.2px",
+      "top": "785px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Crown Stalks",
+      "left": "432.8px",
+      "top": "127.575px",
+      "scale": "6.199999999999995",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#f0f269",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T18:42:12.948Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758085057/noxistence/creatures/crown-stalks.png",
+      "left": "1141px",
+      "top": "284.381px",
+      "scale": "3.200000000000002",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crown-stalks",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758129247/noxistence/imageart/crownstalks2.png",
+      "left": "277px",
+      "top": "692.5px",
+      "scale": "3.7000000000000024",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
