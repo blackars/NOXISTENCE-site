@@ -1,0 +1,79 @@
+{
+  "texts": [
+    {
+      "content": "The Veinroot displays a bulbous central mass of fibrous tissue with\n reddish branching structures resembling exposed veins.",
+      "left": "202px",
+      "top": "332px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Its design reveals high vascularization, optimized for mineral fluid transport from saturated soils.",
+      "left": "85px",
+      "top": "409px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Common in hydrocarbon-rich zones, its reddish sap contains flammable resinous compounds. ",
+      "left": "92px",
+      "top": "447px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Preliminary studies suggest that some of Maxkodia’s primitive communities use\n it as a natural fuel in fire rituals.",
+      "left": "138.4px",
+      "top": "485.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Qalb Shawka",
+      "left": "395.563px",
+      "top": "207.1px",
+      "scale": "5.199999999999998",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#6eaa7a",
+  "fontSettings": {
+    "family": "goaroundthebooksarrows",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T16:54:53.593Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758046850/noxistence/creatures/qalb-shawka.png",
+      "left": "1022.9px",
+      "top": "232.104px",
+      "scale": "2.7000000000000015",
+      "rotate": "0",
+      "flipped": false,
+      "name": "qalb-shawka",
+      "fontFamily": "goaroundthebooksarrows",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

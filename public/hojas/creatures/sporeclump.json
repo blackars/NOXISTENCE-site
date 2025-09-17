@@ -1,0 +1,98 @@
+{
+  "texts": [
+    {
+      "content": "The Sporeclump manifests as bulbous masses in hues of fuchsia, purple,\nand blue,supported by twisted stalks that raise slimy, spore-filled eyes.",
+      "left": "429px",
+      "top": "191px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Each eye locks onto a target and bursts violently in its direction, releasing a\ncloud of dust that coats the victim with compounds irresistible to nearby predators.",
+      "left": "385.388px",
+      "top": "263.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Sporeclump\n\n",
+      "left": "664.375px",
+      "top": "57.8125px",
+      "scale": "4.8",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Drawn by the scent, these hunters consume the prey, allowing the spores to\ncomplete their reproductive cycle within their highly acidic stomachs.",
+      "left": "416px",
+      "top": "340px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Beyond reproduction, the released clouds have hallucinogenic\npropertiesthat alter the behavior of nearby fauna.",
+      "left": "491px",
+      "top": "448px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "This effect is believed to deter herbivorous threats,\nensuring the Cluster’s survival in hostile ecosystems.",
+      "left": "530px",
+      "top": "529px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#c6f868",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "28",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T17:35:10.904Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758047181/noxistence/creatures/sporeclump.png",
+      "left": "179px",
+      "top": "267.5px",
+      "scale": "2.5000000000000013",
+      "rotate": "0",
+      "flipped": false,
+      "name": "sporeclump",
+      "fontFamily": "melonfruit",
+      "fontSize": "28px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758129263/noxistence/imageart/sporeclump2.png",
+      "left": "1206.49px",
+      "top": "247.498px",
+      "scale": "2.8000000000000016",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
