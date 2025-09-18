@@ -1,0 +1,59 @@
+{
+  "texts": [
+    {
+      "content": "The Roluc Stalker is a carnivorous predator that hides among vegetation by mimicking\n inert lumps or exotic fruit, subtly shifting its coloration to blend into its surroundings.\n Beneath its compact frame lies brutal strength, feline agility, and explosive\n speed making it a deadly hunter.",
+      "left": "540.8px",
+      "top": "258.4px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "A crown of mobile eyes grants it full panoramic awareness, allowing it \nto anticipate even the slightest movement from its prey. When it strikes, it does\nso with rawphysical force beating its victims into submission before selectively\n devouring the shredded remains.Its method is direct,\n savage, and efficienta stalking engine built for silent chaos.",
+      "left": "580.6px",
+      "top": "417px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Roluc Stalker",
+      "left": "902.8px",
+      "top": "108.2px",
+      "scale": "5.799999999999996",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#c20000",
+  "fontSettings": {
+    "family": "stormgust",
+    "size": "24",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T20:58:02.964Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758047312/noxistence/creatures/roluc-stalker.png",
+      "left": "182px",
+      "top": "235.18px",
+      "scale": "2.9000000000000017",
+      "rotate": "0",
+      "flipped": false,
+      "name": "roluc-stalker",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

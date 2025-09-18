@@ -1,0 +1,69 @@
+{
+  "texts": [
+    {
+      "content": "Flesh Flower",
+      "left": "857.6px",
+      "top": "65.575px",
+      "scale": "4.600000000000001",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "The Flesh flower is marked by a vertical, meaty stalk covered in spiral ridges, each ending in a bulbous\nappendage Its slickreddish surface suggests an unusually high protein content for\n a plant, as do its dense tissues and thick, crimson sap.",
+      "left": "612.2px",
+      "top": "192px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Rarely seen on Maxkodia’s surface, it thrives in tunnels and sinkholes, where it lures small animals\nwith its putrid scent.Upon sensingmovement, it unfurls like a massive slab of bloodied\n, toothed flesh, ensnaring its prey in a sudden acidic embrace.",
+      "left": "636.4px",
+      "top": "341.6px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Once trapped, the bloom secretes corrosive compounds that slowly dissolve organic\n matter The process is silent and methodical, leaving behind\nliquefied remains that nourish the parasitic mycelium below.",
+      "left": "676.4px",
+      "top": "498.2px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#800000",
+  "fontSettings": {
+    "family": "nightcore",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T21:21:08.167Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758047296/noxistence/creatures/flesh-flower.png",
+      "left": "140.463px",
+      "top": "207.968px",
+      "scale": "2.5000000000000013",
+      "rotate": "0",
+      "flipped": false,
+      "name": "flesh-flower",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

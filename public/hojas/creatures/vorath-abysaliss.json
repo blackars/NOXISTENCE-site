@@ -1,0 +1,59 @@
+{
+  "texts": [
+    {
+      "content": "A deep-sea predator, this carnivore lurks in total darkness,\nluring prey with its bioluminescentorbs. It strikes with sudden\nviolence,tearing apart any creature that ventures too close.",
+      "left": "325.7px",
+      "top": "314.4px",
+      "scale": "2.8000000000000016",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Vorath Abyssalis rarely leaves the abyssal trenches; its\nterritory is marked by sudden silence in the waters,\nas even the smallest creatures avoid its presence.",
+      "left": "358px",
+      "top": "472.2px",
+      "scale": "2.8000000000000016",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Vorath Abysaliss",
+      "left": "481px",
+      "top": "148.987px",
+      "scale": "9.599999999999984",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#362999",
+  "fontSettings": {
+    "family": "stormgust",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-17T21:06:59.766Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758047270/noxistence/creatures/vorath-abysaliss.png",
+      "left": "1147.8px",
+      "top": "240.8px",
+      "scale": "2.9000000000000017",
+      "rotate": "0",
+      "flipped": false,
+      "name": "vorath-abysaliss",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

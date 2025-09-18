@@ -1,0 +1,108 @@
+{
+  "texts": [
+    {
+      "content": "The Triaquor-Dens is a small, semi-scavenging organism that thrives in the aftermath\nof megafaunal predation.Its compact, muscular body and multi-limbed\nstructure allow it to navigate dense terrain with ease, ",
+      "left": "514px",
+      "top": "215px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "often appearing shortly after a kill site has been vacated. Its presence is considered a\nbiological omen -where the Triquor-Dens feeds, dangerous hunters have recently passed.",
+      "left": "509px",
+      "top": "314px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Rather than engaging in direct pursuit, it relies on an array of highly\n sensitive ocular organs arranged in a radial crown. These eyes detect\nresidual heat, pheromonal traces, and subtle shifts in air pressure,",
+      "left": "551px",
+      "top": "388px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "allowing it to track the movements and feeding\npatterns of apex predators with uncanny precision.\nIt rarely hunts independently,preferring to\nextract nutrients from torn viscera,\nexposed marrow, and coagulated fluids.",
+      "left": "586px",
+      "top": "487px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Despite its scavenger role, the Triquor-Dens exhibits brief\n bursts of aggression when threatened, using its pointed limbs to\nlash out before retreating into cover.",
+      "left": "375px",
+      "top": "648px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Some researchers speculate that its physiology may be adapted for symbiosis\nwith larger carnivores, though no confirmed interactions have been documented",
+      "left": "161px",
+      "top": "764px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Triaquor-Dens  ",
+      "left": "816.6px",
+      "top": "92.2px",
+      "scale": "4.400000000000001",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#22634c",
+  "fontSettings": {
+    "family": "windsol",
+    "size": "24",
+    "color": "#000000"
+  },
+  "exportDate": "2025-09-18T02:30:41.772Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758047208/noxistence/creatures/triaquor-dens.png",
+      "left": "211.5px",
+      "top": "256.842px",
+      "scale": "3.9000000000000026",
+      "rotate": "0",
+      "flipped": false,
+      "name": "triaquor-dens",
+      "fontFamily": "nightcore",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758161659/noxistence/imageart/triaquor-dens.webp",
+      "left": "1173.2px",
+      "top": "623.2px",
+      "scale": "3.7000000000000024",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
