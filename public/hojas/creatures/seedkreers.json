@@ -1,0 +1,91 @@
+{
+  "texts": [
+    {
+      "content": "Small herbivorous creatures that build their nests within rock crevices, drilling into\nthe stone with a specialized drill-like tentacle.",
+      "left": "288.9px",
+      "top": "248.6px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Seedkres play a vital role in seed dispersal, encouraging the\ngrowth of new plants in rocky and arid environments.",
+      "left": "302.8px",
+      "top": "674.4px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Seedkreers",
+      "left": "667.2px",
+      "top": "86.2px",
+      "scale": "5.399999999999998",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Inside, they storecollected seeds and fruits. Their other flexible tentacles\nallow them to climb easily and handle food with precision. Curious and\nactive, they gather in noisy colonies that bring life to the cliffs they inhabit.",
+      "left": "437px",
+      "top": "414.8px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#7bea53",
+  "fontSettings": {
+    "family": "windsol",
+    "size": "24",
+    "color": "#000000"
+  },
+  "exportDate": "2025-09-19T02:50:13.181Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758247138/noxistence/creatures/seedkreer.png",
+      "left": "1222.21px",
+      "top": "61.2869px",
+      "scale": "1.5000000000000004",
+      "rotate": "-30",
+      "flipped": false,
+      "name": "seedkreer",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758249728/noxistence/imageart/seedkreers.png",
+      "left": "108px",
+      "top": "302.32px",
+      "scale": "2.9000000000000017",
+      "rotate": "0",
+      "flipped": false,
+      "name": "art",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758247246/noxistence/imageart/seedkreersdrilling.png",
+      "left": "1110.69px",
+      "top": "646.314px",
+      "scale": "2.8000000000000016",
+      "rotate": "55",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
