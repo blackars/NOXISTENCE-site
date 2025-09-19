@@ -1,0 +1,59 @@
+{
+  "texts": [
+    {
+      "content": "Crystal Tree",
+      "left": "919.2px",
+      "top": "61px",
+      "scale": "7.59999999999999",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "The Crystal Tree is a mysterious arboreal species with bark embedded with crystalline\nplates in shades of turquoise and emerald.These formations are not merely decorative, they\nstore and channel electromagnetic energy, allowing the tree to interact with its surroundings.\nIt emits controlled pulses to repel invasive fauna, especially when its foliage is threatened. \nThe large, fleshy leaves function like powerful biological solar panels,\nrich in nutrients and highly efficient in energy absorption.",
+      "left": "639.6px",
+      "top": "156.2px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "In certain primitive cultures of Maxkodia, it is common practice to grind these crystals\ninto fine powder for ingestion.Though the physiological effects remain poorly understood,\nreports suggest altered perception and heightened environmental sensitivity.\nBeyond its ecological role, the Crystal Tree is considered a living conduit,\nan organism deeply attuned to the electromagnetic rhythms of its habitat.",
+      "left": "647.8px",
+      "top": "404.4px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#c1fbea",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "24",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-19T01:57:10.770Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758246667/noxistence/creatures/crystal-tree.png",
+      "left": "204.8px",
+      "top": "235.8px",
+      "scale": "3.0000000000000018",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crystal-tree",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

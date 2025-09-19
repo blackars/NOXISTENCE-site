@@ -1,0 +1,88 @@
+{
+  "texts": [
+    {
+      "content": "The Fhumor is a semi-aquatic creature with a gentle temperament, recognizable by its wrinkled skin,\npeculiar trunk-like appendage, and mismatched eyes that seem to observe with constant curiosity.",
+      "left": "448px",
+      "top": "202px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "It inhabits shallow lagoons and canal systems, forming dense colonies of dozens of individuals.\nIts reproduction is rapid and prolific, making it a common species in certain regions, though\nits behavior remains cautious and reserved around unfamiliar presence.",
+      "left": "476.4px",
+      "top": "266.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Despite its timidity, the Fhumor is a devoted caretaker: it shelters its offspring in damp\ncavities and guides them with soft, deliberate movements of its cephalic appendage.",
+      "left": "641px",
+      "top": "437px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "When feeling safe, it emits bubbling sounds interpreted as playful signals or group communication.\nIts ecological role appears linked to the breakdown of organic waste, positioning it as a keyspecies\n in maintaining habitat balance.",
+      "left": "624.4px",
+      "top": "507.4px",
+      "scale": "1",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Fhumor",
+      "left": "764.4px",
+      "top": "99.575px",
+      "scale": "7.399999999999991",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#c1fbea",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "24",
+    "color": "#000000"
+  },
+  "exportDate": "2025-09-19T02:32:11.588Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758247118/noxistence/creatures/fhumor.png",
+      "left": "1242px",
+      "top": "126.05px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "fhumor",
+      "fontFamily": "melonfruit",
+      "fontSize": "24px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758248785/noxistence/imageart/fhumor.png",
+      "left": "221.5px",
+      "top": "298.718px",
+      "scale": "4.200000000000002",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
