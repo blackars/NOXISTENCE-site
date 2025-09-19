@@ -68,7 +68,7 @@ app.post('/api/generate-all-thumbnails', (req, res) => {
   console.log('[API] Solicitud para generar TODAS las miniaturas.');
 
   // **CARGA DIFERIDA**: El require se hace aquí para no retrasar el arranque del servidor.
-  const { generateAllThumbnails } = require('../js/generate-thumbnails');
+  const { generateAllThumbnails } = require('../dist/js/generate-thumbnails');
 
   // Llama a la función pero NO la espera con await.
   // Esto libera el request de inmediato.
