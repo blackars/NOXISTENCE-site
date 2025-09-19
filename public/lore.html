@@ -307,7 +307,9 @@
             const thumbImg = document.createElement('img');
             const cloudName = 'dgff8o52c';
             const publicId = file.replace('.json', '');
-            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/noxistence/thumbnails/lore/${publicId}.png`;
+            // Reemplazar espacios por guiones bajos en el publicId para la URL de Cloudinary
+            const cloudinaryPublicId = publicId.replace(/ /g, '_');
+            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/${publicId}.png`;
             thumbImg.alt = file;
             thumbImg.style.width = '100%';
             thumbImg.style.height = '100%';
