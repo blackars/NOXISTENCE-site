@@ -32,11 +32,6 @@ export default defineConfig({
           src: 'js/edit-tools.js', // Ruta de origen relativa a `root` (public/js/edit-tools.js)
           dest: 'js' // Ruta de destino relativa a `outDir` (dist/js)
         },
-        {
-          src: 'src/generate-thumbnails.js',
-          dest: 'js',
-          rename: 'generate-thumbnails.js'
-        }
       ]
     })
   ],
@@ -46,7 +41,6 @@ export default defineConfig({
     proxy: {
       '/cloudinary-signature': 'http://localhost:3100',
       '/api': 'http://localhost:3100'
-      
     }
   },
   resolve: {
