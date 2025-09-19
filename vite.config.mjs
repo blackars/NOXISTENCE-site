@@ -34,7 +34,8 @@ export default defineConfig({
         },
         {
           src: 'src/generate-thumbnails.js',
-          dest: 'js'
+          dest: 'js',
+          rename: 'generate-thumbnails.js'
         }
       ]
     })
@@ -45,6 +46,7 @@ export default defineConfig({
     proxy: {
       '/cloudinary-signature': 'http://localhost:3100',
       '/api': 'http://localhost:3100'
+      
     }
   },
   resolve: {
