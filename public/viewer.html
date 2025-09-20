@@ -109,11 +109,13 @@
       z-index: 1;
     }
     .item:focus .item-content img,
-    .item:hover .item-content img {
+    .item[data-has-link]:hover .item-content img,
+    .item.clickable:hover .item-content img {
       transform: scale(1.25);
       z-index: 2;
     }
-    .item:hover {
+    .item[data-has-link]:hover,
+    .item.clickable:hover {
       transform: translateY(-2px);
       filter: brightness(1.05);
       background: transparent;
@@ -444,7 +446,7 @@
             item.innerHTML = `
               <a href="${viewerUrl}" style="text-decoration:underline;color:inherit;"${targetAttr}>
                 <div class="item-content">
-                  <img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+                  <img src="${itemData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
                   ${titleDiv}
                 </div>
               </a>`;
@@ -529,7 +531,7 @@
           // Crear el contenido de la imagen
           const imgHtml = `
             <div class="item-content">
-              <img src="${artData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+              <img src="${artData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
             </div>`;
           
           // Si tiene linkTo, hacerlo clickeable
@@ -588,68 +590,44 @@
         data.loreimages.forEach(loreData => {
           const item = document.createElement('div');
           item.classList.add('item', 'lore-item');
-          item.tabIndex = 0; // Hacerlo enfocable para accesibilidad
+          
+          // Solo hacerlo enfocable si tiene linkTo
+          if (loreData.linkTo) {
+            item.tabIndex = 0;
+            item.style.cursor = 'pointer';
+            item.setAttribute('data-has-link', 'true');
+          } else {
+            item.style.pointerEvents = 'none';
+          }
+          
           item.style.left = loreData.left;
           item.style.top = loreData.top;
           item.style.transform = `scale(${loreData.scale || 1}) rotate(${loreData.rotate || 0}deg)`;
-          item.style.cursor = loreData.linkTo ? 'pointer' : 'default';
           
           // Manejar flip si está definido
           if (loreData.flipped) {
             item.style.transform += ' scaleX(-1)';
           }
           
-          // Crear el contenido de la imagen
-          const imgHtml = `
+          item.innerHTML = `
             <div class="item-content">
-              <img src="${loreData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50%\'%20y%3D\'60%\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
+              <img src="${loreData.img}" onerror="this.onerror=null; this.src='data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D\'100\'%20height%3D\'100\'%20xmlns%3D\'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg\'%3E%3Ctext%20x%3D\'50\'%20y%3D\'60\'%20font-size%3D\'14\'%20text-anchor%3D\'middle\'%3EImage%20not%20found%3C%2Ftext%3E%3C%2Fsvg%3E'" />
             </div>`;
           
           // Si tiene linkTo, envolver en un enlace
           if (loreData.linkTo) {
             const isExternalLink = loreData.linkTo.startsWith('http://') || loreData.linkTo.startsWith('https://');
-            const viewerUrl = isExternalLink ? loreData.linkTo : `/public/viewer.html?file=${encodeURIComponent(loreData.linkTo)}`;
+            const viewerUrl = isExternalLink ? loreData.linkTo : `viewer.html?file=hojas/${encodeURIComponent(loreData.linkTo)}`;
             const targetAttr = isExternalLink ? ' target="_blank" rel="noopener noreferrer"' : '';
             
             item.innerHTML = `
-              <a href="${viewerUrl}" style="text-decoration:none;color:inherit;display:block;"${targetAttr}>
-                ${imgHtml}
+              <a href="${viewerUrl}" style="display: block; height: 100%;"${targetAttr}>
+                ${item.innerHTML}
               </a>`;
-            
-            // Interceptar el click para navegación interna solo si NO es un enlace externo
-            if (!isExternalLink) {
-              const link = item.querySelector('a');
-              link.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                window.location.href = viewerUrl;
-              });
-            } else {
-              // Para enlaces externos, asegurar que se abran en nueva pestaña
-              const link = item.querySelector('a');
-              link.addEventListener('click', function(e) {
-                e.stopPropagation();
-                // No preventDefault para enlaces externos - permitir comportamiento normal
-              });
-            }
-          } else {
-            item.innerHTML = imgHtml;
           }
           
           contentContainer.appendChild(item);
-          
-          // Calcular dimensiones del contenido
-          const left = parseFloat(loreData.left) || 0;
-          const top = parseFloat(loreData.top) || 0;
-          const scale = parseFloat(loreData.scale) || 1;
-          const itemWidth = 150 * scale;
-          const itemHeight = 150 * scale;
-          maxX = Math.max(maxX, left + itemWidth);
-          maxY = Math.max(maxY, top + itemHeight);
-          minX = Math.min(minX, left);
-          minY = Math.min(minY, top);
-          
-          console.log('Renderizando lore', loreData);
+          console.log('Renderizada imagen de lore:', loreData);
         });
       }
       
