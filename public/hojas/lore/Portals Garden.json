@@ -1,0 +1,83 @@
+{
+  "texts": [
+    {
+      "content": "Portals Garden",
+      "left": "729.9px",
+      "top": "91px",
+      "scale": "4.400000000000001",
+      "rotate": "0",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Only void. An intense white that does not reflect, emit, or wait. Suspended, black spheres drift trapped in a\nconstant pulse that expands, contracts, and repels, as if something inside were reaching outward.\nEach one holds a passage: fragments, echoes, errors. There is no sign of origin or destination.",
+      "left": "277.2px",
+      "top": "232.4px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "When you approach and touch them, they touch you back. Everything halts. The space around\nseems to fold, as if the white were collapsing into itself.\nThey are arranged with ritual minimalism: nothing is excess, everything summons.",
+      "left": "332.8px",
+      "top": "371.6px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Those who descend through this rabbit hole find landscapes folding into themselves gardens\nwithin gardens, buried constellations. Portals Garden does not promise\ndestinations; it offers keys. And each key opens new questions",
+      "left": "365.4px",
+      "top": "892.4px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#ffffff",
+  "fontSettings": {
+    "family": "gobold",
+    "size": "20",
+    "color": "#000000"
+  },
+  "exportDate": "2025-09-20T04:09:12.223Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758340668/noxistence/lore/squareplace.png",
+      "left": "756.488px",
+      "top": "675.765px",
+      "scale": "5.299999999999998",
+      "rotate": "0",
+      "flipped": false,
+      "name": "art",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758340753/noxistence/lore/portalsphere2d.webp",
+      "left": "729px",
+      "top": "543.4px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "linkTo": "https://portalsgarden.netlify.app/",
+      "name": "art",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
