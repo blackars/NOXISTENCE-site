@@ -1,0 +1,69 @@
+{
+  "texts": [
+    {
+      "content": "Linjealger Nebulon",
+      "left": "771px",
+      "top": "78px",
+      "scale": "5.999999999999996",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "The species Linjealger Nebulon, commonly referred to as “striped algae,” is a gregarious aquatic organism\nthat inhabits the deep beds of certain large lagoons in Maxkodia. It forms expansive colonies that\nvisually blend into the environment through tentacle-like appendages which mimic the texture\nand movement of native algae and aquatic plants.",
+      "left": "596.6px",
+      "top": "189.6px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "This mimicry attracts small benthic creatures that, upon biting the nebulon’s appendages,\nare instantly paralyzed. In that brief moment, they are swiftly absorbed by the colony.",
+      "left": "784.4px",
+      "top": "325.4px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "No specimen has ever been observed outside the water. Yet their presence is equally\nrare on the surface  or during controlled dives, the Linjealger remains hidden, active\nonly in the deepest, least disturbed zones of the ecosystem.",
+      "left": "855.4px",
+      "top": "453px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#94a45b",
+  "fontSettings": {
+    "family": "windsol",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-20T03:56:02.065Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758340344/noxistence/creatures/linjealger-nebulon.png",
+      "left": "407.453px",
+      "top": "386.49px",
+      "scale": "4.400000000000001",
+      "rotate": "10",
+      "flipped": false,
+      "name": "linjealger-nebulon",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}

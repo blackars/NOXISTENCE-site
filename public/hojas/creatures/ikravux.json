@@ -1,0 +1,77 @@
+{
+  "texts": [
+    {
+      "content": "Ikravux",
+      "left": "796px",
+      "top": "78px",
+      "scale": "5.799999999999996",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Ikravux are small, herbivorous creatures that live in large groups.\nThey feed primarily on green leaves and display an endearing\nappearance that contrasts with their agility. They form strong\nbonds between individuals, evident in their synchronized movements\nand the way they cluster in response to unfamiliar stimuli.",
+      "left": "461.787px",
+      "top": "186.1px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Though naturally timid, their curiosity drives them to explore theirurroundings.\n This tension between caution and exploration is supported by their ability\nto reach high speedsand glide across mid-range distances, using wing-fins and a\nflexible tail that allow for precise navigation. They are natural runners, adapted\nfor swift movement across open terrain and dense vegetation.",
+      "left": "512.9px",
+      "top": "442.388px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "24px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#89ea48",
+  "fontSettings": {
+    "family": "windsol",
+    "size": "24",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-20T03:42:33.844Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758339053/noxistence/creatures/ikravux.png",
+      "left": "1266px",
+      "top": "89.905px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "flipped": false,
+      "name": "ikravux",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758339216/noxistence/imageart/ikravux2.png",
+      "left": "184px",
+      "top": "424.6px",
+      "scale": "2.7000000000000015",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758339594/noxistence/lore/squareplace2.png",
+      "left": "1259px",
+      "top": "284.812px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "flipped": false
+    }
+  ]
+}

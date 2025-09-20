@@ -1,0 +1,69 @@
+{
+  "texts": [
+    {
+      "content": "Achinoskyl",
+      "left": "509.4px",
+      "top": "61.1px",
+      "scale": "6.399999999999995",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Like most lifeforms in Maxkodia, this rabid creature carries lethal toxicity,\nits spines concentrate neurotoxins capable of inducing paralysis within seconds.\nIt is a small, nocturnal predator, fiercely solitary.",
+      "left": "205.45px",
+      "top": "155.5px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "20px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "It does not form groups or share territory; its aggression and metabolic demands make\nproximity intolerable. Even so, it is preyed upon by larger hunters that have developed partial\nimmunity to its toxins. These predators execute precise maneuvers to tear it apart,\nexploiting the vulnerability of its bloated, fleshy body.",
+      "left": "152px",
+      "top": "288px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "20px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Sightings are rare. It emerges only during its brief reproductive phase,\nwhen it leaves the deep fissures and exposes itself to the environment\ndriven by a biological urgency that overrides its instinct to remain hidden.",
+      "left": "363.475px",
+      "top": "458.7px",
+      "scale": "1.2000000000000002",
+      "rotate": "0",
+      "fontFamily": "windsol",
+      "fontSize": "20px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#3b83ba",
+  "fontSettings": {
+    "family": "windsol",
+    "size": "20",
+    "color": "#111111"
+  },
+  "exportDate": "2025-09-20T03:49:56.721Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758339889/noxistence/creatures/achinoskyl.png",
+      "left": "1160px",
+      "top": "310.251px",
+      "scale": "3.300000000000002",
+      "rotate": "0",
+      "flipped": false,
+      "name": "achinoskyl",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
