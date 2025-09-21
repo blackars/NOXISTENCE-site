@@ -204,18 +204,19 @@
     
     /* Hover effects for interactive items */
     .item.interactive {
-      transition: transform 0.2s ease, filter 0.2s ease;
+      /* No transform transition on the container */
+      transition: filter 0.2s ease;
     }
     .item.interactive .item-content img {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease;
       will-change: transform;
+      transform-origin: center center;
     }
     .item.interactive:hover .item-content img {
       transform: scale(1.25);
       z-index: 2;
     }
     .item.interactive:hover {
-      transform: translateY(-2px) !important; /* Override any inline transforms */
       filter: brightness(1.05);
     }
     
