@@ -202,6 +202,19 @@
       box-shadow: none !important;
     }
     
+    /* Ensure creature images have hover effects */
+    .item.creature .item-content img {
+      transition: transform 0.2s ease;
+    }
+    .item.creature:hover .item-content img {
+      transform: scale(1.25);
+      z-index: 2;
+    }
+    .item.creature:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+    
     /* Estilos para textos clickeables con efecto hover */
     .clickable {
       transition: all 0.2s ease;
