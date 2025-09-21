@@ -309,7 +309,7 @@
             const publicId = file.replace('.json', '');
             // Reemplazar espacios por guiones bajos en el publicId para la URL de Cloudinary
             const cloudinaryPublicId = publicId.replace(/ /g, '_');
-            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/${CloudinarypublicId}.png`;
+            thumbImg.src = `https://res.cloudinary.com/${cloudName}/image/upload/${cloudinaryPublicId}.png`;
             thumbImg.alt = file;
             thumbImg.style.width = '100%';
             thumbImg.style.height = '100%';
