@@ -202,16 +202,20 @@
       box-shadow: none !important;
     }
     
-    /* Ensure creature images have hover effects */
-    .item.creature .item-content img {
-      transition: transform 0.2s ease;
+    /* Hover effects for interactive items */
+    .item.interactive {
+      transition: transform 0.2s ease, filter 0.2s ease;
     }
-    .item.creature:hover .item-content img {
+    .item.interactive .item-content img {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      will-change: transform;
+    }
+    .item.interactive:hover .item-content img {
       transform: scale(1.25);
       z-index: 2;
     }
-    .item.creature:hover {
-      transform: translateY(-2px);
+    .item.interactive:hover {
+      transform: translateY(-2px) !important; /* Override any inline transforms */
       filter: brightness(1.05);
     }
     
@@ -440,12 +444,13 @@
       if (data.images && Array.isArray(data.images)) {
         data.images.forEach(itemData => {
           const item = document.createElement('div');
-          item.classList.add('item');
+          item.classList.add('item', 'interactive');
           item.tabIndex = 0;
           item.style.left = itemData.left;
           item.style.top = itemData.top;
           item.style.transform = `scale(${itemData.scale}) rotate(${itemData.rotate}deg)`;
           item.style.cursor = 'pointer';
+          item.style.transition = 'transform 0.2s ease, filter 0.2s ease';
           // Solo crear el div del nombre si showTitles !== false
           let titleDiv = '';
           if (data.showTitles !== false) {
