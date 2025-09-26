@@ -1,0 +1,59 @@
+{
+  "texts": [
+    {
+      "content": "Crimson Plague: KNEADED",
+      "left": "601.163px",
+      "top": "105.775px",
+      "scale": "3.8000000000000025",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "These amalgams follow no fixed patterns, their form, mobility,\nand aggression vary depending on the nature of the remains,\nmaking them volatile threats that defy anticipation.\nSome develop multiple limbs, others crawl as pulsating\nheaps, and some extend themselves as living nets.\nTheir emergence signals that the plague, even in apparent\ndefeat, continues to seek new ways to persist and adapt,\nreclaiming whatever fragments it can to fuel its evolution.",
+      "left": "272.875px",
+      "top": "692.7px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "These entities are not infected in the conventional sense,\nbut rather aberrant by products of the eradication process.\nThey tend to manifest during intense combat scenarios,\nespecially when infected remains are not incinerated swiftly.\nResidual biomass (vascular tissue, cartilage, bone fragments,\nand active larvae) spontaneously fuses into chaotic\namalgams: masses composed of incompatible parts that\nnonetheless operate with unpredictable lethality.",
+      "left": "260px",
+      "top": "332.8px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#0a0a0a",
+  "fontSettings": {
+    "family": "creepyblood",
+    "size": "20",
+    "color": "#8a0000"
+  },
+  "exportDate": "2025-09-26T20:36:19.550Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905400/noxistence/creatures/crimson-plague-kneaded.png",
+      "left": "1122px",
+      "top": "554.907px",
+      "scale": "3.7000000000000024",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-kneaded",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
