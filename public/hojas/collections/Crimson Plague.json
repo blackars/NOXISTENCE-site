@@ -1,0 +1,193 @@
+{
+  "texts": [
+    {
+      "content": "Crimson Plague",
+      "left": "559.9px",
+      "top": "127.2px",
+      "scale": "4.999999999999999",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "20px",
+      "color": "rgb(148, 0, 0)"
+    },
+    {
+      "content": "The Crimson Plague, also known as Blood Chrysalids, is a parasitic infection that targets\n organisms with active circulatory systems. It spreads through tiny larvae that latch onto\nthe host’s skin and begin to extract blood at an accelerated rate. Within seconds, they absorb\na massive quantity of fluid, triggering a violenttransformation: their bodies mutate\nintofilamentous networks that envelop the host, mimicking its original shape.",
+      "left": "267px",
+      "top": "377px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(148, 0, 0)"
+    },
+    {
+      "content": "During this process, the host’s internal organs are crushed and reorganized,\nwhile its blood is rerouted intoan external vascular mesh, an anomalous system\nthat defines the infected creature’s grotesque appearance: a pulsating,\ncrimson-wrapped body driven by erratic movement and extreme aggression.",
+      "left": "584.8px",
+      "top": "669.6px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(148, 0, 0)"
+    },
+    {
+      "content": "Entities possessed by this plague consume all living\nmatter in their path, growing larger with each intake\nof organic material. Their bloodlust is insatiable, making\nthem brutal hunters. Despite this, they exhibit complex behavior,\nforming hierarchical colonies where larger specimens occasionally\ndevour smaller infected individuals to assert dominance.",
+      "left": "180.9px",
+      "top": "1148.7px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(148, 0, 0)"
+    },
+    {
+      "content": "Ancient records across multiple cultures and worlds\nspeak of this plague as a tribal curse, a divine\npunishmentthat appears suddenly and sweeps through\nentire regions with terrifying speed. Its arrival is often\nsilent, its destruction total, leaving behind\nonly scorched memories and ritual warnings.",
+      "left": "394.488px",
+      "top": "1514.7px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(148, 0, 0)"
+    },
+    {
+      "content": "Despite its lethality, the Crimson Plague has one critical weakness:\nfire. Infected creatures fear it instinctively, and exposure to flame or\nextreme heat destroys them completely. This vulnerability has allowed\nsome civilizations to develop defensive tactics and purification rites\nto confront the spread of this affliction.",
+      "left": "167.7px",
+      "top": "1939.6px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(148, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#000000",
+  "fontSettings": {
+    "family": "creepyblood",
+    "size": "20",
+    "color": "#940000"
+  },
+  "exportDate": "2025-09-26T17:27:35.564Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905435/noxistence/creatures/crimson-plague-giant.png",
+      "left": "1181.5px",
+      "top": "1357.71px",
+      "scale": "4.400000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-giant",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901568/noxistence/creatures/crimson-plague-flyers.png",
+      "left": "115.5px",
+      "top": "747.053px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-flyers",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905426/noxistence/creatures/crimson-plague-human.png",
+      "left": "887.5px",
+      "top": "2038.13px",
+      "scale": "1.1",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-human",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901597/noxistence/creatures/crimson-plague-dog.png",
+      "left": "82px",
+      "top": "1444.8px",
+      "scale": "1.4000000000000004",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-dog",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901512/noxistence/creatures/crimson-plague-bug.png",
+      "left": "663px",
+      "top": "869.6px",
+      "scale": "0.9",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-bug",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905417/noxistence/creatures/crimson-plague-imps.png",
+      "left": "613px",
+      "top": "2161.55px",
+      "scale": "0.9",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-imps",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905400/noxistence/creatures/crimson-plague-kneaded.png",
+      "left": "1267.5px",
+      "top": "256.106px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-kneaded",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905446/noxistence/creatures/crimson-plague-soldier.png",
+      "left": "1204.5px",
+      "top": "2056.06px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-soldier",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    },
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758902210/noxistence/creatures/crimson-plague-worm.png",
+      "left": "49.6px",
+      "top": "2193px",
+      "scale": "1.1",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-worm",
+      "fontFamily": "gobold",
+      "fontSize": "20px",
+      "color": "rgb(0, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
