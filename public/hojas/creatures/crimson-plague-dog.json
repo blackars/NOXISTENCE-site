@@ -1,0 +1,49 @@
+{
+  "texts": [
+    {
+      "content": "Infected canids like other quadrupeds retain their speed, endurance, and\nacute sense of smell, making them exceptional trackers within the swarm.\nTheir musculature hypertrophies asymmetrically, reinforcing the jaw,\nwhich mutates into a serrated structure capable of tearing through\nlight armor and dense tissue with ease.",
+      "left": "759.587px",
+      "top": "339px",
+      "scale": "2.6000000000000014",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "Crimson Plague: DOGS",
+      "left": "849.9px",
+      "top": "108.8px",
+      "scale": "4.999999999999999",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#0a0a0a",
+  "fontSettings": {
+    "family": "batesshower",
+    "size": "14",
+    "color": "#8a0000"
+  },
+  "exportDate": "2025-09-26T19:31:42.235Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901597/noxistence/creatures/crimson-plague-dog.png",
+      "left": "178.9px",
+      "top": "248.608px",
+      "scale": "2.8000000000000016",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-dog",
+      "fontFamily": "batesshower",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
