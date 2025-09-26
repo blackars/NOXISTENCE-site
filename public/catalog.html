@@ -460,14 +460,20 @@
           console.error('Error loading collections:', e);
         }
       }
-
       // Eventos de filtrado
       searchInput.addEventListener('input', renderCreatures);
       worldSelect.addEventListener('change', renderCreatures);
 
-      // Función para normalizar nombres (quitar espacios, convertir a minúsculas, etc.)
+      // Función para normalizar nombres (maneja mayúsculas, espacios, guiones y dos puntos)
       function normalizeName(name) {
-        return name ? name.toString().trim().toLowerCase().replace(/\s+/g, ' ') : '';
+        if (!name) return '';
+        const normalized = name.toString()
+          .toLowerCase()
+          .replace(/[:\-]/g, ' ')  // Reemplaza : y - por espacios
+          .replace(/\s+/g, ' ')     // Normaliza espacios múltiples
+          .trim();
+        console.log('Normalizando nombre:', name, '→', normalized);
+        return normalized;
       }
 
       // Evento para filtrar por colección
@@ -475,16 +481,13 @@
         const selectedFile = this.value;
         
         if (!selectedFile) {
-          // Si se selecciona "All Collections", mostrar todas las criaturas
           renderCreatures();
           return;
         }
         
         try {
-          // Mostrar estado de carga
           grid.innerHTML = '<div class="loading">Cargando colección...</div>';
           
-          // Cargar la colección seleccionada
           const res = await fetch(`hojas/collections/${selectedFile}?t=${new Date().getTime()}`);
           const collectionData = await res.json();
           
@@ -495,7 +498,6 @@
           if (collectionData.images) {
             collectionData.images.forEach(img => {
               if (img.name) {
-                // Agregar el nombre normalizado al conjunto
                 creatureNames.add(normalizeName(img.name));
               }
             });
@@ -505,7 +507,6 @@
           if (collectionData.artimages) {
             collectionData.artimages.forEach(art => {
               if (art.name) {
-                // Agregar el nombre normalizado al conjunto
                 creatureNames.add(normalizeName(art.name));
               }
             });
@@ -518,13 +519,21 @@
           const filteredCreatures = allCreatures.filter(creature => {
             const normalizedCreatureName = normalizeName(creature.name);
             const isInCollection = creatureNames.has(normalizedCreatureName);
-            console.log(`Comprobando ${creature.name} (${normalizedCreatureName}): ${isInCollection}`);
+            
+            // Log detallado de la comparación
+            console.group('Comparando criatura con colección');
+            console.log('Nombre original:', creature.name);
+            console.log('Nombre normalizado:', normalizedCreatureName);
+            console.log('Nombres en colección:', Array.from(creatureNames));
+            console.log('¿Está en colección?', isInCollection);
+            console.groupEnd();
+            
             return isInCollection;
           });
           
           console.log('Criaturas filtradas:', filteredCreatures);
           
-          // Aplicar filtros actuales (búsqueda y mundo)
+          // Aplicar filtros adicionales si los hay
           const filterName = searchInput.value.trim().toLowerCase();
           const filterWorld = worldSelect.value;
           
