@@ -1,0 +1,79 @@
+{
+  "texts": [
+    {
+      "content": "The possessed that grow into giant forms become siege-class\nunits within the swarm. Their bodies expand\ndisproportionately, reinforced by layers of external vascular\ntissue and ossified plating that serve as partial armor.\n",
+      "left": "216.013px",
+      "top": "445.8px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "These creatures are not only defined by brute strength,\nbut by an accelerated metabolism that allows partial\nregeneration after sustaining damage.\n",
+      "left": "228.6px",
+      "top": "947.2px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "Crimson Plague: GIANTS",
+      "left": "604.6px",
+      "top": "183.988px",
+      "scale": "4.400000000000001",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "They typically manifest a massive serrated weapon\n(assembled from reconfigured bone and cartilage)\ncapable of cleaving through large structures and\nconsuming entire bodies in a single strike.",
+      "left": "236.7px",
+      "top": "694px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "They absorb biomass from the environment or fallen\nprey to rebuild limbs, seal wounds, or even alter the\nir form mid-combat. Their presence on the battlefield\ndemands immediate tactical response, as they\ncan destabilize defenses, crush formations,\nand spread chaos with every movement.",
+      "left": "253.375px",
+      "top": "1166.8px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#0a0a0a",
+  "fontSettings": {
+    "family": "creepyblood",
+    "size": "20",
+    "color": "#8a0000"
+  },
+  "exportDate": "2025-09-26T20:17:45.102Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905435/noxistence/creatures/crimson-plague-giant.png",
+      "left": "1089px",
+      "top": "788.378px",
+      "scale": "4.7",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-giant",
+      "fontFamily": "sans-serif",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
