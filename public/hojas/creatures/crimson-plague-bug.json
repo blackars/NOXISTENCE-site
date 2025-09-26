@@ -1,0 +1,49 @@
+{
+  "texts": [
+    {
+      "content": "Possessed arthropods function as dispersal swarms, releasing bloodborne spores and\nairborne larvae that rapidly contaminate their surroundings. Their erratic flight,\ncombined with accelerated replication, makes them primary infestation vectors.\n  They serve as the swarm’s initial wave, saturating vulnerable zones and\npreparingthe ground for more complex forms of the plague.",
+      "left": "356.888px",
+      "top": "368.6px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "Crimson Plague: Bug",
+      "left": "509.7px",
+      "top": "143.2px",
+      "scale": "5.399999999999998",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#0a0a0a",
+  "fontSettings": {
+    "family": "batesshower",
+    "size": "14",
+    "color": "#8a0000"
+  },
+  "exportDate": "2025-09-26T18:25:35.882Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901512/noxistence/creatures/crimson-plague-bug.png",
+      "left": "1225px",
+      "top": "235.85px",
+      "scale": "2.100000000000001",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-bug",
+      "fontFamily": "sans-serif",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
