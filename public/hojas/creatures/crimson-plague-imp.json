@@ -1,0 +1,69 @@
+{
+  "texts": [
+    {
+      "content": "Small intelligent creatures (whether diminutive humans, gray-type alien variants,\nor corporeal demonic entities) are often transformed into Imps within the\nCrimson Plague swarm.\n",
+      "left": "271.812px",
+      "top": "484.6px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "Crimson Plague: IMPS",
+      "left": "596.562px",
+      "top": "258.188px",
+      "scale": "4.400000000000001",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "These hearts are far more than trophies. Imps convert them into living capsules,\npacking them with larvae they appear to produce autonomously.\nThe result is a biological bomb, deployed to spread the plague in densely\npopulated or fortified zones. Their behavior is ritualistic, almost theatrical,\nand their presence often heralds large-scale outbreaks.\nThough small in stature, their tactical intelligence and rapid\nreplication make them critical\nassets in the swarm’s expansion strategy.",
+      "left": "252.775px",
+      "top": "960.8px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "Despite their low metabolic demand, these infected are remarkably\nagile and lethally efficient. Their appetite is modest compared to\nother forms, yet their sadism is markedly higher: they specialize in\nextracting still-beating hearts from victims, using their speed to\nstrike vital points with surgical precision.",
+      "left": "270.9px",
+      "top": "681.6px",
+      "scale": "1.6000000000000005",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#0a0a0a",
+  "fontSettings": {
+    "family": "creepyblood",
+    "size": "20",
+    "color": "#8a0000"
+  },
+  "exportDate": "2025-09-26T20:30:35.157Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758905417/noxistence/creatures/crimson-plague-imps.png",
+      "left": "1120px",
+      "top": "741.959px",
+      "scale": "3.400000000000002",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-imps",
+      "fontFamily": "creepyblood",
+      "fontSize": "20px",
+      "color": "rgb(138, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
