@@ -1,0 +1,58 @@
+{
+  "texts": [
+    {
+      "content": "Flying infected creatures patrol elevated zones, emitting sonic\npulses that disorient prey and trigger responses from nearby\nswarm members.  They function as sentinels,\nmarking hunting routes and identifying resistance pockets.\nThough small in size, their extreme speed and piercing capabilities\nmake them surgical weapons in coordinated assaults, able to\nbreach defenses and eliminate key targets before the main wave arrives.",
+      "left": "569.388px",
+      "top": "322.4px",
+      "scale": "2.4000000000000012",
+      "rotate": "0",
+      "fontFamily": "creepyblood",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)"
+    },
+    {
+      "content": "Crimson Plague: Flyers",
+      "left": "650.5px",
+      "top": "80px",
+      "scale": "4.400000000000001",
+      "rotate": "0",
+      "fontFamily": "batesshower",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#0a0a0a",
+  "fontSettings": {
+    "family": "batesshower",
+    "size": "14",
+    "color": "#8a0000"
+  },
+  "exportDate": "2025-09-26T19:28:20.244Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901568/noxistence/creatures/crimson-plague-flyers.png",
+      "left": "110.988px",
+      "top": "317.013px",
+      "scale": "2.5000000000000013",
+      "rotate": "0",
+      "flipped": false,
+      "name": "crimson-plague-flyers",
+      "fontFamily": "batesshower",
+      "fontSize": "14px",
+      "color": "rgb(138, 0, 0)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1758901992/noxistence/imageart/crimsonplaguebird.png",
+      "left": "1264px",
+      "top": "296.635px",
+      "scale": "2.200000000000001",
+      "rotate": "0",
+      "flipped": false
+    }
+  ],
+  "loreimages": []
+}
