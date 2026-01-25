@@ -9,7 +9,7 @@
 
 > ⚠️ **Important Notice**: This website and its content are protected under the [CC BY-NC-ND 4.0](LICENSE.txt) license. Any commercial use, modification, or redistribution is strictly prohibited without express written permission from the author.
 <div align="center">
-  <p>To know more about project visit the </p> <a href="https://blackars.com/projects/noxistence-website">website</a>
+  <p>To know more about project visit this <a href="https://blackars.com/projects/noxistence-website">blog</a> </p>
 </div>
 ## 🌟 Key Features
 
