@@ -42,7 +42,7 @@
 
 ## System Architecture Diagram
 
-[![System Architecture Diagram](https://res.cloudinary.com/dgff8o52c/image/upload/NOXISTENCE_Main_Website_Architeture_qljcby.jpg)]
+![System Architecture Diagram](https://res.cloudinary.com/dgff8o52c/image/upload/NOXISTENCE_Main_Website_Architeture_qljcby.jpg)
 
 ## 🚀 Quick Start
 
