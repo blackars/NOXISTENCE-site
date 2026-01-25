@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🚀 NOXISTENCE</h1>
+  <h1>NOXISTENCE</h1>
   <p>Creature and Content Management Platform</p>
   
   [![License: CC BY-NC-ND 4.0](https://img.shields.io/badge/License-CC%20BY--NC--ND%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
@@ -7,8 +7,10 @@
   [![Vite](https://img.shields.io/badge/Vite-4.x-646CFF.svg)](https://vitejs.dev/)
 </div>
 
-> ⚠️ **Important Notice**: This website and its content are protected under the [CC BY-NC-ND 4.0](LICENSE) license. Any commercial use, modification, or redistribution is strictly prohibited without express written permission from the author.
-
+> ⚠️ **Important Notice**: This website and its content are protected under the [CC BY-NC-ND 4.0](LICENSE.txt) license. Any commercial use, modification, or redistribution is strictly prohibited without express written permission from the author.
+<div align="center">
+  <p>To know more about project visit the </p> <a href="https://blackars.com/projects/noxistence-website">website</a>
+</div>
 ## 🌟 Key Features
 
 - **🎨 Modern UI** - Smooth animations and responsive minimalistic design
@@ -129,7 +131,7 @@ This project is licensed under the **Creative Commons Attribution-NonCommercial-
 - **NonCommercial** — No commercial use without permission
 - **NoDerivatives** — No modifications allowed
 
-For full details, see the [LICENSE](LICENSE) file.
+For full details, see the [LICENSE](LICENSE.txt) file.
 
 ---
 
