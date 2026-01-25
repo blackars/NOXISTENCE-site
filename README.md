@@ -40,6 +40,10 @@
 - **GitHub Actions** - CI/CD
 - **Google Cloud Run** - Deployment
 
+## System Architecture Diagram
+
+[![System Architecture Diagram](https://res.cloudinary.com/dgff8o52c/image/upload/NOXISTENCE_Main_Website_Architeture_qljcby.jpg)]
+
 ## 🚀 Quick Start
 
 ### Prerequisites
