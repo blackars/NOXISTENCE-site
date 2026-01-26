@@ -16,6 +16,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      packages: 'write' # Needed to push to GitHub Container Registry
 
     steps:
       - name: Checkout code
@@ -30,13 +31,30 @@ jobs:
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
 
-      - name: Enable Cloud Build API
-        run: gcloud services enable cloudbuild.googleapis.com --project ${{ env.PROJECT_ID }}
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set repository name to lowercase
+        id: string
+        uses: ASzc/change-string-case-action@v6
+        with:
+          string: ${{ github.repository }}
 
-      - name: Build and Deploy to Cloud Run from Source
+      - name: Build and push Docker image to GHCR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }}
+
+      - name: Deploy to Cloud Run from GHCR
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --source . \
+            --image ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }} \
             --project ${{ env.PROJECT_ID }} \
             --region ${{ env.REGION }} \
             --platform managed \
