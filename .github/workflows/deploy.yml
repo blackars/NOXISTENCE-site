@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-      packages: 'write' # Needed to push to GitHub Container Registry
+      packages: 'write' # Needed to push to GitHub Container Registry and manage visibility
 
     steps:
       - name: Checkout code
@@ -45,18 +45,57 @@ jobs:
           string: ${{ github.repository }}
 
       - name: Build and push Docker image to GHCR
+        id: build-push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }}
+          tags: |
+            ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }}
+            ghcr.io/${{ steps.string.outputs.lowercase }}:latest
+          metadata: |
+            labels=org.opencontainers.image.source=${{ github.repository }}
+
+      - name: Make package public
+        if: success()
+        run: |
+          PACKAGE_NAME="${{ steps.string.outputs.lowercase }}"
+          OWNER=$(echo "$PACKAGE_NAME" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$PACKAGE_NAME" | cut -d'/' -f2)
+          
+          echo "Making package public: $PACKAGE_NAME"
+          
+          # Try organization endpoint first (most common case)
+          if gh api -X PATCH "/orgs/$OWNER/packages/container/$REPO_NAME" -f visibility=public 2>/dev/null; then
+            echo "✅ Package made public via organization endpoint"
+          # Try user endpoint as fallback
+          elif gh api -X PATCH "/user/packages/container/$REPO_NAME" -f visibility=public 2>/dev/null; then
+            echo "✅ Package made public via user endpoint"
+          else
+            echo "⚠️  Warning: Could not automatically make package public."
+            echo "Please make it public manually at: https://github.com/${{ github.repository }}?tab=packages"
+            echo "Or run: gh api -X PATCH /orgs/$OWNER/packages/container/$REPO_NAME -f visibility=public"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy to Cloud Run from GHCR
+        if: success()
         run: |
+          IMAGE_TAG="ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }}"
+          echo "Deploying image: $IMAGE_TAG"
+          
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }} \
+            --image "$IMAGE_TAG" \
             --project ${{ env.PROJECT_ID }} \
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
             --quiet
+          
+          if [ $? -eq 0 ]; then
+            echo "✅ Deployment successful"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
