@@ -9,6 +9,8 @@ env:
   PROJECT_ID: noxistence-site-v1
   SERVICE_NAME: noxistence-site
   REGION: us-central1
+  AR_REPOSITORY: ghcr-remote
+  AR_LOCATION: us-central1
 
 jobs:
   deploy:
@@ -113,14 +115,57 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Deploy to Cloud Run from GHCR
+      - name: Setup Artifact Registry repository
+        run: |
+          echo "Setting up Artifact Registry repository..."
+          
+          # Enable Artifact Registry API if not already enabled
+          gcloud services enable artifactregistry.googleapis.com --project=${{ env.PROJECT_ID }} || true
+          
+          # Check if repository exists, create if it doesn't
+          if gcloud artifacts repositories describe ${{ env.AR_REPOSITORY }} \
+            --location=${{ env.AR_LOCATION }} \
+            --project=${{ env.PROJECT_ID }} 2>/dev/null; then
+            echo "✅ Artifact Registry repository already exists"
+          else
+            echo "Creating Artifact Registry repository..."
+            gcloud artifacts repositories create ${{ env.AR_REPOSITORY }} \
+              --repository-format=docker \
+              --location=${{ env.AR_LOCATION }} \
+              --project=${{ env.PROJECT_ID }} \
+              --description="Repository for NOXISTENCE site images from GHCR"
+          fi
+
+      - name: Authenticate to Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.AR_LOCATION }}-docker.pkg.dev --quiet
+
+      - name: Pull from GHCR and push to Artifact Registry
         if: success()
         run: |
-          IMAGE_TAG="ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }}"
-          echo "Deploying image: $IMAGE_TAG"
+          GHCR_IMAGE="ghcr.io/${{ steps.string.outputs.lowercase }}:${{ github.sha }}"
+          AR_IMAGE="${{ env.AR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPOSITORY }}/noxistence-site:${{ github.sha }}"
+          
+          echo "Pulling image from GHCR: $GHCR_IMAGE"
+          docker pull "$GHCR_IMAGE"
+          
+          echo "Tagging image for Artifact Registry: $AR_IMAGE"
+          docker tag "$GHCR_IMAGE" "$AR_IMAGE"
+          
+          echo "Pushing image to Artifact Registry..."
+          docker push "$AR_IMAGE"
+          
+          echo "✅ Image successfully pushed to Artifact Registry"
+
+      - name: Deploy to Cloud Run from Artifact Registry
+        if: success()
+        run: |
+          AR_IMAGE="${{ env.AR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPOSITORY }}/noxistence-site:${{ github.sha }}"
+          
+          echo "Deploying image: $AR_IMAGE"
           
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image "$IMAGE_TAG" \
+            --image "$AR_IMAGE" \
             --project ${{ env.PROJECT_ID }} \
             --region ${{ env.REGION }} \
             --platform managed \
