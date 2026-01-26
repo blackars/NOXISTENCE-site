@@ -41,6 +41,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
 
+      # Convert repository name to lowercase for Docker tag
+      - name: Set repository name to lowercase
+        id: string
+        run: echo "repository_lowercase=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       # Construye y publica la imagen en GHCR
       - name: Build and push Docker image to GHCR
         id: build-and-push
@@ -48,7 +53,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          tags: ghcr.io/${{ steps.string.outputs.repository_lowercase }}:${{ github.sha }}
           labels: |
             "run.googleapis.com/location=${{ env.REGION }}"
             "run.googleapis.com/service=${{ env.SERVICE_NAME }}"
