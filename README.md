@@ -44,7 +44,7 @@
 
 ![System Architecture Diagram](https://res.cloudinary.com/dgff8o52c/image/upload/NOXISTENCE_Main_Website_Architeture_qljcby.jpg)
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18.x or later

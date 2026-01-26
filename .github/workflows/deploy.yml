@@ -9,6 +9,7 @@ env:
   PROJECT_ID: noxistence-site-v1 # Reemplaza con tu ID de proyecto de GCP
   SERVICE_NAME: noxistence-site # Reemplaza con el nombre de tu servicio de Cloud Run
   REGION: us-central1 # Reemplaza con la región de tu servicio de Cloud Run (ej. us-central1, europe-west1)
+  GAR_LOCATION: us-central1 #new
 
 jobs:
   deploy:
@@ -16,14 +17,13 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+      packages: 'write' # Añadido para permitir la publicación en GHCR
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+      # Autenticación con Google Cloud (necesaria para el comando de despliegue)
       - name: Authenticate to Google Cloud
         id: 'auth'
         uses: 'google-github-actions/auth@v2'
@@ -32,29 +32,32 @@ jobs:
 
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
+      
+      # Inicia sesión en GitHub Container Registry
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
-      - name: Build and push Docker image
-        run: |
-          # Configura Docker para usar gcloud como asistente de credenciales
-          gcloud auth configure-docker
+      # Construye y publica la imagen en GHCR
+      - name: Build and push Docker image to GHCR
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          labels: |
+            "run.googleapis.com/location=${{ env.REGION }}"
+            "run.googleapis.com/service=${{ env.SERVICE_NAME }}"
 
-          # Construye la imagen Docker
-          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
-
-          # Sube la imagen al Container Registry
-          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
-
+      # Despliega en Cloud Run usando la imagen de GHCR
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+            --image ${{ steps.build-and-push.outputs.digest }} \
             --region ${{ env.REGION }} \
             --platform managed \
-            --allow-unauthenticated # O --no-allow-unauthenticated si tu servicio requiere autenticación
-            # Añade aquí cualquier otra configuración de Cloud Run que necesites, ej:
-            # --port 8080 \
-            # --set-env-vars KEY=VALUE \
-            # --memory 512Mi \
-            # --cpu 1 \
-            # --min-instances 0 \
-            # --max-instances 1
+            --allow-unauthenticated
