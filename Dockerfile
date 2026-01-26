@@ -40,7 +40,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 WORKDIR /usr/src/app
 
 # Copia los archivos de definición de paquetes desde la etapa de build
-COPY --from=builder /usr/src/app/package*.json .
+COPY --from=builder /usr/src/app/package*.json ./
 # Instala ÚNICAMENTE las dependencias de producción
 RUN npm ci --omit=dev
 
