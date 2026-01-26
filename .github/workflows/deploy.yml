@@ -37,18 +37,42 @@ jobs:
         with:
           string: ${{ github.repository }}
 
+      - name: Debug authentication info
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository Owner: ${{ github.repository_owner }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Lowercase repo: ${{ steps.string.outputs.lowercase }}"
+          echo "Package will be: ghcr.io/${{ steps.string.outputs.lowercase }}"
+          echo "Token exists: ${{ secrets.GHCR_TOKEN != '' && 'YES' || 'NO' }}"
+
+      - name: Verify GHCR token
+        run: |
+          if [ -z "${{ secrets.GHCR_TOKEN }}" ]; then
+            echo "❌ ERROR: GHCR_TOKEN secret is not set or is empty"
+            echo "Please create a Personal Access Token with 'write:packages' scope"
+            echo "and add it as a secret named 'GHCR_TOKEN' in your repository settings"
+            exit 1
+          fi
+          echo "✅ GHCR_TOKEN secret exists"
+          
+          # Test token by trying to authenticate
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin || {
+            echo "❌ ERROR: Failed to authenticate with GHCR"
+            echo "Please verify that:"
+            echo "1. The token has 'write:packages' scope"
+            echo "2. The token is not expired"
+            echo "3. The username matches your GitHub username: ${{ github.repository_owner }}"
+            exit 1
+          }
+          echo "✅ Successfully authenticated with GHCR"
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Debug package name
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "Lowercase: ${{ steps.string.outputs.lowercase }}"
-          echo "Package will be: ghcr.io/${{ steps.string.outputs.lowercase }}"
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_TOKEN }}
 
       - name: Build and push Docker image to GHCR
         id: build-push
@@ -72,23 +96,19 @@ jobs:
           REPO_NAME=$(echo "$PACKAGE_NAME" | cut -d'/' -f2)
           
           echo "Making package public: $PACKAGE_NAME"
+          echo "Owner: $OWNER"
+          echo "Repo name: $REPO_NAME"
           
-          # Use PAT if available, otherwise use GITHUB_TOKEN
-          TOKEN="${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}"
-          
-          # Try organization endpoint first (most common case)
-          if gh api -X PATCH "/orgs/$OWNER/packages/container/$REPO_NAME" -f visibility=public 2>/dev/null; then
-            echo "✅ Package made public via organization endpoint"
-          # Try user endpoint as fallback
-          elif gh api -X PATCH "/user/packages/container/$REPO_NAME" -f visibility=public 2>/dev/null; then
+          # For user accounts (not organizations), use user endpoint
+          if gh api -X PATCH "/user/packages/container/$REPO_NAME" -f visibility=public 2>&1; then
             echo "✅ Package made public via user endpoint"
           else
             echo "⚠️  Warning: Could not automatically make package public."
             echo "Please make it public manually at: https://github.com/${{ github.repository }}?tab=packages"
-            echo "Or run: gh api -X PATCH /orgs/$OWNER/packages/container/$REPO_NAME -f visibility=public"
+            echo "Or run: gh api -X PATCH /user/packages/container/$REPO_NAME -f visibility=public"
           fi
         env:
-          GH_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GHCR_TOKEN }}
 
       - name: Deploy to Cloud Run from GHCR
         if: success()
