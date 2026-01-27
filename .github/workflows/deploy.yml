@@ -178,3 +178,48 @@ jobs:
             echo "❌ Deployment failed"
             exit 1
           fi
+
+      - name: Cleanup old images from Artifact Registry
+        if: success()
+        run: |
+          echo "🧹 Cleaning up old images from Artifact Registry..."
+          echo "Keeping only the last 3 images to minimize storage costs"
+          
+          REPO_PATH="${{ env.AR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.AR_REPOSITORY }}/noxistence-site"
+          
+          # Get all image versions sorted by creation time (newest first)
+          IMAGE_VERSIONS=$(gcloud artifacts docker images list "$REPO_PATH" \
+            --sort-by=~CREATE_TIME \
+            --format="value(version)" \
+            --project=${{ env.PROJECT_ID }} 2>/dev/null || echo "")
+          
+          if [ -z "$IMAGE_VERSIONS" ]; then
+            echo "ℹ️  No images found to clean up"
+            exit 0
+          fi
+          
+          # Count total images
+          TOTAL=$(echo "$IMAGE_VERSIONS" | grep -v '^$' | wc -l)
+          echo "📊 Total images found: $TOTAL"
+          
+          if [ "$TOTAL" -le 3 ]; then
+            echo "✅ Only $TOTAL image(s) found, keeping all (limit is 3)"
+            exit 0
+          fi
+          
+          # Get images to delete (skip first 3, delete the rest)
+          IMAGES_TO_DELETE=$(echo "$IMAGE_VERSIONS" | grep -v '^$' | tail -n +4)
+          COUNT_TO_DELETE=$(echo "$IMAGES_TO_DELETE" | grep -v '^$' | wc -l)
+          
+          echo "🗑️  Deleting $COUNT_TO_DELETE old image(s)..."
+          
+          echo "$IMAGES_TO_DELETE" | while read -r VERSION; do
+            if [ -n "$VERSION" ]; then
+              echo "  Deleting: $VERSION"
+              gcloud artifacts docker images delete "$REPO_PATH@$VERSION" \
+                --quiet \
+                --project=${{ env.PROJECT_ID }} 2>/dev/null || echo "    ⚠️  Failed to delete $VERSION (may already be deleted)"
+            fi
+          done
+          
+          echo "✅ Cleanup completed. Keeping only the last 3 images."
