@@ -1,0 +1,59 @@
+{
+  "texts": [
+    {
+      "content": "Within the pulsing textures of the underbrush, a massive creature lurks,\narachnid in form,with dull eyes that distill death. It camouflages\nitself among the tangled vegetation, partially\nburied in moss, extending long limbs covered in sensory\nfilaments that grant it extreme perception and predatory agility. ",
+      "left": "737.2px",
+      "top": "191.2px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "From its low, sprawling posture on the damp forest floor,\nit detects even the faintest vibrationv within several meters.Then the\nforest responds: rows of sharpened teeth erupt like vegetal arms,\nembracing you with brutal force, as if the jungle itself\nhad chosen to close around you.",
+      "left": "750px",
+      "top": "446.2px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(0, 0, 0)"
+    },
+    {
+      "content": "Tahlabusatt",
+      "left": "858.6px",
+      "top": "50.5875px",
+      "scale": "7.399999999999991",
+      "rotate": "0",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(0, 0, 0)"
+    }
+  ],
+  "backgroundColor": "#2b4a73",
+  "fontSettings": {
+    "family": "nightcore",
+    "size": "14",
+    "color": "#000000"
+  },
+  "exportDate": "2026-02-02T17:18:59.878Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1770052565/noxistence/creatures/tahlabusatt.png",
+      "left": "319.5px",
+      "top": "228.75px",
+      "scale": "2.6000000000000014",
+      "rotate": "0",
+      "flipped": false,
+      "name": "tahlabusatt",
+      "fontFamily": "nightcore",
+      "fontSize": "14px",
+      "color": "rgb(160, 24, 24)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
