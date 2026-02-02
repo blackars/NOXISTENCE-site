@@ -1,0 +1,49 @@
+{
+  "texts": [
+    {
+      "content": "This strange, soft-bodied, gelatinous organism generates powerful electric\ndischarges, which it uses both for hunting and self-defense.\nIt inhabits densely vegetated marine surfaces, where it is rarely seen.\nIts skin displays shifting patterns and intensely luminous colors\nwith hypnotic properties, capable of disorienting and impairing prey.\nThis illusory capacity is fueled by the vast reserves\nof electrical energy it stores and regulates with precision.",
+      "left": "766.9px",
+      "top": "289.8px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "19px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Cryetroxus",
+      "left": "904.6px",
+      "top": "99.7px",
+      "scale": "6.999999999999992",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "19px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#ddf71d",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "19",
+    "color": "#111111"
+  },
+  "exportDate": "2026-02-02T17:11:24.497Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1770052187/noxistence/creatures/cryetroxus.png",
+      "left": "266px",
+      "top": "257.843px",
+      "scale": "3.0000000000000018",
+      "rotate": "0",
+      "flipped": false,
+      "name": "cryetroxus",
+      "fontFamily": "melonfruit",
+      "fontSize": "19px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
