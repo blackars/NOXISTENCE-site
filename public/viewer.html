@@ -819,8 +819,8 @@
     // Cargar fuentes primero
     loadCustomFonts().then(() => {
       if (creatureName) {
-        // Mostrar criatura individual desde data/creatures.json
-        loadJSON('data/creatures.json', function(data) {
+        // Mostrar criatura individual desde Cloudinary vía backend (/api/creatures)
+        loadJSON(`/api/creatures?cb=${Date.now()}`, function(data) {
           if (data && Array.isArray(data)) {
             const creature = data.find(c => c.name === creatureName);
             if (creature) {

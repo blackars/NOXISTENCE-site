@@ -239,6 +239,10 @@ app.delete('/api/art/:id', async (req, res) => {
 // --- Concurrency control for creatures.json ---
 let isProcessingCreatures = false;
 const creatureQueue = [];
+function addCacheBuster(url) {
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}cb=${Date.now()}`;
+}
 async function processCreatureQueue() {
   if (isProcessingCreatures || creatureQueue.length === 0) return;
   isProcessingCreatures = true;
@@ -248,7 +252,9 @@ async function processCreatureQueue() {
     const creaturesPublicId = 'creatures';
     let creatures = [];
     try {
-      const existingDataUrl = cloudinary.url(`${creaturesFolder}/${creaturesPublicId}.json`, { resource_type: 'raw', secure: true });
+      const existingDataUrl = addCacheBuster(
+        cloudinary.url(`${creaturesFolder}/${creaturesPublicId}.json`, { resource_type: 'raw', secure: true })
+      );
       const response = await fetch(existingDataUrl, { cache: 'no-store' });
       if (response.ok) {
         creatures = await response.json();
@@ -278,7 +284,7 @@ app.post('/api/upload', (req, res) => {
 // Rutas para leer datos JSON desde Cloudinary
 const readJsonFromCloudinary = async (publicId, res) => {
   try {
-    const dataUrl = cloudinary.url(publicId, { resource_type: 'raw', secure: true });
+    const dataUrl = addCacheBuster(cloudinary.url(publicId, { resource_type: 'raw', secure: true }));
     const response = await fetch(dataUrl, { cache: 'no-store' });
     if (response.ok) {
       res.setHeader('Cache-Control', 'no-store').json(await response.json());
