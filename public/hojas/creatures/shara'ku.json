@@ -1,0 +1,69 @@
+{
+  "texts": [
+    {
+      "content": "Extremely rare, this species dwells in the abyssal depths, where it glows with fluctuating\nintensity against the mineral darkness.  Its bioluminescence mimics the glow of electric species,\nmaking it appear more toxic and less attractive to opportunistic predators.",
+      "left": "663px",
+      "top": "188px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "18px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "It feeds on specific mineral-rich rocks from the seafloor, which it processes internally and\nregurgitates as a dense, dark, viscous mist-similar to metallic plasma. This substance slowly descends into 0\ndeeper zones, where it accumulates and nourishes marine vegetation, subtly reshaping entire ecosystems.",
+      "left": "643.8px",
+      "top": "326.2px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "18px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Equipped with three eyes and an ill-defined physiology, these creatures are rarely\neasy prey: they live in large groups,can propel themselves at high speed, and\nwhen threatened, expel their metal-laced  mist as a biological\ncannon-capable of disorienting, damaging, or repelling any intruder.",
+      "left": "700.8px",
+      "top": "465px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "18px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Shara'ku",
+      "left": "875.8px",
+      "top": "78.7875px",
+      "scale": "7.799999999999989",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "18px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#dd5427",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "18",
+    "color": "#111111"
+  },
+  "exportDate": "2026-02-02T17:06:35.863Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1770051786/noxistence/creatures/sharaku.png",
+      "left": "188.4px",
+      "top": "238.258px",
+      "scale": "2.6000000000000014",
+      "rotate": "0",
+      "flipped": false,
+      "name": "sharaku",
+      "fontFamily": "melonfruit",
+      "fontSize": "18px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
