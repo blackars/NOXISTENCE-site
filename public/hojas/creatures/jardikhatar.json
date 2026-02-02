@@ -1,0 +1,49 @@
+{
+  "texts": [
+    {
+      "content": "Jardinkhatar",
+      "left": "522.8px",
+      "top": "133.4px",
+      "scale": "5.799999999999996",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "23px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Once described it like “Garden of Danger”. These creatures live in\ngroups that can number in the thousands, spreading across vast\ngrasslands with the peculiar floral texture that covers their backs.\nThe flowers release substances that lure and hinder other life forms,\nwhich, lost within their territories, become their main source of\nnourishment-though they also feed on carrion.",
+      "left": "287.6px",
+      "top": "317.6px",
+      "scale": "1.8000000000000007",
+      "rotate": "0",
+      "fontFamily": "melonfruit",
+      "fontSize": "23px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#5e04b9",
+  "fontSettings": {
+    "family": "melonfruit",
+    "size": "23",
+    "color": "#111111"
+  },
+  "exportDate": "2026-02-02T17:24:19.815Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1770052978/noxistence/creatures/jardikhatar.png",
+      "left": "1108.5px",
+      "top": "278.78px",
+      "scale": "3.200000000000002",
+      "rotate": "0",
+      "flipped": false,
+      "name": "jardikhatar",
+      "fontFamily": "melonfruit",
+      "fontSize": "23px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
