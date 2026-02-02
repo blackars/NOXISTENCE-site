@@ -1,0 +1,69 @@
+{
+  "texts": [
+    {
+      "content": "Ferrugal  Siphon",
+      "left": "501.9px",
+      "top": "78px",
+      "scale": "5.999999999999996",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "The Ferrugal Siphon is a large invertebrate that inhabits grasslands\n and areas of low vegetation. It can exceed five meters in length\nand moves by crawling with undulating motions.",
+      "left": "365.5px",
+      "top": "194.2px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "It is predominantly herbivorous and detritivorous, filtering organic matter and\nhard minerals from the soil through its siphon-shaped mouth apparatus.",
+      "left": "326px",
+      "top": "317px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    },
+    {
+      "content": "Nocturnal and solitary in nature, it remains underground for most of its life,\noccasionally emerging on nights illuminated by blue light. When threatened,\n it expels a viscous fluid with a pungent odor to disorient potential attackers.",
+      "left": "300.6px",
+      "top": "436.6px",
+      "scale": "2.000000000000001",
+      "rotate": "0",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)"
+    }
+  ],
+  "backgroundColor": "#2db98f",
+  "fontSettings": {
+    "family": "stormgust",
+    "size": "14",
+    "color": "#111111"
+  },
+  "exportDate": "2026-02-02T16:54:27.845Z",
+  "showTitles": false,
+  "images": [
+    {
+      "img": "https://res.cloudinary.com/dgff8o52c/image/upload/v1770051047/noxistence/creatures/ferrugal-siphon.png",
+      "left": "1140.6px",
+      "top": "259.1px",
+      "scale": "2.9000000000000017",
+      "rotate": "0",
+      "flipped": false,
+      "name": "ferrugal-siphon",
+      "fontFamily": "stormgust",
+      "fontSize": "14px",
+      "color": "rgb(17, 17, 17)",
+      "showTitles": true
+    }
+  ],
+  "artimages": [],
+  "loreimages": []
+}
